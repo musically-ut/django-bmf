@@ -35,8 +35,10 @@
             base.btn = base.$el.find('.input-group-btn').first();
             base.container = base.$el.parent();
 
+            // base.btn.append('<button class="btn btn-default" tabindex="-1" type="button"><span class="glyphicon glyphicon-search"></span></button>');
             base.btn.append('<button class="btn btn-default" tabindex="-1" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
             // base.btn.append('<button class="btn btn-default" tabindex="-1" type="button"><span class="glyphicon glyphicon-plus"></span></button>');
+            // base.btn.append('<button class="btn btn-default" tabindex="-1" type="button"><span class="glyphicon glyphicon-pencil"></span></button>');
 
             // base.$el.parent().css('position', 'relative');
             base.container.append('<ul class="dropdown-menu" style="display: none"></ul>');
