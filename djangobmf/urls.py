@@ -67,7 +67,7 @@ urlpatterns = patterns(
 
     url(r'^document/', include('djangobmf.document.urls')),
     url(r'^i18n/', i18n_javascript, name="jsi18n"),
-    #  url(r'^messages/', include('djangobmf.message.urls')),
+    url(r'^messages/', include('djangobmf.message.urls')),
     url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),
     url(r'^notifications/', include('djangobmf.notification.urls')),
     url(r'^wizard/', include('djangobmf.wizard.urls')),

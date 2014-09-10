@@ -76,14 +76,12 @@
                                         <span class="nav-text">{% trans "Notifications" %}</span>
                                     </a>
                                 </li>
-                                {% comment %}
                                 <li data-count="{{ djangobmf.message_count }}" id="bmf_message">
                                     <a href="{% url 'djangobmf:message' %}">
                                         <span class="glyphicon glyphicon-envelope"></span>
                                         <span class="nav-text">{% trans "Messages" %}</span>
                                     </a>
                                 </li>
-                                {% endcomment %}
                                 {% comment %}
                                 <li class="disabled" id="bmf_calendar">
                                     <a href="#">
