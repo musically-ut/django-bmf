@@ -29,23 +29,23 @@
             base.options = $.extend({}, $.bmf.editform.defaultOptions, options);
 
             base.container = base.$el.parent();
-//          base.container.append('<div class="row" style="position: relative; z-index:5; display:hidden"><div class="col-sm-6"></div><div class="col-sm-6"></div></div>');
-//          base.datefield = base.container.find('div.row div').first();
-//          base.timefield = base.container.find('div.row div').last();
+            base.container.append('<div class="row" style="position: relative; z-index:5; display:hidden"><div class="col-sm-6"></div><div class="col-sm-6"></div></div>');
+            base.datefield = base.container.find('div.row div').first();
+            base.timefield = base.container.find('div.row div').last();
 
             base.$el.append('<span class="input-group-btn"><button class="btn btn-default" tabindex="-1" type="button"><span class="glyphicon glyphicon-calendar"></span></button></span>');
 
-//          base.input = base.$el.children('input[type="text"]').first();
-//
-//          base.$el.find('button').first().on('click', function () {
-//              base.initCalendar();
-//          });
-//          base.input.on('focus', function () {
-//              base.initCalendar();
-//          });
-//          base.input.on('blur', function () {
-//              window.setTimeout(function() { base.destroyCalendar(); }, 100);
-//          });
+            base.input = base.$el.children('input[type="text"]').first();
+  
+            base.$el.find('button').first().on('click', function () {
+                base.initCalendar();
+            });
+            base.input.on('focus', function () {
+                base.initCalendar();
+            });
+            base.input.on('blur', function () {
+                window.setTimeout(function() { base.destroyCalendar(); }, 100);
+            });
         }
       
         base.getDaysInMonth = function(month, year) {
