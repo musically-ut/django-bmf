@@ -12,6 +12,7 @@ from django.contrib.admin.sites import NotRegistered
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.db.utils import OperationalError
+from django.db.utils import ProgrammingError
 from django.utils.module_loading import module_has_submodule
 from django.utils.module_loading import import_module
 from django.utils import six
@@ -395,7 +396,7 @@ class DjangoBMFSite(object):
 
         try:
             ws, created = workspace.objects.get_or_create(module=label, level=0)
-        except OperationalError:
+        except (OperationalError, ProgrammingError):
             logger.debug('Database not ready, skipping registration of Dashboard %s' % label)
             return False
 
@@ -418,7 +419,7 @@ class DjangoBMFSite(object):
 
         try:
             parent_workspace = workspace.objects.get(module=parent_label)
-        except OperationalError:
+        except (OperationalError, ProgrammingError):
             logger.debug('Database not ready, skipping registration of Category %s' % label)
             return False
         except workspace.DoesNotExist:
@@ -448,7 +449,7 @@ class DjangoBMFSite(object):
 
         try:
             parent_workspace = workspace.objects.get(module=parent_label)
-        except OperationalError:
+        except (OperationalError, ProgrammingError):
             logger.debug('Database not ready, skipping registration of View %s' % label)
             return False
         except workspace.DoesNotExist:
