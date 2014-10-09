@@ -121,6 +121,10 @@ class BaseMixin(object):
             cur_category = None
             new_category = False
             for ws in Workspace.objects.all():
+                if not ws.module_cls:
+                    # TODO generate warning!
+                    continue
+
                 if ws.level == 1:
                     cur_category = ws
                     new_category = True
