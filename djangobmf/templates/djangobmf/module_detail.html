@@ -29,7 +29,7 @@
     {% if bmfworkflow.enabled %}
      {% if bmfworkflow.transitions %}
        <div class="btn-group">
-         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">{{ bmfworkflow.state }} <span class="caret"></span></button>
+         <button type="button" class="btn btn-bmfworkflow dropdown-toggle" data-toggle="dropdown">{{ bmfworkflow.state }} <span class="caret"></span></button>
          <ul class="dropdown-menu" role="menu">
            {% for transition in bmfworkflow.transitions %}
            <li><a href="{% get_bmf_url object "workflow" transition=transition.0 %}?next={{ request.path_info }}">{{ transition.1 }}</a></li>
@@ -44,20 +44,20 @@
     {% endif %}
     {% if bmfmodule.has_report %}
      <div class="btn-group">
-     <a class="btn btn-default btn-success" href="{% get_bmf_url object "report" %}">
+     <a class="btn btn-bmfreport" href="{% get_bmf_url object "report" %}">
        <span class="glyphicon glyphicon-print"></span> {% trans "Print" %} 
      </a>
      </div>
     {% endif %}
     {% if bmfworkflow.state.update %}
      <div class="btn-group">
-     <a class="btn btn-default btn-warning bmfedit" href="{% get_bmf_url object "update" %}">
+     <a class="btn btn-bmfupdate bmfedit" href="{% get_bmf_url object "update" %}">
        <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
      </a>
      </div>
     {% else %}
      <div class="btn-group">
-     <a class="btn btn-default btn-default disabled" href="#">
+     <a class="btn btn-default disabled" href="#">
        <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
      </a>
      </div>

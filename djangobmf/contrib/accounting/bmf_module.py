@@ -30,17 +30,16 @@ site.register(Account, **{
 
 from .models import Transaction
 from .views import OpenTransactionView
-from .views import TransferView
-from .views import TransactionCreateView
-from .views import TransactionDetailView
+from .views import ClosedTransactionView
+from .views import TransactionCreateSimpleView
+from .views import TransactionCreateSplitView
 from .views import TransactionUpdateView
 
 site.register(Transaction, **{
     'create': OrderedDict((
-        ('transfer', (_('Between two Accounts'), TransferView)),
-        ('template', (_('Split Transaction'), TransactionCreateView)),
+        ('simple', (_('Simple Transaction'), TransactionCreateSimpleView)),
+        ('split', (_('Split Transaction'), TransactionCreateSplitView)),
     )),
-    'detail': TransactionDetailView,
     'update': TransactionUpdateView,
 })
 
@@ -70,4 +69,5 @@ site.register_dashboard(Accounting)
 site.register_category(Accounting, TransactionCategory)
 site.register_view(Account, TransactionCategory, AccountIndexView)
 site.register_view(Transaction, TransactionCategory, OpenTransactionView)
+site.register_view(Transaction, TransactionCategory, ClosedTransactionView)
 site.register_view(TransactionItem, TransactionCategory, AllTransactionView)

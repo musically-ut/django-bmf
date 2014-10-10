@@ -477,6 +477,9 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
     def clone_related_objects(self, formdata, old_object, new_object):
         pass
 
+    def form_object_save(self, form):
+        self.object = form.save()
+
     def form_valid(self, form):
         # messages.success(self.request, 'Object cloned')
         old_object = copy.copy(self.object)
@@ -490,7 +493,7 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
             )
         form.instance.created_by = self.request.user
         form.instance.modified_by = self.request.user
-        self.object = form.save()
+        self.form_object_save(form)
         self.clone_related_objects(form.cleaned_data, old_object, self.object)
         activity_create.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
@@ -541,12 +544,16 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
         return super(ModuleCreateView, self).get_template_names() \
             + ["djangobmf/module_create_default.html"]
 
+    def form_object_save(self, form):
+        self.object = form.save()
+        activity_create.send(sender=self.object.__class__, instance=self.object)
+
     def form_valid(self, form):
         # messages.success(self.request, 'Object created')
         form.instance.modified_by = self.request.user
         form.instance.created_by = self.request.user
-        self.object = form.save()
-        activity_create.send(sender=self.object.__class__, instance=self.object)
+        self.form_object_save(form)
+
         return self.render_valid_form({
             'object_pk': self.object.pk,
             'message': ugettext('Object created'),

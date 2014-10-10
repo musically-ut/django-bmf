@@ -169,7 +169,7 @@ class BaseTransaction(BMFModel):
     text = models.CharField(
         _('Posting text'), max_length=255, null=False, blank=False,
     )
-    draft = models.BooleanField(_('Draft'), default=False, editable=False)
+    draft = models.BooleanField(_('Draft'), default=True, editable=False)
 
 #   expensed = models.BooleanField(_('Expensed'), blank=True, null=False, default=False, )
 
