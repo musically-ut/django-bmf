@@ -1,5 +1,7 @@
 # Django settings
 
+from sandbox.test_settings import *
+
 import os
 from django.utils import six
 
@@ -23,7 +25,6 @@ TIME_ZONE = 'Europe/Berlin'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'de'
 
 SITE_ID = 1
 
@@ -83,7 +84,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'sandbox.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = 'sandbox.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -109,7 +110,6 @@ TEST_PROJECT_APPS = (
     'djangobmf.contrib.accounting',
     'djangobmf.contrib.address',
     'djangobmf.contrib.customer',
-    'djangobmf.contrib.document',
     'djangobmf.contrib.employee',
     'djangobmf.contrib.invoice',
     'djangobmf.contrib.position',
@@ -121,7 +121,7 @@ TEST_PROJECT_APPS = (
     'djangobmf.contrib.task',
     'djangobmf.contrib.taxing',
     'djangobmf.contrib.team',
-#   'djangobmf.contrib.timesheet',
+    'djangobmf.contrib.timesheet',
     'djangobmf.currencies.EUR',
     'djangobmf.currencies.USD',
 )
@@ -145,11 +145,6 @@ INSTALLED_APPS = (
 )
 INSTALLED_APPS += TEST_PROJECT_APPS
 
-LANGUAGES = (
-    (u'de', 'Deutsch'),
-    (u'en', 'English'),
-)
-
 DEFAULT_FROM_EMAIL = "team@igelware.de"
 SERVER_EMAIL = "noreply@igelware.de"
 
@@ -160,13 +155,6 @@ CACHES = {
   }
 }
 
-# DJANGO JENKINS ==================================================================
-
-JENKINS_TASKS = (
-    'django_jenkins.tasks.with_coverage',
-    'django_jenkins.tasks.run_pylint',
-    'django_jenkins.tasks.run_pep8',
-)
 
 # BM ==============================================================================
 
@@ -182,37 +170,34 @@ BMF_DOCUMENT_URL = '/bmf_documents/'
 # LOCAL SETTINGS ==================================================================
 
 try:
-  from local_settings import *
+    from local_settings import *
 except ImportError:
-  SECRET_KEY = 'just-a-dummy-key-overwrite-it-in:local_settings.py'
-  DATABASES = {
-      'default': {
-          'ENGINE': 'django.db.backends.sqlite3',
-          'NAME': '%s/database.sqlite' % PROJECT_PATH,
-          'USER': '',
-          'PASSWORD': '',
-          'HOST': '',
-          'PORT': '',
+    SECRET_KEY = 'just-a-dummy-key-overwrite-it-in:local_settings.py'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '%s/database.sqlite' % PROJECT_PATH,
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+      }
     }
-  }
-  DEBUG = True
-  TEMPLATE_DEBUG = DEBUG
-  EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-  CELERY_ALWAYS_EAGER=True # deactivate celery
+    DEBUG = True
+    TEMPLATE_DEBUG = DEBUG
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    CELERY_ALWAYS_EAGER=True # deactivate celery
 
-  INSTALLED_APPS += (
-    'discover_jenkins',
-#   'django_extensions',
-    'debug_toolbar',
-  )
-  TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-# TEST_RUNNER = 'discover_jenkins.runner.DiscoverCIRunner'
-  MIDDLEWARE_CLASSES += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-  )
-  DEBUG_TOOLBAR_CONFIG = {
-      'INTERCEPT_REDIRECTS': False,
-  }
+    INSTALLED_APPS += (
+#       'django_extensions',
+        'debug_toolbar',
+    )
+    MIDDLEWARE_CLASSES += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+    DEBUG_TOOLBAR_CONFIG = {
+        'JQUERY_URL': None,
+    }
 
 # LOGGING =========================================================================
 
@@ -224,23 +209,45 @@ except ImportError:
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S",
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console':{
+             'level': 'DEBUG',
+             'filters': ['require_debug_true'],
+             'class': 'logging.StreamHandler',
+             'formatter': 'verbose',
+         },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        'djangobmf': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
     }
 }

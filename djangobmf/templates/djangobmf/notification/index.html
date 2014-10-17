@@ -8,46 +8,87 @@
 <div class="row">
     <div class="col-lg-9 col-sm-8">
         <ul class="nav nav-tabs">
-            {% if selected_ct %}
-            <li{% if not all_data %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' ct=selected_ct filter=None %}">{% trans "Unread notifications" %}</a></li>
-            <li{% if all_data %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' ct=selected_ct filter="all" %}">{% trans "All notifications" %}</a></li>
+            {% if glob_settings %}
+            <li{% if datafilter == "unread" %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' ct=selected_ct filter="unread" %}">{% trans "Unread" %}</a></li>
+            <li{% if datafilter == "active" %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' ct=selected_ct filter="active" %}">{% trans "Active" %}</a></li>
+            <li{% if datafilter == "all" %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' ct=selected_ct filter="all" %}">{% trans "All" %}</a></li>
             {% else %}
-            <li{% if not all_data %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' filter=None %}">{% trans "Unread notifications" %}</a></li>
-            <li{% if all_data %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' filter="all" %}">{% trans "All notifications" %}</a></li>
+            <li{% if datafilter == "unread" %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' filter="unread" %}">{% trans "Unread" %}</a></li>
+            <li{% if datafilter == "active" %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' filter="active" %}">{% trans "Active" %}</a></li>
+            <li{% if datafilter == "all" %} class="active"{% endif %}><a href="{% url 'djangobmf:notification' filter="all" %}">{% trans "All" %}</a></li>
             {% endif %}
-            <li><a href="{% url 'djangobmf:watch' %}">{% trans "Watching" %}</a></li>
         </ul>
+        <p class="text-right" style="padding: 0.5em 0">
+            {% if glob_settings %}
+                {% trans "Default settings" %}:
+                <button class="btn {% if glob_settings.new_entry %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.created }}"></span></button>
+
+                {% if has_detectchanges %}
+                    <button class="btn {% if glob_settings.changed %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.updated }}"></span></button>
+                {% endif %}
+
+                {% if has_workflow %}
+                    <button class="btn {% if glob_settings.workflow %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.workflow }}"></span></button>
+                {% endif %}
+
+                {% if has_comments %}
+                    <button class="btn {% if glob_settings.comment %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.comment }}"></span></button>
+                {% endif %}
+
+                {% if has_files %}
+                    <button class="btn {% if glob_settings.file %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.file }}"></span></button>
+                {% endif %}
+                <a class="btn btn-warning bmfedit" href="{% url 'djangobmf:notification-update' pk=glob_settings.pk %}">
+                    <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
+                </a>
+            {% else %}
+            <button class="btn disabled" href="#">{% trans "Select a category to edit the default settings" %}</button>
+            {% endif %}
+        </p>
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>{% trans "Entry" %}</th>
-                    <th style="width: 150px;">{% trans "Time" %}</th>
-                    <th style="width: 45px;"></th>
+                    <th>{% trans "Notifications" %}</th>
+                    <th style="width: 150px;"></th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in object_list %}
-                <tr{% if not item.unread %} class="text-muted"{% endif %}>
+                <tr{% if not item.is_active %} class="text-muted"{% endif %}>
                     <td>
-                        <span class="text-truncate" style="width:100%; display: block">
-                            <span class="glyphicon {{ item.activity.get_symbol }}"></span>
-                            {#<a href="#">#}[{{ item.obj_ct }}] {{ item.obj }}{#</a>#}
-                            <br>
-                            <small>{{ item.created_by.get_full_name }}</small>
-                        </span>
-                    </td>
-                    <td>
-                        {{ item.created|timesince }}<br><small>{{ item.created|date:"SHORT_DATETIME_FORMAT" }}</small>
+                        <a href="{{ item.watch_object.bmfmodule_detail }}">{{ item.watch_object }}</a>
+                        {% if item.unread %}<span class="label label-primary">new</span>{% endif %}
+                        <br><span><small>
+                            {% if not glob_settings %}[{{ item.watch_ct }}]{% endif %}
+                            {{ item.modified|date:"SHORT_DATETIME_FORMAT" }}
+                        </small></span>
                     </td>
                     <td class="text-right">
-                        <a class="btn btn-xs btn-primary" href="{{ item.obj.bmfmodule_detail }}">
+                        {% if item.is_active %}
+                        {% if has_detectchanges %}
+                        <button class="btn btn btn-xs {% if item.changed %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.updated }}"></span></button>
+                        {% endif %}
+                        {% if has_workflow %}
+                        <button class="btn btn btn-xs {% if item.workflow %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.workflow }}"></span></button>
+                        {% endif %}
+                        {% if has_comments %}
+                        <button class="btn btn btn-xs {% if item.comment %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.comment }}"></span></button>
+                        {% endif %}
+                        {% if has_files %}
+                        <button class="btn btn btn-xs {% if item.file %}btn-info{% else %}btn-default{% endif %} disabled"><span class="glyphicon {{ symbols.file }}"></span></button>
+                        {% endif %}
+                        {% endif %}
+                        <a class="btn btn-xs btn-warning bmfedit" href="{% url "djangobmf:notification-update" pk=item.pk %}">
+                            <span class="glyphicon glyphicon-wrench"></span>
+                        </a>
+                        <a class="btn btn-xs btn-primary" href="{{ item.watch_object.bmfmodule_detail }}">
                             <span class="glyphicon glyphicon-list"></span>
                         </a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3"><em>{% trans "You dont have notifications" %}</em></td>
+                    <td colspan="2"><em>{% trans "You dont have notifications" %}</em></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -67,18 +108,20 @@
     <div class="col-lg-3 col-sm-4">
         <ul class="nav nav-pills nav-stacked">
             <li{% if not selected_ct %} class="active"{% endif %}>
-                <a href="{% url 'djangobmf:notification' filter=all_data %}">
+                <a href="{% url 'djangobmf:notification' filter=datafilter %}">
                     {% if unread > 0 %}<span class="badge pull-right">{{ unread }}</span>{% endif %}
                     {% trans "All" %}
                 </a>
             </li>
             {% for item in navigation|dictsort:"name" %}
-            <li{% if item.obj_ct == selected_ct %} class="active"{% endif %}>
-                <a href="{% url 'djangobmf:notification' ct=item.obj_ct filter=all_data %}">
+            {% if item.visible or item.count %}
+            <li{% if item.ct == selected_ct %} class="active"{% endif %}>
+                <a href="{% url 'djangobmf:notification' ct=item.ct filter=datafilter %}">
                     {% if item.count %}<span class="badge pull-right">{{ item.count }}</span>{% endif %}
                     {{ item.name }}
                 </a>
             </li>
+            {% endif %}
             {% endfor %}
         </ul>
     </div>

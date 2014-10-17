@@ -28,12 +28,12 @@ CLASSIFIERS = [
 version = __import__('djangobmf').get_version()
 
 setup(
-    name='djangoBMF',
+    name='django-bmf',
     version=version,
     url=__homepage__,
     license='BSD',
     platforms=['OS Independent'],
-    description='Buisiness Management Framework with integrated ERP solution written for django',
+    description='Business Management Framework with integrated ERP solution written for django',
     long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
     author=__author__,
     author_email=__contact__,

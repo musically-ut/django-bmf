@@ -20,7 +20,7 @@
 <div class="btn-toolbar pull-right" role="toolbar">
     {% if bmfmodule.can_clone %}
     <div class="btn-group">
-        <a class="btn btn-default btn-default bmf-edit" href="{% get_bmf_url object "clone" %}">
+        <a class="btn btn-default btn-default bmfedit" href="{% get_bmf_url object "clone" %}">
             <span class="glyphicon glyphicon-transfer"></span>
         </a>
     </div>
@@ -29,10 +29,10 @@
     {% if bmfworkflow.enabled %}
      {% if bmfworkflow.transitions %}
        <div class="btn-group">
-         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">{{ bmfworkflow.state }} <span class="caret"></span></button>
+         <button type="button" class="btn btn-bmfworkflow dropdown-toggle" data-toggle="dropdown">{{ bmfworkflow.state }} <span class="caret"></span></button>
          <ul class="dropdown-menu" role="menu">
            {% for transition in bmfworkflow.transitions %}
-           <li><a href="{% get_bmf_url object "workflow" transition=transition.0 %}">{{ transition.1 }}</a></li>
+           <li><a href="{% get_bmf_url object "workflow" transition=transition.0 %}?next={{ request.path_info }}">{{ transition.1 }}</a></li>
            {% endfor %}
          </ul>
        </div>
@@ -44,32 +44,38 @@
     {% endif %}
     {% if bmfmodule.has_report %}
      <div class="btn-group">
-     <a class="btn btn-default btn-success" href="{% get_bmf_url object "report" %}">
+     <a class="btn btn-bmfreport" href="{% get_bmf_url object "report" %}">
        <span class="glyphicon glyphicon-print"></span> {% trans "Print" %} 
      </a>
      </div>
     {% endif %}
     {% if bmfworkflow.state.update %}
      <div class="btn-group">
-     <a class="btn btn-default btn-warning bmf-edit" href="{% get_bmf_url object "update" %}">
+     <a class="btn btn-bmfupdate bmfedit" href="{% get_bmf_url object "update" %}">
        <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
      </a>
      </div>
     {% else %}
      <div class="btn-group">
-     <a class="btn btn-default btn-default disabled" href="#">
+     <a class="btn btn-default disabled" href="#">
        <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
      </a>
      </div>
     {% endif %}
 
     <div class="btn-group">
-        {% if bmfactivity.watch %}
-            <a href="{% url 'djangobmf:watch_edit' ct=bmfactivity.ct pk=object.pk %}?next={{ object.bmfmodule_detail }}" class="btn btn-info following">
-                <span class="glyphicon glyphicon-star"></span>
-            </a>
+        {% if bmfactivity.notification %}
+            {% if bmfactivity.watch %}
+                <a href="{% url "djangobmf:notification-update" pk=bmfactivity.notification.pk %}" class="btn {% if bmfactivity.notification.unread %}btn-info{% else %}btn-default{% endif %} bmfedit">
+                    <span class="glyphicon glyphicon-star"></span>
+                </a>
+            {% else %}
+                <a href="{% url "djangobmf:notification-update" pk=bmfactivity.notification.pk %}" class="btn btn-default bmfedit">
+                    <span class="glyphicon glyphicon-star-empty"></span>
+                </a>
+            {% endif %}
         {% else %}
-            <a href="{% url 'djangobmf:watch_edit' ct=bmfactivity.ct pk=object.pk %}?next={{ object.bmfmodule_detail }}" class="btn btn-default">
+            <a href="{% url 'djangobmf:notification-create' ct=bmfactivity.ct pk=object.pk %}" class="btn btn-default bmfedit">
                 <span class="glyphicon glyphicon-star-empty"></span>
             </a>
         {% endif %}

@@ -7,7 +7,17 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
-from .currency import BaseCurrency
+from .currencies import BaseCurrency
+
+
+class OptionalForeignKey(models.ForeignKey):
+    pass
+#   def __new__(cls, foreignname, *args, **kwargs):
+#       print(cls)
+#       print(foreignname)
+#       print(args)
+#       print(kwargs)
+#       return = super(OptionalForeignKey, cls).__new__(foreignname, *args, **kwargs)
 
 
 class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
@@ -48,9 +58,11 @@ class MoneyProxy(object):
     def __get__(self, obj, type=None):
         if obj is None:
             raise AttributeError('Can only be accessed via an instance.')
-        return obj.__dict__[self.field.name].value
+        return obj.__dict__[self.field.name]
 
     def __set__(self, obj, value):
+
+        # get currency model
         currency = getattr(obj, self.field.get_currency_field_name())
 
         if self.field.has_precision:
@@ -96,6 +108,12 @@ class CurrencyField(with_metaclass(models.SubfieldBase, models.CharField)):
         value = self._get_val_from_obj(obj)
         return self.get_prep_value(value)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(CurrencyField, self).deconstruct()
+        del kwargs["null"]
+        del kwargs["default"]
+        return name, path, args, kwargs
+
 
 class MoneyField(models.DecimalField):
     description = _("Money Field")
@@ -124,11 +142,22 @@ class MoneyField(models.DecimalField):
     def get_precision_field_name(self):
         return '%s_precision' % self.name
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(MoneyField, self).deconstruct()
+        del kwargs["null"]
+        del kwargs["max_digits"]
+        del kwargs["decimal_places"]
+        return name, path, args, kwargs
+
     def contribute_to_class(self, cls, name):
         super(MoneyField, self).contribute_to_class(cls, name)
         if not cls._meta.abstract:
             self.has_precision = hasattr(self, self.get_precision_field_name())
             setattr(cls, self.name, MoneyProxy(self))
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self.get_prep_value(value)
 
     def get_prep_value(self, value):
         if isinstance(value, BaseCurrency):

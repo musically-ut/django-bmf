@@ -1,0 +1,10 @@
+[
+{
+ "fields": {
+  "user": 1,
+  "name": null
+ },
+ "model": "djangobmf.dashboard",
+ "pk": 1
+}
+]

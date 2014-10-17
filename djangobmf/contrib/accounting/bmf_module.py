@@ -4,8 +4,13 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.categories import BaseCategory
+from djangobmf.categories import Accounting
 from djangobmf.sites import site
+
+from collections import OrderedDict
 
 from .apps import AccountingConfig
 
@@ -15,18 +20,35 @@ from .models import ACCOUNTING_ASSET
 from .models import ACCOUNTING_LIABILITY
 
 from .models import Account
-site.register(Account)
+from .views import AccountIndexView
+
+
+site.register(Account, **{
+    'index': AccountIndexView,
+})
+
 
 from .models import Transaction
-from .views import TransactionCreateView
-from .views import TransactionDetailView
+from .views import OpenTransactionView
+from .views import ClosedTransactionView
+from .views import TransactionCreateSimpleView
+from .views import TransactionCreateSplitView
 from .views import TransactionUpdateView
 
 site.register(Transaction, **{
-    'create': TransactionCreateView,
-    'detail': TransactionDetailView,
+    'create': OrderedDict((
+        ('simple', (_('Simple Transaction'), TransactionCreateSimpleView)),
+        ('split', (_('Split Transaction'), TransactionCreateSplitView)),
+    )),
     'update': TransactionUpdateView,
 })
+
+from .models import TransactionItem
+from .views import AllTransactionView
+
+
+site.register(TransactionItem)
+
 
 SETTINGS = {
     'income': forms.ModelChoiceField(queryset=Account.objects.filter(type=ACCOUNTING_INCOME)),
@@ -35,3 +57,17 @@ SETTINGS = {
     'supplier': forms.ModelChoiceField(queryset=Account.objects.filter(type=ACCOUNTING_LIABILITY)),
 }
 site.register_settings(AccountingConfig.label, SETTINGS)
+
+
+class TransactionCategory(BaseCategory):
+    name = _('Transactions')
+    slug = "transactions"
+
+
+site.register_dashboard(Accounting)
+
+site.register_category(Accounting, TransactionCategory)
+site.register_view(Account, TransactionCategory, AccountIndexView)
+site.register_view(Transaction, TransactionCategory, OpenTransactionView)
+site.register_view(Transaction, TransactionCategory, ClosedTransactionView)
+site.register_view(TransactionItem, TransactionCategory, AllTransactionView)

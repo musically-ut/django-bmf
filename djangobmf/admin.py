@@ -4,21 +4,22 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+from mptt.admin import MPTTModelAdmin
 
 from .configuration.models import Configuration
-admin.site.register(Configuration)
-
 from .dashboard.models import Dashboard
-admin.site.register(Dashboard)
-
 from .numbering.models import NumberCycle
-admin.site.register(NumberCycle)
-
 from .report.models import Report
+from .workspace.models import Workspace
+
+
+admin.site.register(Configuration)
+admin.site.register(Dashboard)
+admin.site.register(NumberCycle)
 admin.site.register(Report)
 
-from .dashboard.models import View
-admin.site.register(View)
 
-from .watch.models import Watch
-admin.site.register(Watch)
+class WorkspaceAdmin(MPTTModelAdmin):
+    list_display = ('slug', '__str__', 'ct', 'public', 'editable', 'url')
+
+admin.site.register(Workspace, WorkspaceAdmin)

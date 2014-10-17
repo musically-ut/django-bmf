@@ -1,4 +1,11 @@
 $(document).ready(function() {
+    /* Sidebar
+     * ----------------------------------------------------------------------- */
+
+    $("#sidebar p.switch a").click(function(e) {
+        e.preventDefault();
+        $("body").toggleClass("bmfsidebar-toggled");
+    });
 
     /* Notification
      * ----------------------------------------------------------------------- */
@@ -33,7 +40,7 @@ $(document).ready(function() {
         event.preventDefault();
         if ($('#bmfmodal_logout').length == 0) {
             $.get($(this).attr('href'), function(data) {
-                $('#wrap').prepend('<div class="modal fade" id="bmfmodal_logout" tabindex="-1" role="dialog" aria-hidden="true">'+data+'</div>');
+                $('#wrap').prepend('<div class="modal fade" id="bmfmodal_logout" tabindex="-1" role="dialog" aria-hidden="true">'+data.html+'</div>');
                 $('#bmfmodal_logout').modal('show');
             });
         }

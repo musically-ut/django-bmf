@@ -1,0 +1,72 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Sebastian Braun <sebastian@elmnt.de>, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: django-bmf\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 23:35+0200\n"
+"PO-Revision-Date: 2014-10-09 13:13+0000\n"
+"Last-Translator: Dirk <Dirk_Matthes@gmx.net>\n"
+"Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: models.py:37
+msgid "Title"
+msgstr "Titel"
+
+#: models.py:38
+msgid "Description"
+msgstr "Beschreibung"
+
+#: models.py:77
+msgid "Timesheet"
+msgstr "Stundenzettel"
+
+#: models.py:78
+msgid "Timesheets"
+msgstr "Stundenzettel"
+
+#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:9
+msgid "Date"
+msgstr "Datum"
+
+#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:10
+msgid "Subject"
+msgstr "Betreff"
+
+#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:11
+msgid "Employee"
+msgstr "Mitarbeiter"
+
+#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:12
+msgid "Time"
+msgstr "Zeit"
+
+#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:20
+#: workflows.py:21
+msgid "Active"
+msgstr "Aktiv"
+
+#: workflows.py:22
+msgid "Finished"
+msgstr "Abgeschlossen"
+
+#: workflows.py:23
+msgid "Validated"
+msgstr "Validiert"
+
+#: workflows.py:27
+msgid "Finish"
+msgstr "Abschließen"
+
+#: workflows.py:32
+msgid "Validate"
+msgstr "Validieren"

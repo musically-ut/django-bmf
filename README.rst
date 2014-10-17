@@ -1,4 +1,6 @@
 
+|Build status| |PyPi version| |PyPi downloads| |PyPi wheel| |Project license|
+
 Django BMF understands itself as a ERP-Framework with the following design concepts:
 
 * KISS-Principe for endusers
@@ -32,14 +34,45 @@ Features
 Documentation
 ===========================
 
+.. note::
+    Please note that this Project is documented poorly. If you have any questions please contact us!
+    We'd love to update the documentation and answer your question!
+
+http://www.django-bmf.org/docs/dev
+
+Demo
+===========================
+
+http://demo.django-bmf.org/
+
 Getting Help
 ===========================
+
+Please report bugs or ask questions using the `Issue Tracker`_ or contact us via team@django-bmf.org
+
+Check also for the latest updates of this project on Github_.
 
 Credits
 ===========================
 
-django
-django-filter
-django-mptt
-django-celery
-xhtml2pdf
+* `django`_
+* django-filter
+* `django-mptt`_
+* xhtml2pdf
+
+.. _Github: https://github.com/django-bmf/django-bmf
+.. _Issue Tracker: https://github.com/django-bmf/django-bmf/issues
+.. _django: http://www.djangoproject.com
+.. _django-mptt: https://github.com/django-mptt/django-mptt
+
+
+.. |Build status| image:: https://api.travis-ci.org/django-bmf/django-bmf.svg?branch=develop
+   :target: http://travis-ci.org/django-bmf/django-bmf
+.. |PyPi version| image:: https://pypip.in/v/django-bmf/badge.svg
+   :target: https://pypi.python.org/pypi/django-bmf/
+.. |PyPi downloads| image:: https://pypip.in/d/django-bmf/badge.svg
+   :target: https://pypi.python.org/pypi/django-bmf/
+.. |PyPi wheel| image:: https://pypip.in/wheel/django-bmf/badge.svg
+   :target: https://pypi.python.org/pypi/django-bmf/
+.. |Project license| image:: https://pypip.in/license/django-bmf/badge.svg
+   :target: https://pypi.python.org/pypi/django-bmf/

@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 models doctype
 """
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
 from django.utils.encoding import python_2_unicode_compatible
@@ -18,7 +19,9 @@ from djangobmf.fields import MoneyField
 from djangobmf.fields import WorkflowField
 from djangobmf.models import BMFMPTTModel
 from djangobmf.models import BMFModel
-from djangobmf.settings import BASE_MODULE
+from djangobmf.settings import CONTRIB_ACCOUNT
+from djangobmf.settings import CONTRIB_PROJECT
+from djangobmf.settings import CONTRIB_TRANSACTION
 
 from .workflows import TransactionWorkflow
 
@@ -50,6 +53,17 @@ ACCOUNTING_TYPES = (
 @python_2_unicode_compatible
 class BaseAccount(BMFMPTTModel):
     """
+    Accounts
+
+    ==============  ========  ========
+    Account-Type     Credit     Debit
+    ==============  ========  ========
+    Asset           Decrease  Increase
+    Liability       Increase  Decrease
+    Income/Revenue  Increase  Decrease
+    Expense         Decrease  Increase
+    Equity/Capital  Increase  Decrease
+    ==============  ========  ========
     """
     parent = TreeForeignKey(
         'self', null=True, blank=True, related_name='children',
@@ -60,7 +74,7 @@ class BaseAccount(BMFMPTTModel):
     number = models.CharField(_('Number'), max_length=30, null=True, blank=True, unique=True, db_index=True)
     name = models.CharField(_('Name'), max_length=100, null=False, blank=False)
     type = models.PositiveSmallIntegerField(
-        _('Type'), null=False, blank=False, choices=ACCOUNTING_TYPES,
+        _('Type'), null=True, blank=True, choices=ACCOUNTING_TYPES,
     )
     read_only = models.BooleanField(_('Read-only'), default=False)
 
@@ -88,10 +102,36 @@ class BaseAccount(BMFMPTTModel):
         verbose_name_plural = _('Accounts')
         ordering = ['number', 'name', 'type']
         abstract = True
+        swappable = "BMF_CONTRIB_ACCOUNT"
 
     class BMFMeta:
         category = ACCOUNTING
         observed_fields = ['name', ]
+
+    class MPTTMeta:
+        order_insertion_by = ['number', 'name', 'type']
+
+    def __init__(self, *args, **kwargs):
+        super(BaseAccount, self).__init__(*args, **kwargs)
+        self.initial_number = self.number
+
+    @staticmethod
+    def post_save(sender, instance, created, *args, **kwargs):
+        if not created and instance.initial_number != instance.number:
+            # TODO this get's the job done, but there might be a more efficient way to do this
+            if instance.parent:
+                instance._meta.model.objects.partial_rebuild(instance.tree_id)
+            else:
+                instance._meta.model.objects.rebuild()
+
+    def clean(self):
+        if self.parent:
+            if not self.type:
+                self.type = self.parent.type
+            elif self.type != self.parent.type:
+                raise ValidationError(_('The type does not match the model parents type'))
+        elif not self.type:
+            raise ValidationError(_('Root accounts must define a type'))
 
     def __str__(self):
         return '%s: %s' % (self.number, self.name)
@@ -118,37 +158,26 @@ class Account(AbstractAccount):
 
 
 @python_2_unicode_compatible
-class AbstractTransaction(BMFModel):
+class BaseTransaction(BMFModel):
     """
     Transaction
-
-    ==============  ========  ========
-    Account-Type     Credit     Debit
-    ==============  ========  ========
-    Asset           Decrease  Increase
-    Liability       Increase  Decrease
-    Income/Revenue  Increase  Decrease
-    Expense         Decrease  Increase
-    Equity/Capital  Increase  Decrease
-    ==============  ========  ========
     """
     state = WorkflowField()
-    if BASE_MODULE["PROJECT"]:
-        project = models.ForeignKey(
-            BASE_MODULE["PROJECT"], null=True, blank=True, on_delete=models.SET_NULL,
-        )
+    project = models.ForeignKey(  # TODO optional
+        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
+    )
     text = models.CharField(
         _('Posting text'), max_length=255, null=False, blank=False,
     )
-    accounts = models.ManyToManyField(BASE_MODULE["ACCOUNT"], blank=False, through="TransactionItem")
-    balanced = models.BooleanField(_('Draft'), default=False, editable=False)
+    draft = models.BooleanField(_('Draft'), default=True, editable=False)
 
-# expensed = models.BooleanField(_('Expensed'), blank=True, null=False, default=False, )
+#   expensed = models.BooleanField(_('Expensed'), blank=True, null=False, default=False, )
 
     class Meta:
         verbose_name = _('Transaction')
         verbose_name_plural = _('Transactions')
         abstract = True
+        swappable = "BMF_CONTRIB_TRANSACTION"
 
     class BMFMeta:
         category = ACCOUNTING
@@ -161,7 +190,7 @@ class AbstractTransaction(BMFModel):
         return '%s' % self.text
 
 
-class Transaction(AbstractTransaction):
+class Transaction(BaseTransaction):
     """
     """
     pass
@@ -172,35 +201,39 @@ class TransactionItemManager(models.Manager):
     """
     def get_queryset(self):
         return super(TransactionItemManager, self).get_queryset() \
-            .select_related('account').extra(select={"type": "type"})
+            .select_related('account', 'transaction').extra(select={"type": "type"})
 
 
-class AbstractTransactionItem(models.Model):
+class BaseTransactionItem(BMFModel):
     """
     """
     account = models.ForeignKey(
-        BASE_MODULE["ACCOUNT"], null=True, blank=True,
-        related_name="transaction_accounts", on_delete=models.PROTECT,
+        CONTRIB_ACCOUNT, null=True, blank=False,
+        related_name="transactions", on_delete=models.PROTECT,
     )
     transaction = models.ForeignKey(
-        BASE_MODULE["TRANSACTION"], null=True, blank=True,
-        related_name="account_transactions", on_delete=models.CASCADE,
+        CONTRIB_TRANSACTION, null=True, blank=False,
+        related_name="items", on_delete=models.CASCADE,
     )
+
     amount_currency = CurrencyField()
-    amount = MoneyField()
+    amount = MoneyField(blank=False)
+
     credit = models.BooleanField(
         choices=((True, _('Credit')), (False, _('Debit'))),
         default=True,
     )
-    balanced = models.BooleanField(default=False, editable=False)
-    modified = models.DateTimeField(
-        _("Modified"), auto_now=True, editable=False, null=True, blank=False,
-    )
+    draft = models.BooleanField(_('Draft'), default=True, editable=False)
 
     objects = TransactionItemManager()
 
     class Meta:
         abstract = True
+        swappable = "BMF_CONTRIB_TRANSACTIONITEM"
+
+    class BMFMeta:
+        category = ACCOUNTING
+        has_logging = False
 
 # def set_debit(self, amount):
 #   if self.get_type in [ACCOUNTING_ASSET, ACCOUNTING_EXPENSE]:
@@ -240,7 +273,7 @@ class AbstractTransactionItem(models.Model):
 #     return (0, abs(self.amount))
 
 
-class TransactionItem(AbstractTransactionItem):
+class TransactionItem(BaseTransactionItem):
     """
     This only inherits from AbstractTransactionItem.
     """

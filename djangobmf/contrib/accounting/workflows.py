@@ -17,3 +17,6 @@ class TransactionWorkflow(Workflow):
     class Transitions:
         balance = Transition(_("Balance"), "open", "balanced")
         cancel = Transition(_("Cancel"), "open", "cancelled", validate=False)
+
+    def balance(self):
+        self.instance.draft = False

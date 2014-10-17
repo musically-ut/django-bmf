@@ -10,44 +10,258 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect, Http404, QueryDict
+from django.views.generic import View
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
+from django.views.generic.base import TemplateView
+# from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseFormView
+from django.views.generic.dates import BaseDateListView
+from django.views.generic.dates import YearMixin
+from django.views.generic.dates import MonthMixin
+from django.views.generic.dates import WeekMixin
+from django.views.generic.dates import DayMixin
+from django.views.generic.dates import _date_from_string
+from django.views.generic.dates import _get_next_prev
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.list import MultipleObjectMixin
+from django.views.generic.list import MultipleObjectTemplateResponseMixin
 from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
+from django.utils.encoding import force_text
+from django.utils.formats import get_format
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
-from .activity.models import Activity
-from .watch.models import Watch
-from .models import Report
-from .activity.forms import HistoryCommentForm
-from .signals import activity_create
-from .signals import activity_update
-from .signals import activity_workflow
-from .signals import djangobmf_post_save
-from .utils import get_model_from_cfg
-from .utils import form_class_factory
-from .viewmixins import ModuleClonePermissionMixin
-from .viewmixins import ModuleCreatePermissionMixin
-from .viewmixins import ModuleDeletePermissionMixin
-from .viewmixins import ModuleUpdatePermissionMixin
-from .viewmixins import ModuleViewPermissionMixin
-from .viewmixins import ModuleAjaxMixin
-from .viewmixins import ModuleBaseMixin
-from .viewmixins import ModuleViewMixin
-from .viewmixins import NextMixin
+from djangobmf.document.forms import UploadDocument
+from djangobmf.document.models import Document
+# from djangobmf.document.views import DocumentCreateView
+from djangobmf.models import Report
+from djangobmf.notification.forms import HistoryCommentForm
+from djangobmf.notification.models import Activity
+from djangobmf.notification.models import Notification
+from djangobmf.signals import activity_create
+from djangobmf.signals import activity_update
+# from .signals import activity_workflow
+from djangobmf.utils import form_class_factory
+from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
+from djangobmf.viewmixins import ModuleClonePermissionMixin
+from djangobmf.viewmixins import ModuleCreatePermissionMixin
+from djangobmf.viewmixins import ModuleDeletePermissionMixin
+from djangobmf.viewmixins import ModuleUpdatePermissionMixin
+from djangobmf.viewmixins import ModuleViewPermissionMixin
+from djangobmf.viewmixins import ModuleAjaxMixin
+from djangobmf.viewmixins import ModuleBaseMixin
+from djangobmf.viewmixins import ModuleViewMixin
+from djangobmf.viewmixins import NextMixin
+from djangobmf.viewmixins import ViewMixin
 
-import re
-import operator
 import copy
+import datetime
+import operator
+import re
 import types
+import warnings
 from functools import reduce
 from django_filters.views import FilterView
+
+
+# --- list views --------------------------------------------------------------
+
+
+class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
+    """
+    """
+    model = None  # set by workspace.views
+    workspace = None  # set by workspace.views
+    context_object_name = 'objects'
+    template_name_suffix = None
+    template_name = None
+    allow_empty = True
+    name = None
+    slug = None
+    paginate_by = None
+
+    def get_template_names(self):
+        """
+        Return a list of template names to be used for the request. Must return
+        a list. May not be called if render_to_response is overridden.
+        """
+        if self.template_name:
+            return [self.template_name]
+
+        names = []
+        if self.template_name_suffix:
+            names.append("%s/%s_bmfgeneric_%s.html" % (
+                self.model._meta.app_label,
+                self.model._meta.model_name,
+                self.template_name_suffix
+            ))
+
+        names.append("%s/%s_bmfgeneric.html" % (
+            self.model._meta.app_label,
+            self.model._meta.model_name
+        ))
+        if self.template_name_suffix:
+            names.append("djangobmf/module_generic_%s.html" % self.template_name_suffix)
+
+        names.append("djangobmf/module_generic_default.html")
+
+        return names
+
+
+class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
+    """
+    This view generates a simple parginated list
+    """
+    template_name_suffix = 'list'
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data(object_list=self.object_list)
+        return self.render_to_response(context)
+
+
+class ModuleFilterView(ModuleGenericBaseView, FilterView):
+    """
+    """
+    template_name_suffix = 'filter'
+
+    def get_context_data(self, **kwargs):
+        if self.filterset_class:
+            kwargs.update({
+                'has_filter': True,
+            })
+        else:
+            kwargs.update({
+                'has_filter': False,
+            })
+        return super(ModuleFilterView, self).get_context_data(**kwargs)
+
+
+class ModuleTreeView(ModuleGenericBaseView, FilterView):
+    """
+    This view generates a parginated list and tree navigation
+    """
+    template_name_suffix = 'tree'
+
+
+class ModuleCategoryView(ModuleGenericBaseView, FilterView):
+    """
+    TODO: Some mixin between Tree, List and Letter, probably with multiple categorie-items or workspace-states
+    """
+    template_name_suffix = 'category'
+
+
+class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
+                        MultipleObjectTemplateResponseMixin, BaseDateListView):
+    """
+    This view generates a parginated list for a time intervall
+    """
+    template_name_suffix = 'archive'
+    date_field = 'modified'
+    date_resolution = 'year'
+    allow_empty = True
+    allow_future = False
+
+    def get(self, request, *args, **kwargs):
+        self.date_list, self.object_list, extra_context = self.get_dated_items()
+        context = self.get_context_data(object_list=self.object_list, date_list=self.date_list)
+        context.update(extra_context)
+        return self.render_to_response(context)
+
+    def get_week_format(self):
+        return '%W' if get_format('FIRST_DAY_OF_WEEK') else '%U'
+
+    def get_dated_items(self):
+        """
+        Return (date_list, items, extra_context) for this request.
+        """
+
+        year = self.request.GET.get('year', None)
+        month = self.request.GET.get('month', None)
+        day = self.request.GET.get('day', None)
+        week = self.request.GET.get('week', None)
+
+        year_format = '%Y'
+        month_format = '%m'
+        day_format = '%d'
+        week_format = self.get_week_format()
+
+        date_now = now()
+
+        if not year:
+            year = date_now.strftime(year_format)
+
+        if not month and not week and self.date_resolution in ["month", "day"]:
+            month = date_now.strftime(month_format)
+
+        if not week and not month and self.date_resolution in ["week"]:
+            week = date_now.strftime(week_format)
+
+        if not day and self.date_resolution in ["day"]:
+            day = date_now.strftime(day_format)
+
+        date_field = self.get_date_field()
+
+        if month and not week:
+            if day:
+                date = _date_from_string(year, year_format, month, month_format, day, day_format)
+                period = "day"
+                until = self._make_date_lookup_arg(self._get_next_day(date))
+            else:
+                date = _date_from_string(year, year_format, month, month_format)
+                period = "month"
+                until = self._make_date_lookup_arg(self._get_next_month(date))
+        elif week and not month:
+            if week_format == '%W':
+                date = _date_from_string(year, year_format, week, week_format, '1', '%w')
+            else:
+                date = _date_from_string(year, year_format, week, week_format, '0', '%w')
+            period = "week"
+            until = self._make_date_lookup_arg(self._get_next_week(date))
+        else:
+            date = _date_from_string(year, year_format)
+            period = "year"
+            until = self._make_date_lookup_arg(self._get_next_year(date))
+        since = self._make_date_lookup_arg(date)
+
+        lookup_kwargs = {
+            '%s__gte' % date_field: since,
+            '%s__lt' % date_field: until,
+        }
+
+        qs = self.get_dated_queryset(**lookup_kwargs)
+        date_list = self.get_date_list(qs)
+
+        return (date_list, qs, {
+            'current_period': period,
+            'current_period_start': date,
+            'current_period_end': until - datetime.timedelta(1),
+            'next_period': _get_next_prev(self, date, False, period),
+            'previous_period': _get_next_prev(self, date, True, period),
+            'dateformat': {
+                'year': year_format[1:],
+                'month': month_format[1:],
+                'day': day_format[1:],
+                'week': week_format[1:],
+            }
+        })
+
+
+class ModuleLetterView(ModuleGenericBaseView, FilterView):
+    """
+    This view generates a parginated list and a "A-Z 0-9"
+    navigation
+    """
+    template_name_suffix = 'letter'
+
+
+# --- detail, forms and api ---------------------------------------------------
 
 
 class ModuleActivityMixin(object):
@@ -58,15 +272,19 @@ class ModuleActivityMixin(object):
     def get_context_data(self, **kwargs):
         ct = ContentType.objects.get_for_model(self.object)
 
-        watch = Watch.objects.filter(
-            user=self.request.user,
-            watch_ct=ct,
-            watch_id__in=[self.object.pk, 0]
-        ).order_by('-watch_id').first()
-
-        if watch:
-            watching = watch.active
-        else:
+        try:
+            watch = Notification.objects.get(
+                user=self.request.user,
+                watch_ct=ct,
+                watch_id=self.object.pk
+            )
+            if watch.unread:
+                watch.unread = False
+                watch.save()
+            notification = watch
+            watching = watch.is_active()
+        except Notification.DoesNotExist:
+            notification = None
             watching = False
 
         kwargs.update({
@@ -77,6 +295,7 @@ class ModuleActivityMixin(object):
                 'log': self.model._bmfmeta.has_history,
                 'pk': self.object.pk,
                 'ct': ct.pk,
+                'notification': notification,
                 'watch': watching,
                 'log_data': None,
                 'comment_form': None,
@@ -99,15 +318,12 @@ class ModuleFilesMixin(object):
 
     def get_context_data(self, **kwargs):
         if self.model._bmfmeta.has_files:
-            from .file.views import FileAddView
-            document = get_model_from_cfg('DOCUMENT')
-
             ct = ContentType.objects.get_for_model(self.object)
 
             kwargs.update({
                 'has_files': True,
-                'history_file_form': FileAddView.form_class(),
-                'files': document.objects.filter(content_type=ct, content_id=self.object.pk),
+                'history_file_form': UploadDocument,
+                'files': Document.objects.filter(content_type=ct, content_id=self.object.pk),
             })
         return super(ModuleFilesMixin, self).get_context_data(**kwargs)
 
@@ -141,28 +357,6 @@ class ModuleFormMixin(object):
             else:
                 self.form_class = modelform_factory(model, exclude=self.exclude)
         return form_class_factory(self.form_class)
-
-
-class ModuleIndexView(ModuleViewPermissionMixin, ModuleViewMixin, FilterView):
-    """
-    """
-    context_object_name = 'objects'
-    template_name_suffix = '_bmfindex'
-    allow_empty = True
-
-    def get_template_names(self):
-        return super(ModuleIndexView, self).get_template_names() + ["djangobmf/module_index_default.html"]
-
-    def get_context_data(self, **kwargs):
-        if self.filterset_class:
-            kwargs.update({
-                'has_filter': True,
-            })
-        else:
-            kwargs.update({
-                'has_filter': False,
-            })
-        return super(ModuleIndexView, self).get_context_data(**kwargs)
 
 
 class ModuleDetailView(
@@ -283,6 +477,9 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
     def clone_related_objects(self, formdata, old_object, new_object):
         pass
 
+    def form_object_save(self, form):
+        self.object = form.save()
+
     def form_valid(self, form):
         # messages.success(self.request, 'Object cloned')
         old_object = copy.copy(self.object)
@@ -296,7 +493,7 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
             )
         form.instance.created_by = self.request.user
         form.instance.modified_by = self.request.user
-        self.object = form.save()
+        self.form_object_save(form)
         self.clone_related_objects(form.cleaned_data, old_object, self.object)
         activity_create.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
@@ -308,7 +505,6 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
 
 class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxMixin, UpdateView):
     """
-    update an update
     """
     context_object_name = 'object'
     template_name_suffix = '_bmfupdate'
@@ -348,12 +544,16 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
         return super(ModuleCreateView, self).get_template_names() \
             + ["djangobmf/module_create_default.html"]
 
+    def form_object_save(self, form):
+        self.object = form.save()
+        activity_create.send(sender=self.object.__class__, instance=self.object)
+
     def form_valid(self, form):
         # messages.success(self.request, 'Object created')
         form.instance.modified_by = self.request.user
         form.instance.created_by = self.request.user
-        self.object = form.save()
-        activity_create.send(sender=self.object.__class__, instance=self.object)
+        self.form_object_save(form)
+
         return self.render_valid_form({
             'object_pk': self.object.pk,
             'message': ugettext('Object created'),
@@ -373,7 +573,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, NextMixin, ModuleViewMixin, 
 
     def get_success_url(self):
         messages.info(self.request, 'Object deleted')
-        return self.redirect_next('%s:index' % self.model._bmfmeta.url_namespace)
+        return self.redirect_next()
 
 
 class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
@@ -385,22 +585,19 @@ class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
 
     def get_permissions(self, perms):
         info = self.model._meta.app_label, self.model._meta.model_name
-        perms.append('%s.update_%s' % info)
+        perms.append('%s.change_%s' % info)
         perms.append('%s.view_%s' % info)
         return super(ModuleWorkflowView, self).get_permissions(perms)
 
     def get_success_url(self):
-        return self.redirect_next('%s:index' % self.model._bmfmeta.url_namespace)
+        return self.redirect_next()
 
     def get(self, request, transition='', *args, **kwargs):
         self.object = self.get_object()
 
-        transitions = dict(self.object._bmfworkflow._from_here())
-        if transition not in transitions:
-            raise Http404
-
         try:
-            self.success_url = self.object._bmfworkflow._call(transition, self.object, self.request.user)
+            # TODO also change modelbase.py, when updating to use ajax
+            self.success_url = self.object.bmfworkflow_transition(transition, self.request.user)
         except ValidationError as e:
             # the objects gets checks with full_clean
             # if a validation error is raised, show an error page and don't save the object
@@ -409,12 +606,7 @@ class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
                 template=['djangobmf/module_workflow.html'],
                 context=self.get_context_data(error=e),
             )
-        self.object = self.object._bmfworkflow.instance
-        self.object.save()
 
-        # generate a history object and signal
-        activity_workflow.send(sender=self.object.__class__, instance=self.object)
-        djangobmf_post_save.send(sender=self.object.__class__, instance=self.object, new=False)
         messages.success(self.request, 'Workflow-State changed')
         return HttpResponseRedirect(self.get_success_url())
 
@@ -467,7 +659,10 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             if not field:
                 # TODO ADD LOGGING
                 raise Http404
-            qs = field.field.choices.queryset
+            qs = field.field.queryset
+
+            if hasattr(field.field.queryset.model, 'has_permissions'):
+                qs = field.field.queryset.model.has_permissions(qs, self.request.user)
 
             func = getattr(form.instance, 'get_%s_queryset' % field.name, None)
             if func:
@@ -522,3 +717,49 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             return "%s__search" % field_name[1:]
         else:
             return "%s__icontains" % field_name
+
+
+# --- misc --------------------------------------------------------------------
+
+
+class ModuleOverviewView(ViewMixin, TemplateView):
+    template_name = "djangobmf/modules.html"
+
+    def get_context_data(self, **kwargs):
+        from .sites import site
+
+        modules = []
+        for ct, model in site.models.items():
+            info = model._meta.app_label, model._meta.model_name
+            perm = '%s.view_%s' % info
+            if self.request.user.has_perms([perm, ]):
+                key = force_text(model._bmfmeta.category)
+                modules.append({
+                    'category': key,
+                    'model': model,
+                    'name': model._meta.verbose_name_plural,
+                    'url': model._bmfmeta.url_namespace + ':index',
+                })
+
+        context = super(ModuleOverviewView, self).get_context_data(**kwargs)
+        context['modules'] = modules
+        return context
+
+
+# --- old ---------------------------------------------------------------------
+
+
+class ModuleIndexView(ModuleListView):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "ModuleIndexView is is deprecated - use ModuleListView",
+            RemovedInNextBMFVersionWarning, stacklevel=2)
+        super(ModuleIndexView, self).__init__(*args, **kwargs)
+
+
+class ModuleGenericListView(ModuleListView):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "ModuleGenericListView is is deprecated - use ModuleListView",
+            RemovedInNextBMFVersionWarning, stacklevel=2)
+        super(ModuleGenericListView, self).__init__(*args, **kwargs)

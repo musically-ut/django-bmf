@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-VERSION = ((0, 1, 4), ('a', 2))  # all alpha versions
+VERSION = ((0, 2, 0), ('a', 1))  # all alpha versions
 # VERSION = ((0, 2), ('b', 0)) # first beta
 # VERSION = ((0, 3), ('b', 0)) # second beta
 # VERSION = ((0, 9), ('rc', 0)) # first official release
@@ -54,7 +54,5 @@ __author__ = 'Sebastian Braun'
 __contact__ = 'sebastian@elmnt.de'
 __homepage__ = 'http://www.igelware.de'
 __docformat__ = 'restructuredtext'
-
-# -eof meta-
 
 default_app_config = 'djangobmf.apps.BMFConfig'

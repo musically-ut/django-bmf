@@ -16,8 +16,7 @@ from django.views.decorators.http import last_modified
 
 from djangobmf import get_version
 from djangobmf.dashboard.views import DashboardView
-from djangobmf.module.views import ModuleView
-from djangobmf.modals.views import ModalSaveView
+from djangobmf.views import ModuleOverviewView
 
 
 @cache_page(86400, key_prefix='bmf-js18n-%s' % get_version())
@@ -39,16 +38,12 @@ urlpatterns = patterns(
     url(r'^accounts/', include('djangobmf.account.urls')),
     url(r'^config/', include('djangobmf.configuration.urls')),
     url(r'^dashboard/', include('djangobmf.dashboard.urls')),
-    url(r'^file/', include('djangobmf.file.urls')),
+    url(r'^document/', include('djangobmf.document.urls')),
     url(r'^i18n/', i18n_javascript, name="jsi18n"),
     #  url(r'^messages/', include('djangobmf.message.urls')),
     url(r'^notifications/', include('djangobmf.notification.urls')),
-    url(r'^watching/', include('djangobmf.watch.urls')),
     url(r'^wizard/', include('djangobmf.wizard.urls')),
+    url(r'^workspace/', include('djangobmf.workspace.urls')),
     #   r'^module/' via sites
-
-    # TODO
-    url(r'^modules/$', ModuleView.as_view(), name="modules"),
-    url(r'^ajax/save/view/$', ModalSaveView.as_view(), name="modal_saveview"),
-    url(r'^activities/', include('djangobmf.activity.urls')),
+    url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),
 )

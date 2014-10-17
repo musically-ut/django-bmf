@@ -1,0 +1,17 @@
+{% extends "djangobmf/base_modal.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Update Notification" %}{% endblock %}
+
+{% block base_buttons %}
+<button type="button" class="btn bmfedit-cancel btn-danger">{% trans "Close" %}</button>
+<button type="button" class="btn bmfedit-submit btn-success">{% trans "Save changes" %}</button>
+{% endblock %}
+
+{% block base_content %}
+<form class="form" role="form" action="{{ request.path }}" method="post">
+{% csrf_token %}
+{{ form.as_p }}
+</form>
+{% endblock %}

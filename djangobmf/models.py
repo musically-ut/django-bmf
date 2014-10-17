@@ -9,23 +9,23 @@ __all__ = (
     'BMFMPTTModel',
     'Activity',
     'Dashboard',
+    'Document',
     'Configuration',
     'Notification',
     'NumberCycle',
     'Report',
-    'View',
-    'Watch',
+    'Workspace',
 )
 
 from .modelbase import BMFSimpleModel
 from .modelbase import BMFModel
 from .modelbase import BMFMPTTModel
 
-from .activity.models import Activity
 from .dashboard.models import Dashboard
+from .document.models import Document
 from .configuration.models import Configuration
+from .notification.models import Activity
 from .notification.models import Notification
 from .numbering.models import NumberCycle
 from .report.models import Report
-from .dashboard.models import View
-from .watch.models import Watch
+from .workspace.models import Workspace
