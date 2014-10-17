@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Dirk <Dirk_Matthes@gmx.net>, 2014
 # Sebastian Braun <sebastian@elmnt.de>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-06 23:35+0200\n"
-"PO-Revision-Date: 2014-10-06 21:36+0000\n"
-"Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
+"PO-Revision-Date: 2014-10-09 13:09+0000\n"
+"Last-Translator: Dirk <Dirk_Matthes@gmx.net>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,7 +47,7 @@ msgstr ""
 #: static/djangobmf/js/djangobmf.js:243 static/djangobmf/js/djangobmf.js:363
 #: static/djangobmf/js/djangobmf.min.js:16
 msgid "Su Mo Tu We Th Fr Sa"
-msgstr ""
+msgstr "So Mo Di Mi Do Fr Sa"
 
 #: static/djangobmf/js/djangobmf.js:244 static/djangobmf/js/djangobmf.js:364
 #: static/djangobmf/js/djangobmf.min.js:16
