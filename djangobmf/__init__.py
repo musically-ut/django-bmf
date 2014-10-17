@@ -3,11 +3,10 @@
 
 from __future__ import unicode_literals
 
-VERSION = ((0, 2, 0), ('a', 1))  # all alpha versions
-# VERSION = ((0, 2), ('b', 0)) # first beta
-# VERSION = ((0, 3), ('b', 0)) # second beta
-# VERSION = ((0, 9), ('rc', 0)) # first official release
-# VERSION = ((1, 0), ('final', 0)) # first final version
+VERSION = ((0, 2, 1), ('a', 0))  # all alpha versions
+# VERSION = ((0, 9, 0), ('b', 0)) # first beta
+# VERSION = ((1, 0, 0), ('rc', 0)) # first official release canidate
+# VERSION = ((1, 0, 0), ('final', 0)) # first final version
 
 
 def get_version(dev=True):
