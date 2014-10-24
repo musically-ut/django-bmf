@@ -740,7 +740,6 @@ class ModuleOverviewView(ViewMixin, TemplateView):
                     'category': key,
                     'model': model,
                     'name': model._meta.verbose_name_plural,
-                    'url': model._bmfmeta.url_namespace + ':index',
                 })
 
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)
