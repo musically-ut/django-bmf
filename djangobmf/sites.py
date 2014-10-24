@@ -20,12 +20,11 @@ from django.utils.text import slugify
 
 from .apps import BMFConfig
 from .models import Configuration
-from .views import ModuleIndexView
-from .views import ModuleReportView
 from .views import ModuleCreateView
+from .views import ModuleDetailView
 from .views import ModuleDeleteView
+from .views import ModuleReportView
 from .views import ModuleCloneView
-from .views import ModuleAutoDetailView
 from .views import ModuleUpdateView
 from .views import ModuleWorkflowView
 from .views import ModuleFormAPI
@@ -41,6 +40,9 @@ APP_LABEL = BMFConfig.label
 
 
 class DjangoBMFSetting(object):
+    """
+    Object used to register settings
+    """
     def __init__(self, app_label, name, field):
         self.app_label = app_label
         self.name = name
@@ -78,100 +80,146 @@ class DjangoBMFSetting(object):
 
 
 class DjangoBMFModule(object):
-    index = None
-    create = None
-    delete = None
-    update = None
-    detail = None
-    report = None
-    clone = None
-    urlpatterns = None
+    """
+    Object internally used to register modules
+    """
 
-    def __init__(self, model):
+    def __init__(self, model, **options):
         self.model = model
 
-    def get_urls(self, **options):
-        index = self.index or options.get('index', None)
-        create = self.create or options.get('create', None)
-        delete = self.delete or options.get('delete', None)
-        update = self.update or options.get('update', None)
-        detail = self.detail or options.get('detail', None)
-        report = self.report or options.get('report', None)
-        clone = self.clone or options.get('clone', None)
+        self.create = options.get('create', ModuleCreateView)
+        self.detail = options.get('detail', ModuleDetailView)
+        self.update = options.get('update', ModuleUpdateView)
+        self.delete = options.get('delete', ModuleDeleteView)
+        self.clone = options.get('clone', ModuleCloneView)
+        self.report = options.get('report', None)
+        self.urlpatterns = options.get('urlpatterns', None)
 
-        add_patterns = self.urlpatterns or options.get('urlpatterns', None)
+    def list_reports(self):
+        if hasattr(self, 'listed_reports'):
+            return self.listed_reports
+        self.listed_reports = []
+
+        if isinstance(self.report, dict):
+            for label, view in six.iteritems(self.report):
+                key = slugify(label)
+                if isinstance(view, (list, tuple)) and len(view) == 2:
+                    # overwrite the label, and correct the view
+                    label = slugify(view[0])
+                    view = view[1]
+            self.listed_reports.append((key, label, view))
+
+        elif isinstance(self.report, ModuleReportView):
+            self.listed_reports.append(('default', 'default', self.report))
+
+        return self.listed_reports
+
+    def list_creates(self):
+        if hasattr(self, 'listed_creates'):
+            return self.listed_creates
+        self.listed_creates = []
+
+        if isinstance(self.create, dict):
+            for label, view in six.iteritems(self.create):
+                key = slugify(label)
+                if isinstance(view, (list, tuple)) and len(view) == 2:
+                    # overwrite the label, and correct the view
+                    label = slugify(view[0])
+                    view = view[1]
+            self.listed_creates.append((key, label, view))
+
+        elif isinstance(self.create, ModuleCreateView):
+            self.listed_creates.append(('default', 'default', self.create))
+
+        return self.listed_creates
+
+    def get_detail_urls(self):
+        reports = self.list_reports()
+        creates = self.list_creates()
 
         urlpatterns = patterns(
             '',
-            url(  # TODO: OLD
-                r'^$',
-                index.as_view(model=self.model),
-                name='index',
-            ),
             url(
-                r'^(?P<pk>[0-9]+)/$',
-                detail.as_view(model=self.model),
+                r'^/$',
+                self.detail.as_view(model=self.model, reports=reports, creates=creates),
                 name='detail',
-            ),
-            url(
-                r'^(?P<pk>[0-9]+)/update/$',
-                update.as_view(model=self.model),
-                name='update',
-            ),
-            url(
-                r'^(?P<pk>[0-9]+)/delete/$',
-                delete.as_view(model=self.model),
-                name='delete',
-            ),
-            url(
-                r'^(?P<pk>[0-9]+)/update/form-api/$',
-                ModuleFormAPI.as_view(
-                    model=self.model,
-                    form_view=update,
-                ),
-                name='form-api',
             ),
         )
 
-        # create view(s)
-        if isinstance(create, dict):
-            for label, view in six.iteritems(create):
-                key = slugify(label)
-                if isinstance(view, (list, tuple)):
-                    label = view[0]
-                    view = view[1]
-                self.model._bmfmeta.create_views.append((key, label))
-                urlpatterns += patterns(
-                    '',
-                    url(
-                        r'^create/(?P<key>%s)/$' % key,
-                        view.as_view(model=self.model),
-                        name='create',
-                    ),
-                    url(
-                        r'^create/(?P<key>%s)/form-api/$' % key,
-                        ModuleFormAPI.as_view(
-                            model=self.model,
-                            form_view=view,
-                        ),
-                        name='form-api',
-                    ),
-                )
-        else:
+        # add custom url patterns
+        if self.urlpatterns:
+            urlpatterns += self.urlpatterns
+
+        return urlpatterns
+
+    def get_api_urls(self):
+        reports = self.list_reports()
+        creates = self.list_creates()
+
+        urlpatterns = patterns(
+            '',
+            url(
+                r'^/update/(?P<pk>[0-9]+)/$',
+                self.update.as_view(model=self.model),
+                name='update',
+            ),
+            url(
+                r'^(?P<pk>[0-9]+)/update/form/$',
+                ModuleFormAPI.as_view(
+                    model=self.model,
+                    form_view=self.update,
+                ),
+                name='update-form',
+            ),
+            url(
+                r'^/delete/(?P<pk>[0-9]+)/$',
+                self.delete.as_view(model=self.model),
+                name='delete',
+            ),
+        )
+        if self.model._bmfmeta.can_clone:
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^create/$',
-                    create.as_view(model=self.model),
+                    r'^/clone/(?P<pk>[0-9]+)/$',
+                    self.clone.as_view(model=self.model),
+                    name='clone',
+                ),
+                url(
+                    r'^/clone/(?P<pk>[0-9]+)/form/$',
+                    ModuleFormAPI.as_view(
+                        model=self.model,
+                        form_view=self.clone,
+                    ),
+                    name='clone-form',
+                ),
+            )
+
+        for key, label, view in creates:
+            urlpatterns += patterns(
+                '',
+                url(
+                    r'^create/(?P<key>%s)/$' % key,
+                    view.as_view(model=self.model),
                     name='create',
                 ),
                 url(
-                    r'^create/form-api/$',
+                    r'^create/(?P<key>%s)/form/$' % key,
                     ModuleFormAPI.as_view(
                         model=self.model,
-                        form_view=create,
+                        form_view=view,
                     ),
-                    name='form-api',
+                    name='create-form',
+                ),
+            )
+
+        for key, label, view in reports:
+            urlpatterns += patterns(
+                '',
+                url(
+                    r'^report/(?P<key>%s)/$' % key,
+                    view.as_view(model=self.model),
+                    name='report',
                 ),
             )
 
@@ -180,53 +228,18 @@ class DjangoBMFModule(object):
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^(?P<pk>[0-9]+)/workflow/(?P<transition>\w+)/$',
+                    r'^workflow/(?P<pk>[0-9]+)/(?P<transition>\w+)/$',
                     ModuleWorkflowView.as_view(model=self.model),
                     name='workflow',
                 ),
             )
-
-        # model reports
-        if report:
-            self.model._bmfmeta.has_report = True
-            urlpatterns += patterns(
-                '',
-                url(
-                    r'^(?P<pk>[0-9]+)/report/$',
-                    report.as_view(model=self.model),
-                    name='report',
-                ),
-            )
-
-        # clone model
-        if self.model._bmfmeta.can_clone:
-            urlpatterns += patterns(
-                '',
-                url(
-                    r'^(?P<pk>[0-9]+)/clone/$',
-                    clone.as_view(model=self.model),
-                    name='clone',
-                ),
-                url(
-                    r'^(?P<pk>[0-9]+)/clone/form-api/$',
-                    ModuleFormAPI.as_view(
-                        model=self.model,
-                        form_view=clone,
-                    ),
-                    name='clone-form-api',
-                ),
-            )
-
-        # url patterns
-        if add_patterns:
-            urlpatterns += add_patterns
 
         return urlpatterns
 
 
 class DjangoBMFSite(object):
     """
-    Handle this object like the AdminSite from django.contrib.admin.sites
+    Handle modules like the AdminSite from django.contrib.admin.sites
     """
 
     def __init__(self, name='djangobmf', app_name=APP_LABEL):
@@ -236,7 +249,7 @@ class DjangoBMFSite(object):
 
     def clear(self):
         # combine all registered modules here
-        self._registry = {}
+        self.modules = {}
 
         # all currencies should be stored here
         self.currencies = {}
@@ -253,73 +266,34 @@ class DjangoBMFSite(object):
             'currency': forms.CharField(max_length=10, required=True,),  # TODO add validation / use dropdown
         })
 
+    # --- modules -------------------------------------------------------------
+
+    def register_module(self, module, **options):
+        if not hasattr(module, '_bmfmeta'):
+            raise ImproperlyConfigured(
+                'The module %s needs to be an BMF-Model in order to be'
+                'registered with django BMF.' % module.__name__
+            )
+        if module in self.modules:
+            raise AlreadyRegistered('The module %s is already registered' % module.__name__)
+        self.modules[module] = DjangoBMFModule(module, **options)
+        logger.debug('registered module %s' % module.__name__)
+
+    def unregister_module(self, module):
+        if module not in self.modules:
+            raise NotRegistered('The model %s is not registered' % module.__name__)
+        del self.modules[module]
+        logger.debug('deleted module %s' % module.__name__)
+
     # --- models --------------------------------------------------------------
 
-    def register(self, model, admin=None, **options):
-        self.register_model(model, admin)
+    # TODO REMOVE ME
+    def register(self, module, **options):
+        self.register_module(module, **options)
 
-        for view in ['index', 'create', 'detail', 'update', 'delete', 'report', 'clone']:
-            if view in options:
-                self.register_old_view(model, view, options[view])
-
-        if 'urlpatterns' in options:
-            self._registry[model]['urlpatterns'] = options['urlpatterns']
-
-    def register_model(self, model, admin=None):
-        if not hasattr(model, '_bmfmeta'):
-            raise ImproperlyConfigured(
-                'The model %s needs to be an BMF-Model in order to be'
-                'registered with django BMF.' % model.__name__
-            )
-
-        if model in self._registry:
-            raise AlreadyRegistered('The model %s is already registered' % model.__name__)
-
-        self._registry[model] = {
-            'admin': (admin or DjangoBMFModule)(model),
-            'index': ModuleIndexView,
-            'create': ModuleCreateView,
-            'detail': ModuleAutoDetailView,
-            'update': ModuleUpdateView,
-            'delete': ModuleDeleteView,
-            'clone': ModuleCloneView,
-            'report': None,
-            'urlpatterns': None,
-        }
-
-    def unregister(self, model):
-        self.unregister_model(model)
-
-    def unregister_model(self, model):
-        if model not in self._registry:
-            raise NotRegistered('The model %s is not registered' % model.__name__)
-        del self._registry[model]
-
-    # --- views ---------------------------------------------------------------
-
-    def register_old_view(self, model, type, view):
-        if type in ['index', 'detail', 'update', 'delete', 'clone']:
-            # TODO check if view is an bmf-view
-            # add the view
-            self._registry[model][type] = view
-
-        elif type == 'report':
-            if isinstance(view, bool):
-                if view:
-                    self._registry[model][type] = ModuleReportView
-            else:
-                # TODO check if view is an bmf-view
-                # add the view
-                self._registry[model][type] = view
-
-        elif type == 'create':
-            # if isinstance(create, dict):
-            # TODO check if view is an bmf-view
-            # add the view
-            self._registry[model][type] = view
-
-    def register_genericview(self, dashboard, category, model, view):
-        pass
+    # TODO REMOVE ME
+    def unregister(self, module):
+        self.unregister_model(module)
 
     # --- currencies ----------------------------------------------------------
 
@@ -529,44 +503,37 @@ class DjangoBMFSite(object):
         if settings.DEBUG:
             self.check_dependencies()
 
-        for model in self._registry:
-            data = self._registry[model]
-            urls = data['admin'].get_urls(**{
-                "index": data['index'],
-                "create": data['create'],
-                "detail": data['detail'],
-                "update": data['update'],
-                "delete": data['delete'],
-                "report": data['report'],
-                "clone": data['clone'],
-                "urlpatterns": data['urlpatterns'],
-            })
-            info = (model._meta.app_label, model._meta.model_name)
+        for module, data in self.modules.items():
+            info = (module._meta.app_label, module._meta.model_name)
+            ct = ContentType.objects.get_for_model(module)
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^module/%s/%s/' % (info[1], info[0]),
-                    include((urls, self.app_name, "module_%s_%s" % info))
+                    r'^api/%s/' % ct.pk,
+                    include((data.get_api_urls(), self.app_name, "module_%s_%s" % info))
+                ),
+                url(
+                    r'^detail/%s/%s/(?P<pk>[0-9]+)' % (info[1], info[0]),
+                    include((data.get_detail_urls(), self.app_name, "module_%s_%s" % info))
                 )
             )
         return urlpatterns
-
-site = DjangoBMFSite()
 
 
 def autodiscover():
     for app_config in apps.get_app_configs():
         try:
             # get a copy of old site configuration
-            before_import_r = copy.copy(site._registry)
+            before_import_m = copy.copy(site.modules)
             before_import_c = copy.copy(site.currencies)
             before_import_s = copy.copy(site.settings)
             before_import_p = copy.copy(site.reports)
             import_module('%s.%s' % (app_config.name, "bmf_module"))
+            logger.debug('bmf_module from %s loaded' % app_config.name)
         except:
             # Reset the model registry to the state before the last import
             # skiping this may result in an AlreadyRegistered Error
-            site._registry = before_import_r
+            site.modules = before_import_m
             site.currencies = before_import_c
             site.settings = before_import_s
             site.reports = before_import_p
@@ -574,3 +541,5 @@ def autodiscover():
             # Decide whether to bubble up this error
             if module_has_submodule(app_config.module, "bmf_module"):
                 raise
+
+site = DjangoBMFSite()

@@ -35,8 +35,10 @@ def i18n_javascript(request):
 urlpatterns = patterns(
     '',
     url(r'^$', DashboardView.as_view(), name="dashboard"),
+    #   r'^api/module/' via sites
     url(r'^accounts/', include('djangobmf.account.urls')),
     url(r'^config/', include('djangobmf.configuration.urls')),
+    #   r'^detail/' via sites
     url(r'^dashboard/', include('djangobmf.dashboard.urls')),
     url(r'^document/', include('djangobmf.document.urls')),
     url(r'^i18n/', i18n_javascript, name="jsi18n"),
@@ -44,6 +46,5 @@ urlpatterns = patterns(
     url(r'^notifications/', include('djangobmf.notification.urls')),
     url(r'^wizard/', include('djangobmf.wizard.urls')),
     url(r'^workspace/', include('djangobmf.workspace.urls')),
-    #   r'^module/' via sites
-    url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),
+    url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),  # TODO Old
 )
