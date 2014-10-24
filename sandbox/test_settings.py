@@ -101,6 +101,8 @@ INSTALLED_APPS = (
     'mptt',
     'sekizai',
     'djangobmf',
+    'celery',
+    'haystack',
 )
 
 SECRET_KEY = 'djangobmf-secret-key'

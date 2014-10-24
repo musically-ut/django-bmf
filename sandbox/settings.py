@@ -142,6 +142,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'mptt',
     'sekizai',
+    'celery',
+    'haystack',
 )
 INSTALLED_APPS += TEST_PROJECT_APPS
 

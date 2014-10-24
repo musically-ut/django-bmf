@@ -46,6 +46,8 @@ setup(
         'django-sekizai',
         'django-mptt',
         'django-filter',
+        'celery',
+        'django-haystack',
         'reportlab',
         'xhtml2pdf',
         'markdown',
