@@ -81,7 +81,9 @@ class BMFOptions(object):
         # used to detect changes
         self.changelog = {}
         # set namespace of urls
-        self.url_namespace = '%s:module_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.url_namespace = '%s:module_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)  # TODO OLD
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
         # is filles with keys if multiple create views are definied for this model (see sites.py)
@@ -325,7 +327,7 @@ class BMFSimpleModel(six.with_metaclass(BMFModelBase, models.Model)):
         """
         A permalink to the default view of this model in the BMF-System
         """
-        return ('%s:detail' % self._bmfmeta.url_namespace, (), {"pk": self.pk})
+        return ('%s:detail' % self._bmfmeta.namespace_detail, (), {"pk": self.pk})
 
     def get_absolute_url(self):
         return self.bmfmodule_detail()

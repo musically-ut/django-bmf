@@ -109,7 +109,9 @@ class DjangoBMFModule(object):
                     view = view[1]
             self.listed_reports.append((key, label, view))
 
-        elif isinstance(self.report, ModuleReportView):
+        elif isinstance(self.report, bool):
+            self.listed_reports.append(('default', 'default', ModuleReportView))
+        elif self.report and issubclass(self.report, ModuleReportView):
             self.listed_reports.append(('default', 'default', self.report))
 
         return self.listed_reports
@@ -128,7 +130,7 @@ class DjangoBMFModule(object):
                     view = view[1]
             self.listed_creates.append((key, label, view))
 
-        elif isinstance(self.create, ModuleCreateView):
+        elif issubclass(self.create, ModuleCreateView):
             self.listed_creates.append(('default', 'default', self.create))
 
         return self.listed_creates
@@ -140,7 +142,7 @@ class DjangoBMFModule(object):
         urlpatterns = patterns(
             '',
             url(
-                r'^/$',
+                r'^$',
                 self.detail.as_view(model=self.model, reports=reports, creates=creates),
                 name='detail',
             ),
@@ -159,7 +161,7 @@ class DjangoBMFModule(object):
         urlpatterns = patterns(
             '',
             url(
-                r'^/update/(?P<pk>[0-9]+)/$',
+                r'^update/(?P<pk>[0-9]+)/$',
                 self.update.as_view(model=self.model),
                 name='update',
             ),
@@ -172,7 +174,7 @@ class DjangoBMFModule(object):
                 name='update-form',
             ),
             url(
-                r'^/delete/(?P<pk>[0-9]+)/$',
+                r'^delete/(?P<pk>[0-9]+)/$',
                 self.delete.as_view(model=self.model),
                 name='delete',
             ),
@@ -181,12 +183,12 @@ class DjangoBMFModule(object):
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^/clone/(?P<pk>[0-9]+)/$',
+                    r'^clone/(?P<pk>[0-9]+)/$',
                     self.clone.as_view(model=self.model),
                     name='clone',
                 ),
                 url(
-                    r'^/clone/(?P<pk>[0-9]+)/form/$',
+                    r'^clone/(?P<pk>[0-9]+)/form/$',
                     ModuleFormAPI.as_view(
                         model=self.model,
                         form_view=self.clone,
@@ -465,7 +467,7 @@ class DjangoBMFSite(object):
     @property
     def models(self):
         models = {}
-        for model in self._registry:
+        for model in self.modules.keys():
             ct = ContentType.objects.get_for_model(model)
             models[ct.pk] = model
         return models
@@ -509,13 +511,13 @@ class DjangoBMFSite(object):
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^api/%s/' % ct.pk,
-                    include((data.get_api_urls(), self.app_name, "module_%s_%s" % info))
+                    r'^api/module/%s/' % ct.pk,
+                    include((data.get_api_urls(), self.app_name, "moduleapi_%s_%s" % info))
                 ),
                 url(
-                    r'^detail/%s/%s/(?P<pk>[0-9]+)' % (info[1], info[0]),
-                    include((data.get_detail_urls(), self.app_name, "module_%s_%s" % info))
-                )
+                    r'^detail/%s/%s/(?P<pk>[0-9]+)/' % (info[1], info[0]),
+                    include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
+                ),
             )
         return urlpatterns
 
