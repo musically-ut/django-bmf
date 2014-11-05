@@ -196,7 +196,10 @@ except ImportError:
     DEBUG = True
     TEMPLATE_DEBUG = DEBUG
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    BROKER_URL = 'redis://redis:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
     CELERY_ALWAYS_EAGER=True # deactivate celery
+
 
     INSTALLED_APPS += (
 #       'django_extensions',

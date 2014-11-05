@@ -4,18 +4,8 @@ redis:
     image: redis
 elasticsearch:
     image: dockerfile/elasticsearch
-worker:
-    build: .
-    command: python develop.py runserver 0.0.0.0:8000
-    volumes:
-        - .:/code
-    links:
-        - db
-        - elasticsearch
-        - redis
 web:
     build: .
-    command: python develop.py runserver 0.0.0.0:8000
     volumes:
         - .:/code
     ports:
@@ -24,3 +14,18 @@ web:
         - db
         - elasticsearch
         - redis
+#worker:
+#    build: .
+#    command: celery -A sandbox worker -l info
+#    volumes:
+#        - .:/code
+#    links:
+#        - db
+#        - elasticsearch
+#        - redis
+flower:
+    build: stack/flower
+    links:
+        - redis
+    ports:
+        - "5555:5555"

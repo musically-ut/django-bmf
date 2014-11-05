@@ -8,8 +8,13 @@ import os
 
 BASEDIR = os.path.dirname(env.real_fabfile)
 
-PYTHON = BASEDIR + "/virtenv/bin/python"
-DJANGO = BASEDIR + "/virtenv/bin/django-admin.py"
+#PYTHON = BASEDIR + "/virtenv/bin/python"
+#DJANGO = BASEDIR + "/virtenv/bin/django-admin.py"
+#MANAGE = BASEDIR + "/sandbox/manage.py"
+#DEVELOP = BASEDIR + "/develop.py"
+
+PYTHON = "python"
+DJANGO = "django-admin.py"
 MANAGE = BASEDIR + "/sandbox/manage.py"
 DEVELOP = BASEDIR + "/develop.py"
 

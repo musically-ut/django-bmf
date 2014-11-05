@@ -3,4 +3,5 @@ ENV PYTHONBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
 ADD . /code/
-RUN pip install -r requirements.txt django-debug-toolbar .
+RUN pip install -r requirements.txt django-debug-toolbar fabric
+CMD ["fab", "make", "start"]
