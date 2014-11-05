@@ -29,11 +29,7 @@ from djangobmf.settings import ACTIVITY_FILE
 from djangobmf.settings import ACTIVITY_CREATED
 from djangobmf.settings import ACTIVITY_UNKNOWN
 
-# celery should be optional!
-try:
-    from djangobmf.tasks.djangobmf_user_watch import async as djangobmf_user_watch
-except ImportError:
-    from .tasks import djangobmf_user_watch
+from djangobmf.tasks import djangobmf_user_watch
 
 ACTION_COMMENT = 1
 ACTION_CREATED = 2
