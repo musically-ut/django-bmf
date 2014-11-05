@@ -15,8 +15,8 @@ class AccountModuleTests(BMFModuleTestCase):
         """
         self.model = Account
 
-        data = self.autotest_ajax_get('create')
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'number': "1",
             'name': "account 1",
             'type': 50,

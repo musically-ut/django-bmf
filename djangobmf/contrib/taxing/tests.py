@@ -15,8 +15,8 @@ class TaxModuleTests(BMFModuleTestCase):
         """
         self.model = Tax
 
-        data = self.autotest_ajax_get('create')
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'name': 1,
             'account': 10,
             'rate': '10',

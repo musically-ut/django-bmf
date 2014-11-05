@@ -34,10 +34,10 @@ class InvoiceModuleTests(BMFModuleTestCase):
         """
         self.model = Invoice
 
-        data = self.autotest_ajax_get('create')
+        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
        #data = self.autotest_ajax_post('create', data={
        #})
-        data = self.autotest_get('index')
+       #data = self.autotest_get('index')
 
 
 @expectedFailure

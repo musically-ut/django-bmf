@@ -15,20 +15,20 @@ class PositionModuleTests(BMFModuleTestCase):
         self.model = Position
         namespace = Position._bmfmeta.url_namespace
 
-        data = self.autotest_ajax_get('create')
+        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
         self.autotest_get('api', status_code=404)
         self.autotest_post('api', status_code=302)
 
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'project': 1, 'name': 'Service', 'price': '100', 'product': 1, 'date': '2012-01-01', 'amount': '2.0', 'employee': 1, 'invoiceable': 1,
         })
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'project': 2, 'name': 'Service', 'price': '100', 'product': 1, 'date': '2012-01-02', 'amount': '0.1', 'employee': 1, 'invoiceable': 1,
         })
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'project': 1, 'name': 'Service', 'price': '100', 'product': 1, 'date': '2012-01-01', 'amount': '1.0', 'employee': 2, 'invoiceable': 1,
         })
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'project': 2, 'name': 'Service', 'price': '100', 'product': 1, 'date': '2012-01-02', 'amount': '5.0', 'employee': 2, 'invoiceable': 1,
         })
         self.assertNotEqual(data["object_pk"], 0)

@@ -14,8 +14,8 @@ class TaxTests(BMFModuleTestCase):
         """
         self.model = Employee
 
-        data = self.autotest_ajax_get('create')
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={
             'name': 'test',
             'email': 'testing@django-bmf.org',
         })

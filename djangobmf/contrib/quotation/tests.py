@@ -18,8 +18,8 @@ class QuotationModuleTests(BMFModuleTestCase):
         """
         self.model = Quotation
 
-        data = self.autotest_ajax_get('create')
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'project': 1,
             'customer': 1,
             'date': '2012-01-01',
@@ -32,7 +32,7 @@ class QuotationModuleTests(BMFModuleTestCase):
             'bmf-products-0-price': 100,
             'bmf-products-0-name': "Service",
         })
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'project': 2,
             'customer': 2,
             'date': '2012-01-01',

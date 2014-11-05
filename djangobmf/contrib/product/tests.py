@@ -18,7 +18,7 @@ class ProductTests(BMFModuleTestCase):
         """
         self.model = Product
 
-        data = self.autotest_ajax_get('create')
+        data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
         # data = self.autotest_ajax_post('create', data={
         #     'number': "1",
         #     'name': "account 1",

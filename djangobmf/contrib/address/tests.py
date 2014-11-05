@@ -14,8 +14,8 @@ class AddressModuleTests(BMFModuleTestCase):
         """
         self.model = Address
 
-        data = self.autotest_ajax_get('create')
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={
             'customer': 1,
             'name': 'name',
             'street': 'street 12',
