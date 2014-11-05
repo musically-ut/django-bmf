@@ -52,7 +52,7 @@ setup(
     ],
     include_package_data=True,
     zip_safe=False,
-    test_suite='run_tests.main',
+    test_suite='runtests.main',
     tests_require = [
 #       'coverage',
 #       'pep8',
