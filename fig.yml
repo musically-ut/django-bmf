@@ -8,21 +8,25 @@ web:
     build: .
     volumes:
         - .:/code
+    command: /code/stack/web.sh
     ports:
         - "8000:8000"
     links:
         - db
         - elasticsearch
         - redis
-#worker:
-#    build: .
-#    command: celery -A sandbox worker -l info
-#    volumes:
-#        - .:/code
-#    links:
-#        - db
-#        - elasticsearch
-#        - redis
+worker:
+    build: .
+    command: celery -A sandbox worker -l info -c 1
+    environment:
+        - C_FORCE_ROOT=1
+    volumes:
+        - .:/code
+    links:
+        - db
+        - elasticsearch
+        - redis
+        - web
 flower:
     build: stack/flower
     links:
