@@ -8,9 +8,10 @@ from django.utils.safestring import mark_safe
 
 import markdown
 
-from ..utils.markdown.urlize import UrlizeExtension
-from ..utils.markdown.checklist import ChecklistExtension
-from ..utils.markdown.strikethrough import StrikeThroughExtension
+from djangobmf.utils.markdown.checklist import ChecklistExtension
+from djangobmf.utils.markdown.mentions import MentionExtension
+from djangobmf.utils.markdown.urlize import UrlizeExtension
+from djangobmf.utils.markdown.strikethrough import StrikeThroughExtension
 
 register = template.Library()
 
@@ -27,6 +28,7 @@ def markdown_filter(text):
             UrlizeExtension(),
             StrikeThroughExtension(),
             ChecklistExtension(),
+            MentionExtension(),
             'smart_strong',
             'sane_lists',
             'smarty',
