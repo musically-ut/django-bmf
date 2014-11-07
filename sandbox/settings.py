@@ -153,7 +153,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake-439478'
-  }
+    }
 }
 
 
@@ -161,17 +161,6 @@ CACHES = {
 
 BMF_DOCUMENT_ROOT = os.path.join(PROJECT_PATH, "bmf_documents")
 BMF_DOCUMENT_URL = '/bmf_documents/'
-
-# CELERY ==========================================================================
-
-HAYSTACK_CONNECTIONS = {
-     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://elasticsearch:9200/',
-        'INDEX_NAME': 'haystack',
-     },
-}
-
 
 #import djcelery
 #djcelery.setup_loader()
@@ -190,14 +179,14 @@ except ImportError:
             'USER': 'postgres',
             'HOST': 'db',
             'PORT': '5432',
-      }
+        }
     }
     DEBUG = True
     TEMPLATE_DEBUG = DEBUG
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     BROKER_URL = 'redis://redis:6379/0'
     CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-    # CELERY_ALWAYS_EAGER=True # deactivate celery
+    CELERY_ALWAYS_EAGER=False
 
     INSTALLED_APPS += (
 #       'django_extensions',

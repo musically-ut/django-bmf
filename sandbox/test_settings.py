@@ -70,6 +70,8 @@ ROOT_URLCONF = 'sandbox.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'wsgi.application'
 
+CELERY_ALWAYS_EAGER=True # deactivate celery
+
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -116,5 +118,11 @@ DATABASES = {
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
+
+HAYSTACK_CONNECTIONS = {
+     'default': {
+         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+     },
+}
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'

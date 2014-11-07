@@ -3,6 +3,14 @@
 Configuration
 =========================
 
+.. setting:: BMF_USE_CELERY
+
+BMF_USE_CELERY
+-------------------------
+
+Default: ``True``
+
+If enabled the Framework will use celery.
 
 
 -------------------------
