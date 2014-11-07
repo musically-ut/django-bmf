@@ -208,7 +208,7 @@ def new_file(sender, instance, file, **kwargs):
 
 
 def activity_post_save(sender, instance, *args, **kwargs):
-    djangobmf_user_watch(instance)
+    djangobmf_user_watch(instance.pk)
 signals.post_save.connect(activity_post_save, sender=Activity)
 
 

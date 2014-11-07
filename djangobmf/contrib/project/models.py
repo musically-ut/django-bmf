@@ -53,7 +53,7 @@ class BaseProject(BMFModel):
     # TODO add validations and make it impossible that you can create a project which is hidden to yourself
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
             return qs
         return qs.filter(

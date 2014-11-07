@@ -95,7 +95,7 @@ class AbstractTimesheet(BMFModel):
         return '%s' % (self.start)
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
             return qs
         return qs.filter(employee=getattr(user, 'djangobmf_employee', -1))

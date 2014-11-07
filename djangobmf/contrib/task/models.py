@@ -84,7 +84,7 @@ class AbstractGoal(BMFModel):
         return '%s' % (self.summary)
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
             return qs
 
@@ -204,7 +204,7 @@ class AbstractTask(BMFModel):
         return '#%s: %s' % (self.pk, self.summary)
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         qs_filter = Q(project__isnull=True, goal__isnull=True)
         qs_filter |= Q(employee=getattr(user, 'djangobmf_employee', -1))
         qs_filter |= Q(in_charge=getattr(user, 'djangobmf_employee', -1))
