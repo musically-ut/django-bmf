@@ -70,6 +70,30 @@ def djangobmf_user_watch(pk):
             logger.debug("Notifications for appended file: %s (pk: %s)" % (object.parent_ct, object.parent_id))
             qs = qs.filter(file=True)
 
-        rows = qs.exclude(user=object.user).update(triggered=True, unread=True, modified=now())
-        rows += qs.filter(user=object.user).update(modified=now())
-        logger.debug("Affected rows: %i" % rows)
+        # ACL
+        for notification in qs.select_related('user'):
+            base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
+            user_add_bmf(notification.user)
+            validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
+
+            if validated:
+                if notification.user != object.user:
+                    notification.triggered = True
+                    notification.unread = True
+                notification.modified = now()
+                logger.debug("Created Notification for user %s (%s) and object %s (%s)" % (
+                    notification.user,
+                    notification.user.pk,
+                    object.parent_ct,
+                    object.parent_id,
+                ))
+            else:
+                # User does not have permissions!
+                # -> delete notification
+                notification.delete()
+                logger.info("Deleted Notification for user %s (%s) and object %s (%s) - no permissions" % (
+                    notification.user,
+                    notification.user.pk,
+                    object.parent_ct,
+                    object.parent_id,
+                ))
