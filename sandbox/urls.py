@@ -12,7 +12,7 @@ djangobmf.autodiscover()
 from django.views.generic.base import RedirectView
 
 urlpatterns = patterns('',
-  url(r'^jsi18n/(?P<packages>\S+?)/$', 'django.views.i18n.javascript_catalog'),
+    url(r'^jsi18n/(?P<packages>\S+?)/$', 'django.views.i18n.javascript_catalog'),
 )
 
 urlpatterns += i18n_patterns('',

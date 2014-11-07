@@ -46,6 +46,21 @@ ACTION_TYPES = (
 )
 
 
+class ActivityQuerySet(models.QuerySet):
+    def comments(self):
+        return self.filter(action=ACTION_COMMENT)
+
+
+class ActivityManager(models.Manager):
+    use_for_related_fields = True
+
+    def get_queryset(self):
+        return ActivityQuerySet(self.model, using=self._db)
+
+    def comments(self):
+         return self.get_queryset().comments()
+
+
 @python_2_unicode_compatible
 class Activity(models.Model):
     """
@@ -76,6 +91,8 @@ class Activity(models.Model):
     parent_object = GenericForeignKey('parent_ct', 'parent_id')
 
     modified = models.DateTimeField(_("Modified"), auto_now=True, editable=False,)
+
+    objects = ActivityManager()
 
     class Meta:
         ordering = ('-modified',)

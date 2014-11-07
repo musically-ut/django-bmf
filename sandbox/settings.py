@@ -187,6 +187,15 @@ except ImportError:
     BROKER_URL = 'redis://redis:6379/0'
     CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
     CELERY_ALWAYS_EAGER=False
+    HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+    HAYSTACK_CONNECTIONS = {
+        'default': {
+            'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+            'URL': 'http://elasticsearch:9200/',
+            'INDEX_NAME': 'djangobmf',
+        },
+    }
+
 
     INSTALLED_APPS += (
 #       'django_extensions',
