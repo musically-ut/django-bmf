@@ -81,7 +81,7 @@ def djangobmf_user_watch(pk):
                     notification.triggered = True
                     notification.unread = True
                 notification.modified = now()
-                logger.debug("Created Notification for user %s (%s) and object %s (%s)" % (
+                logger.debug("Updated Notification for user %s (%s) and object %s (%s)" % (
                     notification.user,
                     notification.user.pk,
                     object.parent_ct,
