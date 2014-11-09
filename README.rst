@@ -70,7 +70,7 @@ Credits
    :target: http://travis-ci.org/django-bmf/django-bmf
 .. |PyPi version| image:: https://pypip.in/v/django-bmf/badge.svg?text=version
    :target: https://pypi.python.org/pypi/django-bmf/
-.. |PyPi downloads| image: https://pypip.in/d/django-bmf/badge.svg?period=month
+.. |PyPi downloads| image:: https://pypip.in/d/django-bmf/badge.svg?period=month
    :target: https://pypi.python.org/pypi/django-bmf/
 .. |Python version| image:: https://pypip.in/py_versions/django-bmf/badge.svg
    :target: https://pypi.python.org/pypi/django-bmf/
