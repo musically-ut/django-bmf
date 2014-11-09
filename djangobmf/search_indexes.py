@@ -3,20 +3,31 @@
 
 from __future__ import unicode_literals
 
-#from djangobmf.notification.models import Activity
-#from djangobmf.notification.models import ACTION_COMMENT
+from django.contrib.contenttypes.models import ContentType
 
-#from haystack import indexes
+from djangobmf.notification.models import Activity
 
-#class NoteIndex(indexes.SearchIndex, indexes.Indexable):
-#    text = indexes.EdgeNgramField(document=True, use_template=True)
-#    ct = indexes.CharField(model_attr="parent_ct")
-#    modified = indexes.DateTimeField(model_attr='modified')
-#
-#    def get_model(self):
-#        return Activity
-#
-#    def index_queryset(self, using=None):
-#        print(using)
-#        """Used when the entire index for model is updated."""
-#        return self.get_model().objects.filter(action=ACTION_COMMENT)
+from haystack import indexes
+
+# SearchQuerySet().filter(content_type_id__exact=10, content="text").using("default").count()
+
+
+class ContribIndex(indexes.SearchIndex):
+    text = indexes.EdgeNgramField(document=True, use_template=True)
+    content_type_id = indexes.IntegerField(faceted=True)
+    modified = indexes.DateTimeField(model_attr='modified')
+
+    def prepare_content_type_id(self, obj):
+        return ContentType.objects.get_for_model(self.get_model()).pk
+
+
+class CommentIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.EdgeNgramField(document=True, use_template=True)
+    content_type_id = indexes.IntegerField(model_attr="parent_ct_id", faceted=True)
+    modified = indexes.DateTimeField(model_attr='modified')
+
+    def get_model(self):
+        return Activity
+
+    def index_queryset(self, using=None):
+        return self.get_model().objects.comments()

@@ -96,8 +96,8 @@ class Activity(models.Model):
 
     class Meta:
         ordering = ('-modified',)
-        verbose_name = _('History')
-        verbose_name_plural = _('History')
+        verbose_name = _('Activity')
+        verbose_name_plural = _('Activity')
         get_latest_by = "modified"
 
     def __str__(self):
