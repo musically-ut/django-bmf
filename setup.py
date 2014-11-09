@@ -38,7 +38,7 @@ setup(
     long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
     author="Sebastian Braun",
     author_email="sebastian@elmnt.de",
-    packages=find_packages(exclude=['sandbox']),
+    packages=find_packages(exclude=['sandbox', 'tests']),
     classifiers=CLASSIFIERS,
     install_requires=[
         'django',
