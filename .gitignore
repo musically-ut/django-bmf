@@ -7,6 +7,8 @@
 /\.coverage*
 /coverage\.xml
 /junit\.xml
+/build
+/dist
 /reports
 /htmlcov
 /django_bmf\.egg-info

@@ -1,0 +1,11 @@
+
+- create a release branch
+- bump version
+- build newest englisch translations (django + djangojs)
+- pull translations
+- compile translations
+
+- pypi:
+  python setup.py register
+  python setup.py bdist_wheel upload
+  python setup.py sdist upload
