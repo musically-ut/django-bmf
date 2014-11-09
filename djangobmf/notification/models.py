@@ -58,7 +58,7 @@ class ActivityManager(models.Manager):
         return ActivityQuerySet(self.model, using=self._db)
 
     def comments(self):
-         return self.get_queryset().comments()
+        return self.get_queryset().comments()
 
 
 @python_2_unicode_compatible
