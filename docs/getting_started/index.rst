@@ -6,4 +6,7 @@ Getting Started
     :maxdepth: 2
 
     about
+    architecture
     installation
+    configuration
+    integration

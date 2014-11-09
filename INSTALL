@@ -12,6 +12,7 @@ Requirements
 * `Python`_ 2.7, 3.3 or 3.4
 * `Django`_ 1.7
 * `django-mptt`_
+* `celery`_ (can be disabled)
 * An installed and working instance of one of the databases listed in the `Databases`_ section.
 
 .. note:: When installing the django BMF using pip all requirements are installed automatically.
@@ -19,6 +20,7 @@ Requirements
 .. _Python: http://www.python.org
 .. _Django: http://www.djangoproject.com
 .. _django-mptt: https://github.com/django-mptt/django-mptt
+.. _celery: http://www.celeryproject.org/
 
 Recommended
 ===========
@@ -26,9 +28,22 @@ Recommended
 These packages are not *required*, but they provide useful functionality with
 minimal additional configuration and are well-proven.
 
-* `celery`_ (not supported yet)
+************************************
+Installing using docker and fig
+************************************
 
-.. _celery: http://www.celeryproject.org/
+You can deploy django BMF in a production-mimicing development stack using
+`fig`_ and `docker`_.
+
+.. code-block:: bash
+
+  #!/bin/sh
+  fig up
+
+This command installs and runs `PostgreSQL`_, a web and a worker instance of django-bmf,
+reddis, elasticsearch and the celery monitoring tool flower, each inside their own
+docker container.
+
 
 ************************************
 Installing in a virtualenv using tox
@@ -88,6 +103,8 @@ for MySQL you would also add:
 and install libmysqlclient-dev (on Debian-based distro)
 
 .. _virtualenv: http://www.virtualenv.org
+.. _fig: http://www.fig.sh
+.. _docker: http://www.docker.io
 .. _pip: http://www.pip-installer.org
 .. _tox: http://tox.readthedocs.org/en/latest/
 .. _requirements.txt: http://www.pip-installer.org/en/latest/cookbook.html#requirements-files

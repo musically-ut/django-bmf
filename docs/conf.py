@@ -26,6 +26,7 @@ extensions = [
 #   'sphinx.ext.coverage',
 #   'sphinx.ext.viewcode',
     'sphinx.ext.extlinks',
+    'sphinx.ext.graphviz',
     'djangobmfdocs',
 ]
 
