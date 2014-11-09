@@ -6,8 +6,6 @@ import sys
 
 from setuptools import setup, find_packages, Command
 
-from djangobmf import __author__, __contact__, __homepage__
-
 CLASSIFIERS = [
     'Environment :: Web Environment',
     'Framework :: Django',
@@ -16,6 +14,8 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     'Topic :: Office/Business :: Groupware',
@@ -30,13 +30,13 @@ version = __import__('djangobmf').get_version()
 setup(
     name='django-bmf',
     version=version,
-    url=__homepage__,
+    url="http://www.django-bmf.org/",
     license='BSD',
     platforms=['OS Independent'],
     description='Business Management Framework with integrated ERP solution written for django',
     long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
-    author=__author__,
-    author_email=__contact__,
+    author="Sebastian Braun",
+    author_email="sebastian@elmnt.de",
     packages=find_packages(exclude=['sandbox']),
     classifiers=CLASSIFIERS,
     install_requires=[

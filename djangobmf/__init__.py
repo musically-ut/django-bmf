@@ -49,9 +49,6 @@ def get_version(dev=True):
     return version
 
 __version__ = get_version(dev=False)
-__author__ = 'Sebastian Braun'
-__contact__ = 'sebastian@elmnt.de'
-__homepage__ = 'http://www.igelware.de'
 __docformat__ = 'restructuredtext'
 
 default_app_config = 'djangobmf.apps.BMFConfig'
