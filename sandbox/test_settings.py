@@ -1,8 +1,12 @@
 # Common settings for testing
 
 import os
+import tempfile
 
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+
+BMF_DOCUMENT_ROOT = tempfile.mkdtemp(prefix='djangobmf_')
+BMF_DOCUMENT_URL = '/documents/'
 
 SITE_ID = 1
 

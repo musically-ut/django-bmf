@@ -15,8 +15,7 @@ from djangobmf.views import ModuleUpdateView
 # from .models import Account
 
 from .forms import TransactionUpdateForm
-from .forms import TransactionCreateSimpleForm
-from .forms import TransactionCreateSplitForm
+from .forms import TransactionCreateForm
 
 
 class AccountIndexView(ModuleListView):
@@ -47,11 +46,11 @@ class OpenTransactionView(ModuleListView):
         return super(OpenTransactionView, self).get_queryset().filter(draft=True).order_by('modified')
 
 
-class TransactionCreateSimpleView(ModuleCreateView):
-    form_class = TransactionCreateSimpleForm
+class TransactionCreateView(ModuleCreateView):
+    form_class = TransactionCreateForm
 
     def form_object_save(self, form):
-        super(TransactionCreateSimpleView, self).form_object_save(form)
+        super(TransactionCreateView, self).form_object_save(form)
 
         self.object.items.create(
             account=form.cleaned_data['debit'],
@@ -64,12 +63,8 @@ class TransactionCreateSimpleView(ModuleCreateView):
             amount=form.cleaned_data['amount'],
         )
 
-        if form.cleaned_data['execute'] is True:
+        if form.cleaned_data['draft'] is False:
             self.object.bmfworkflow_transition('balance', self.request.user)
-
-
-class TransactionCreateSplitView(ModuleCreateView):
-    form_class = TransactionCreateSplitForm
 
 
 class TransactionUpdateView(ModuleUpdateView):

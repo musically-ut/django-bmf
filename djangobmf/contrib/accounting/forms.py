@@ -28,21 +28,14 @@ class TransactionUpdateForm(ModelForm):
         exclude = []
 
 
-class TransactionCreateSimpleForm(ModelForm):
+class TransactionCreateForm(ModelForm):
 
     debit = ModelChoiceField(queryset=account.objects.filter(read_only=False), empty_label=None)
     credit = ModelChoiceField(queryset=account.objects.filter(read_only=False), empty_label=None)
     # amount_currency = CurrencyField()
     # amount = MoneyField()
     amount = FloatField(label=_("Amount"), min_value=0, localize=True)
-    execute = BooleanField(label=_("Execute Transation"), initial=True, required=False)
-
-    class Meta:
-        model = Transaction
-        exclude = []
-
-
-class TransactionCreateSplitForm(ModelForm):
+    draft = BooleanField(label=_("Create draft"), initial=True, required=False)
 
     class Meta:
         model = Transaction

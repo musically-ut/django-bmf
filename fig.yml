@@ -1,9 +1,12 @@
 db:
     image: postgres
+
 redis:
     image: redis
+
 elasticsearch:
     image: dockerfile/elasticsearch
+
 web:
     build: .
     volumes:
@@ -26,7 +29,7 @@ worker:
         - db
         - elasticsearch
         - redis
-        - web
+
 flower:
     build: docker/flower
     links:
