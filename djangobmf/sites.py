@@ -347,22 +347,26 @@ class DjangoBMFSite(object):
 
     # --- settings ------------------------------------------------------------
 
+    # TODO move settings to cache backend!
     def register_settings(self, app_label, settings_dict):
         for setting_name, options in settings_dict.items():
             self.register_setting(app_label, setting_name, options)
 
+    # TODO move settings to cache backend!
     def register_setting(self, app_label, setting_name, options):
         name = SETTING_KEY % (app_label, setting_name)
         if name in self.settings:
             raise AlreadyRegistered('The setting %s is already registered' % name)
         self.settings[name] = DjangoBMFSetting(app_label, setting_name, options)
 
+    # TODO move settings to cache backend!
     def unregister_setting(self, app_label, setting_name):
         name = SETTING_KEY % (app_label, setting_name)
         if name not in self.settings:
             raise NotRegistered('The setting %s is not registered' % name)
         del self.settings[name]
 
+    # TODO move settings to cache backend!
     def check_settings(self):
         self.settings_valid = False
         for key, setting in self.settings:
@@ -371,6 +375,7 @@ class DjangoBMFSite(object):
                 return False
         return True
 
+    # TODO move settings to cache backend!
     def get_lazy_setting(self, app_label, setting_name):
         """
         will allways return None, if the django apps are not ready
@@ -379,6 +384,7 @@ class DjangoBMFSite(object):
             return self.get_setting(app_label, setting_name)
         return None
 
+    # TODO move settings to cache backend!
     def get_setting(self, app_label, setting_name):
         name = SETTING_KEY % (app_label, setting_name)
         try:

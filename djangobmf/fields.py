@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
@@ -154,6 +155,13 @@ class MoneyField(models.DecimalField):
         if not cls._meta.abstract:
             self.has_precision = hasattr(self, self.get_precision_field_name())
             setattr(cls, self.name, MoneyProxy(self))
+
+    def formfield(self, **kwargs):
+        kwargs.update({
+            'widget': TextInput,
+        })
+        value = super(MoneyField, self).formfield(**kwargs)
+        return value
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
