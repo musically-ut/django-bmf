@@ -73,7 +73,11 @@ class AbstractQuotation(BMFModel):
         on_delete=models.PROTECT,
     )
     quotation_number = models.CharField(_('Quotation number'), max_length=255, null=True, blank=False)
-    products = models.ManyToManyField(CONTRIB_PRODUCT, blank=False, through='QuotationProduct')
+    products = models.ManyToManyField(
+        CONTRIB_PRODUCT,
+        through='QuotationProduct',
+        editable=False,
+    )
     net = models.FloatField(editable=False, blank=True, null=True)
     date = models.DateField(_("Date"), null=True, blank=False)
     valid_until = models.DateField(_("Valid until"), null=True, blank=True)
@@ -177,7 +181,7 @@ class Quotation(AbstractQuotation):
     pass
 
 
-class QuotationProduct(models.Model):
+class QuotationProduct(BMFModel):
     quotation = models.ForeignKey(
         CONTRIB_QUOTATION, null=True, blank=True,
         related_name="quotation_products", on_delete=models.CASCADE,
