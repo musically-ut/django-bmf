@@ -42,7 +42,7 @@ class QuotationCreateView(ModuleCreateView):
             'date': now(),
             'employee': getattr(getattr(self.request, 'djangobmf_employee', None), 'pk', None),
         })
-        print(self.initial)
+#       print(self.initial)
         return super(QuotationCreateView, self).get_initial()
 
 
