@@ -41,7 +41,7 @@ class AbstractTeam(BMFModel):
         return self.name
 
 
-class TeamMember(models.Model):
+class TeamMember(BMFModel):
     team = models.ForeignKey(
         CONTRIB_TEAM, null=True, blank=True, related_name="+", on_delete=models.CASCADE,
     )
@@ -52,6 +52,11 @@ class TeamMember(models.Model):
 
     class Meta:
         unique_together = ("team", "employee")
+
+    class BMFMeta:
+        search_fields = ['name']
+        has_logging = False
+        category = HR
 
 
 class Team(AbstractTeam):

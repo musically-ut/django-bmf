@@ -9,6 +9,8 @@ elasticsearch:
 
 web:
     build: .
+    environment:
+        - DJANGO_SETTINGS_MODULE=sandbox.settings_docker
     volumes:
         - .:/code
     command: /code/docker/web.sh
@@ -23,6 +25,7 @@ worker:
     command: celery -A sandbox worker -l info -c 1 --autoreload
     environment:
         - C_FORCE_ROOT=1
+        - DJANGO_SETTINGS_MODULE=sandbox.settings_docker
     volumes:
         - .:/code
     links:

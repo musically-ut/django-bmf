@@ -164,13 +164,13 @@ if __name__ == '__main__':
     options = parser.parse_args()
 
     if options.contrib:
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings'
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings_test'
 
     if options.settings:
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings
     else:
         if "DJANGO_SETTINGS_MODULE" not in os.environ:
-            os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.test_sqlite'
+            os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings_test'
 
     main(
         options.modules,

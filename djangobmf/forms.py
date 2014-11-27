@@ -7,12 +7,14 @@ from django.core.exceptions import ValidationError
 from django.forms.fields import CharField
 from django.forms.fields import FloatField
 from django.forms.fields import DecimalField
-from django.forms.models import BaseModelFormSet
 from django.forms.models import ModelChoiceField
 from django.forms.util import ErrorList
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils import six
 
+from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
+
+import warnings
 from collections import OrderedDict
 
 import logging
@@ -29,15 +31,13 @@ class BMFFormMetaclass(type):
         if new_cls.form_class is None:
             return new_cls  # probably a normal formular
 
+        # TODO: DONT USE INLINES ANY MORE
         if hasattr(meta, 'inlines'):
-            inlines = OrderedDict(
-                (prefix, form_class)
-                for prefix, form_class in meta.inlines.items()
-                if isinstance(form_class, type) and issubclass(form_class, BaseModelFormSet)
-            )
-        else:
-            inlines = OrderedDict()
-        new_cls.inlines = inlines
+            warnings.warn(
+                "Inlines is deprecated - don't use them!",
+                RemovedInNextBMFVersionWarning, stacklevel=2)
+        new_cls.inlines = OrderedDict()
+
         return new_cls
 
 
@@ -46,7 +46,7 @@ class BMFForm(six.with_metaclass(BMFFormMetaclass, object)):
 
     def __init__(
             self, data=None, files=None, auto_id='bmf_%s', prefix=None,
-            initial=None, instance=None, initial_inlines=None,
+            initial=None, instance=None,
             error_class=ErrorList, **kwargs):
         self.is_bound = data is not None or files is not None
         self.prefix = prefix or self.get_default_prefix()
@@ -59,9 +59,6 @@ class BMFForm(six.with_metaclass(BMFFormMetaclass, object)):
         self._errors = None
         self._non_form_errors = None
 
-        # TODO find out, how this model can get inital values for the related fields
-        self.initial_inlines = initial_inlines or {}
-
         kwargs.update({
             'data': data,
             'files': files,
@@ -72,25 +69,6 @@ class BMFForm(six.with_metaclass(BMFFormMetaclass, object)):
         })
 
         self.base_form = self.form_class(**self.get_form_kwargs(None, **kwargs))
-
-        # Instantiate all the forms in the container
-        for form_prefix, form_class in self.inlines.items():
-            inlineform = form_class(
-                prefix='-'.join(p for p in [self.prefix, form_prefix] if p),
-                **self.get_form_kwargs(form_prefix, **kwargs)
-            )
-            if form_prefix in self.base_form.fields:
-                # update self.forms, make the original field not required and save the required boolean at the formset
-                # and mark the field as excluded (otherwise we can't save the instances with inlines), see 'save'-method
-                inlineform.required = self.base_form.fields[form_prefix].required
-                self.base_form.fields[form_prefix].required = False
-                self.base_form.fields[form_prefix].inlineformset = True
-                self.forms[form_prefix] = inlineform
-                if self.base_form._meta.exclude is None:
-                    self.base_form._meta.exclude = [form_prefix]
-                else:
-                    if form_prefix not in self.base_form._meta.exclude:
-                        self.base_form._meta.exclude = tuple(self.base_form._meta.exclude) + (form_prefix,)
 
     def __str__(self):
         """ Render only the base form ... this should never be used anyway """

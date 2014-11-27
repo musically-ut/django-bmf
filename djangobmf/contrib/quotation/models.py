@@ -80,6 +80,8 @@ class AbstractQuotation(BMFModel):
     notes = models.TextField(_("Notes"), null=True, blank=True)
     term_of_payment = models.TextField(_("Term of payment"), blank=True, null=True)
 
+    completed = models.BooleanField(_("Completed"), default=False, editable=False)
+
     def __init__(self, *args, **kwargs):
         super(AbstractQuotation, self).__init__(*args, **kwargs)
         self.taxes = {}

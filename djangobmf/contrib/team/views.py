@@ -7,17 +7,17 @@ from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleDetailView
 
-from .forms import BMFTeamUpdateForm
-from .forms import BMFTeamCreateForm
+from .forms import TeamUpdateForm
+from .forms import TeamCreateForm
 
 
 class TeamCreateView(ModuleCreateView):
-    form_class = BMFTeamCreateForm
+    form_class = TeamCreateForm
 
 
 class TeamUpdateView(ModuleUpdateView):
-    form_class = BMFTeamUpdateForm
+    form_class = TeamUpdateForm
 
 
 class TeamDetailView(ModuleDetailView):
-    form_class = BMFTeamUpdateForm
+    pass

@@ -8,17 +8,13 @@ import os
 
 BASEDIR = os.path.dirname(env.real_fabfile)
 
-#PYTHON = BASEDIR + "/virtenv/bin/python"
-#DJANGO = BASEDIR + "/virtenv/bin/django-admin.py"
-#MANAGE = BASEDIR + "/sandbox/manage.py"
-#DEVELOP = BASEDIR + "/develop.py"
-
-PYTHON = "python"
-DJANGO = "django-admin.py"
-MANAGE = BASEDIR + "/sandbox/manage.py"
+PYTHON = BASEDIR + "/virtenv/bin/python"
+DJANGO = BASEDIR + "/virtenv/bin/django-admin.py"
 DEVELOP = BASEDIR + "/develop.py"
 
-LANGUAGES = ('en', 'de',)
+#PYTHON = "python"
+#DJANGO = "django-admin.py"
+#DEVELOP = BASEDIR + "/develop.py"
 
 FIXTURES = (
     'fixtures/sites.json',
@@ -163,12 +159,12 @@ def make(data=''):
   """
   """
   with lcd(BASEDIR):
-    local('rm -f sandbox/database.sqlite')
-    local('%s %s migrate --noinput' % (PYTHON, MANAGE))
+    local('rm -f database.sqlite')
+    local('%s %s migrate --noinput' % (PYTHON, DEVELOP))
     if not data:
-        local('%s %s loaddata %s' % (PYTHON, MANAGE, ' '.join(FIXTURES)))
+        local('%s %s loaddata %s' % (PYTHON, DEVELOP, ' '.join(FIXTURES)))
     else:
-        local('%s %s loaddata fixtures/users.json' % (PYTHON, MANAGE))
+        local('%s %s loaddata fixtures/users.json' % (PYTHON, DEVELOP))
 
 
 @task
@@ -176,11 +172,11 @@ def start():
   """
   """
   with lcd(BASEDIR):
-    local('%s %s runserver 8000' % (PYTHON, MANAGE))
+    local('%s %s runserver 8000' % (PYTHON, DEVELOP))
 
 
 @task
 def shell():
   """
   """
-  local('%s %s shell' % (PYTHON, MANAGE))
+  local('%s %s shell' % (PYTHON, DEVELOP))
