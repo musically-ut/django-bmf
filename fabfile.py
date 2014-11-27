@@ -159,7 +159,7 @@ def make(data=''):
   """
   """
   with lcd(BASEDIR):
-    local('rm -f database.sqlite')
+    local('rm -f sandbox/database.sqlite')
     local('%s %s migrate --noinput' % (PYTHON, DEVELOP))
     if not data:
         local('%s %s loaddata %s' % (PYTHON, DEVELOP, ' '.join(FIXTURES)))
