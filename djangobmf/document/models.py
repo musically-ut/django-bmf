@@ -19,17 +19,16 @@ from djangobmf.utils.generate_filename import generate_filename
 
 @python_2_unicode_compatible
 class Document(models.Model):
-    customer = models.ForeignKey(  # TODO: make optional
-        CONTRIB_CUSTOMER, null=True, blank=True, on_delete=models.SET_NULL,
-    )
-    project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
-    )
     name = models.CharField(_('Name'), max_length=120, null=True, blank=True, editable=False)
     file = models.FileField(_('File'), upload_to=generate_filename, storage=BMFStorage())
     size = models.PositiveIntegerField(null=True, blank=True, editable=False)
 
     is_static = models.BooleanField(default=False)
+
+    # this fields are added due to a soft dependency to customer and projects
+    # because djangobmf can't relay on those models to be present!
+    customer_pk = models.PositiveIntegerField(null=True, blank=True, editable=False)
+    project_pk = models.PositiveIntegerField(null=True, blank=True, editable=False)
 
     content_type = models.ForeignKey(
         ContentType,
@@ -69,10 +68,10 @@ class Document(models.Model):
             self.name = self.file.name.split(r'/')[-1]
 
         if hasattr(self, 'project') and hasattr(self.content_object, 'bmfget_project'):
-            self.project = self.content_object.bmfget_project()
+            self.project_pk = getattr(self.content_object.bmfget_project(), 'pk', None)
 
         if hasattr(self, 'customer') and hasattr(self.content_object, 'bmfget_customer'):
-            self.customer = self.content_object.bmfget_customer()
+            self.customer_pk = getattr(self.content_object.bmfget_customer(), 'pk', None)
 
     @models.permalink
     def bmffile_download(self):
