@@ -12,8 +12,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from .storage import BMFStorage
 
-from djangobmf.settings import CONTRIB_CUSTOMER
-from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.utils.generate_filename import generate_filename
 
 
