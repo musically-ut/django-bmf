@@ -127,13 +127,16 @@ class DjangoBMFModule(object):
                 key = slugify(label)
 
                 if isinstance(view, (list, tuple)) and len(view) == 2:
-                    # overwrite the label, and correct the view
-                    label = slugify(view[0])
+                    # overwrite the label, and use the correct the view function
+                    label = view[0]
                     view = view[1]
                 self.listed_creates.append((key, label, view))
 
         elif issubclass(self.create, ModuleCreateView):
             self.listed_creates.append(('default', 'default', self.create))
+
+        # update model with all create views
+        self.model._bmfmeta.create_views = self.listed_creates
 
         return self.listed_creates
 
@@ -145,7 +148,7 @@ class DjangoBMFModule(object):
             '',
             url(
                 r'^$',
-                self.detail.as_view(model=self.model, reports=reports, creates=creates),
+                self.detail.as_view(model=self.model, reports=reports),
                 name='detail',
             ),
         )

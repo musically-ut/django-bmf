@@ -13,7 +13,7 @@
   <input type="text" class="form-control">
   <div class="input-group-btn">
     &nbsp;
-    {% if bmfmodule.create_views %}
+    {% if bmfmodule.create_views|length > 1 %}
     <div class="btn-group">
      <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
       <span class="glyphicon glyphicon-plus"></span> {% trans "Add" %}
@@ -25,7 +25,7 @@
      </ul>
     </div>
     {% else %}
-    <a class="btn btn-success bmf-edit" href="{% get_bmf_url bmfmodule.model "create" %}">
+    <a class="btn btn-success bmf-edit" href="{% get_bmf_url bmfmodule.model "create" bmfmodule.create_views.0.0 %}">
       <span class="glyphicon glyphicon-plus"></span> {% trans "Add" %}
     </a>
     {% endif %}

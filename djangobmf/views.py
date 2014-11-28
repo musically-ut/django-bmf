@@ -366,8 +366,7 @@ class ModuleDetailView(
     """
     context_object_name = 'object'
     template_name_suffix = '_bmfdetail'
-    creates = None
-    reports = None
+    reports = []
 
     def get_related_views(self):
         # TODO: maybe cache this
