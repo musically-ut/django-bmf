@@ -366,6 +366,8 @@ class ModuleDetailView(
     """
     context_object_name = 'object'
     template_name_suffix = '_bmfdetail'
+    creates = None
+    reports = None
 
     def get_related_views(self):
         # TODO: maybe cache this
@@ -738,7 +740,6 @@ class ModuleOverviewView(ViewMixin, TemplateView):
                     'category': key,
                     'model': model,
                     'name': model._meta.verbose_name_plural,
-                    'url': model._bmfmeta.url_namespace + ':index',
                 })
 
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)

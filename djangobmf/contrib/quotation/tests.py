@@ -18,8 +18,8 @@ class QuotationModuleTests(BMFModuleTestCase):
         """
         self.model = Quotation
 
-        data = self.autotest_ajax_get('create')
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={
             'project': 1,
             'customer': 1,
             'date': '2012-01-01',
@@ -32,7 +32,7 @@ class QuotationModuleTests(BMFModuleTestCase):
             'bmf-products-0-price': 100,
             'bmf-products-0-name': "Service",
         })
-        data = self.autotest_ajax_post('create', data={
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={
             'project': 2,
             'customer': 2,
             'date': '2012-01-01',
@@ -45,11 +45,11 @@ class QuotationModuleTests(BMFModuleTestCase):
             'bmf-products-0-price': 10,
             'bmf-products-0-name': "Service",
         })
-        self.autotest_get('index', 200)
+#       self.autotest_get('index', 200)
 
         obj = self.get_latest_object()
 
-        self.autotest_get('detail', kwargs={'pk': obj.pk})
+        self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
         data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
         self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'cancel'})
         self.autotest_get('delete', kwargs={'pk': obj.pk})

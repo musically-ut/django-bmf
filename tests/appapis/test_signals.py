@@ -88,7 +88,11 @@ class NotificationTests(ModuleMixin, TestCase):
         self.prepare_signal_tests()
         self.assertEqual(self.data_activity_create, None)
 
-        object_pk = self.autotest_ajax_post('create', data={'field': 'a'})['object_pk']
+        object_pk = self.autotest_ajax_post(
+            'create',
+            kwargs={'key': 'default'},
+            data={'field': 'a'},
+        )['object_pk']
 
         self.assertTrue(isinstance(self.data_activity_create["instance"], TestView))
         self.assertEqual(self.data_activity_create["instance"].created_by, self.user2)

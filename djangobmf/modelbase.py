@@ -70,6 +70,7 @@ class BMFOptions(object):
         self.has_comments = False
         self.has_files = False
         self.can_clone = False
+        self.only_related = False
         self.clean = False
         self.observed_fields = []
         self.search_fields = []
@@ -81,7 +82,9 @@ class BMFOptions(object):
         # used to detect changes
         self.changelog = {}
         # set namespace of urls
-        self.url_namespace = '%s:module_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        # self.url_namespace = '%s:module_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)  # TODO OLD
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
         # is filles with keys if multiple create views are definied for this model (see sites.py)
@@ -100,6 +103,7 @@ class BMFOptions(object):
                 'has_logging',
                 'has_comments',
                 'has_files',
+                'only_related',
                 'search_fields',
                 'number_cycle',
                 'workflow',
@@ -115,6 +119,10 @@ class BMFOptions(object):
                     if not field.rel and field.name in value \
                             and field.name not in ['created', 'modified', 'created_by', 'modified_by']:
                         self.observed_fields.append(field.name)
+
+        if self.only_related:
+            self.has_logging = False
+            self.can_clone = False
 
         # determin if the model has an workflow
         self.has_workflow = bool(self.workflow_field) and self.has_logging
@@ -155,9 +163,10 @@ class BMFModelBase(ModelBase):
             cls._meta.permissions = tuple(cls._meta.permissions)
 
         # generate permissions
-        cls._meta.permissions += (
-            ('view_' + cls._meta.model_name, u'Can view %s' % cls.__name__),
-        )
+        if not cls._bmfmeta.only_related:
+            cls._meta.permissions += (
+                ('view_' + cls._meta.model_name, u'Can view %s' % cls.__name__),
+            )
         if cls._bmfmeta.can_clone:
             cls._meta.permissions += (
                 ('clone_' + cls._meta.model_name, u'Can clone %s' % cls.__name__),
@@ -225,6 +234,7 @@ class BMFModelBase(ModelBase):
         return cls
 
 
+# TODO: rename to BMFModel
 class BMFSimpleModel(six.with_metaclass(BMFModelBase, models.Model)):
     """
     Base class for BMF models.
@@ -325,13 +335,14 @@ class BMFSimpleModel(six.with_metaclass(BMFModelBase, models.Model)):
         """
         A permalink to the default view of this model in the BMF-System
         """
-        return ('%s:detail' % self._bmfmeta.url_namespace, (), {"pk": self.pk})
+        return ('%s:detail' % self._bmfmeta.namespace_detail, (), {"pk": self.pk})
 
     def get_absolute_url(self):
         return self.bmfmodule_detail()
 
 
-class BMFModel(BMFSimpleModel):
+# TODO: RENAME
+class BMFModelUUID(BMFSimpleModel):
     """
     BMFModel with uuid. A uuid is used to identify an entry in an syncronisation
     """
@@ -341,11 +352,17 @@ class BMFModel(BMFSimpleModel):
         abstract = True
 
 
+# TODO: DELETE IF BMFSimpleModel is renamed
+class BMFModel(BMFModelUUID):
+    class Meta:
+        abstract = True
+
+
 class BMFMPTTModelBase(MPTTModelBase, BMFModelBase):
     pass
 
 
-class BMFMPTTModel(six.with_metaclass(BMFMPTTModelBase, BMFModel, MPTTModel)):
+class BMFMPTTModel(six.with_metaclass(BMFMPTTModelBase, BMFModelUUID, MPTTModel)):
     objects = TreeManager()
 
     class Meta:

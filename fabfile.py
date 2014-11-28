@@ -99,12 +99,15 @@ def js():
 
 
 @task
-def test():
+def test(fast=False):
     """
     Tests code with django unittests
     """
     with lcd(BASEDIR):
-        local('virtenv/bin/coverage run runtests.py -v2')
+        if fast:
+            local('virtenv/bin/coverage run runtests.py -v2 --failfast')
+        else:
+            local('virtenv/bin/coverage run runtests.py -v2')
         local('virtenv/bin/coverage report -m')
 
 

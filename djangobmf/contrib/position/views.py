@@ -66,6 +66,7 @@ class PositionAPI(ModuleViewMixin, View):
     model = Position
 
     def get_success_url(self):
+        # TODO: Does not work, please convert this view to an ajax-call
         return reverse_lazy('%s:index' % self.model._bmfmeta.url_namespace)
 
     def get_permissions(self, perms):

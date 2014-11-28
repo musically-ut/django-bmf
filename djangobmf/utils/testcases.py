@@ -77,12 +77,16 @@ class ModuleMixin(object):
 
     def autotest_get(
             self, namespace=None, status_code=200, data=None, parameter=None,
-            urlconf=None, args=None, kwargs=None, current_app=None, url=None):
+            urlconf=None, args=None, kwargs=None, current_app=None, url=None, api=True):
         """
         tests the POST request of a view, returns the response
         """
+        if api:
+            ns = self.model._bmfmeta.namespace_api
+        else:
+            ns = self.model._bmfmeta.namespace_detail
         if not url:
-            url = reverse(self.model._bmfmeta.url_namespace + ':' + namespace, urlconf, args, kwargs, current_app)
+            url = reverse(ns + ':' + namespace, urlconf, args, kwargs, current_app)
         if parameter:
             url += '?' + parameter
         r = self.client.get(url, data)
@@ -91,12 +95,16 @@ class ModuleMixin(object):
 
     def autotest_post(
             self, namespace=None, status_code=200, data=None, parameter=None,
-            urlconf=None, args=None, kwargs=None, current_app=None, url=None):
+            urlconf=None, args=None, kwargs=None, current_app=None, url=None, api=True):
         """
         tests the GET request of a view, returns the response
         """
+        if api:
+            ns = self.model._bmfmeta.namespace_api
+        else:
+            ns = self.model._bmfmeta.namespace_detail
         if not url:
-            url = reverse(self.model._bmfmeta.url_namespace + ':' + namespace, urlconf, args, kwargs, current_app)
+            url = reverse(ns + ':' + namespace, urlconf, args, kwargs, current_app)
         if parameter:
             url += '?' + parameter
         r = self.client.post(url, data)
@@ -105,12 +113,16 @@ class ModuleMixin(object):
 
     def autotest_ajax_get(
             self, namespace=None, status_code=200, data=None, parameter=None,
-            urlconf=None, args=None, kwargs=None, current_app=None, url=None):
+            urlconf=None, args=None, kwargs=None, current_app=None, url=None, api=True):
         """
         tests the GET request of an ajax-view, returns the serialized data
         """
+        if api:
+            ns = self.model._bmfmeta.namespace_api
+        else:
+            ns = self.model._bmfmeta.namespace_detail
         if not url:
-            url = reverse(self.model._bmfmeta.url_namespace + ':' + namespace, urlconf, args, kwargs, current_app)
+            url = reverse(ns + ':' + namespace, urlconf, args, kwargs, current_app)
         if parameter:
             url += '?' + parameter
         r = self.client.get(url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
@@ -121,12 +133,16 @@ class ModuleMixin(object):
 
     def autotest_ajax_post(
             self, namespace=None, status_code=200, data=None, parameter=None,
-            urlconf=None, args=None, kwargs=None, current_app=None, url=None):
+            urlconf=None, args=None, kwargs=None, current_app=None, url=None, api=True):
         """
         tests the POST request of an ajax-view, returns the serialized data
         """
+        if api:
+            ns = self.model._bmfmeta.namespace_api
+        else:
+            ns = self.model._bmfmeta.namespace_detail
         if not url:
-            url = reverse(self.model._bmfmeta.url_namespace + ':' + namespace, urlconf, args, kwargs, current_app)
+            url = reverse(ns + ':' + namespace, urlconf, args, kwargs, current_app)
         if parameter:
             url += '?' + parameter
         r = self.client.post(url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')

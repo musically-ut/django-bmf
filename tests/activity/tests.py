@@ -19,11 +19,15 @@ class CoreTests(BMFModuleTestCase):
         """
         """
         self.model = get_model_from_cfg("PROJECT")
-        data = self.autotest_ajax_post('create', data={
-            'customer': 1,
-            'name': "Testproject",
-            'employee': 1,
-        })
+        data = self.autotest_ajax_post(
+            'create',
+            kwargs={'key': 'default'},
+            data={
+                'customer': 1,
+                'name': "Testproject",
+                'employee': 1,
+            },
+        )
         self.assertNotEqual(data["object_pk"], 0)
         obj = self.get_latest_object()
         ct = ContentType.objects.get_for_model(self.model)
@@ -62,11 +66,16 @@ class CoreTests(BMFModuleTestCase):
 
         # creation of a tax leads to the creation of a comment
         self.model = get_model_from_cfg("TAX")
-        data = self.autotest_ajax_post('create', data={
-            'name': "Testtax",
-            'rate': 10,
-            'account': 10,
-        })
+        data = self.autotest_ajax_post(
+            'create',
+            kwargs={'key': 'default'},
+            data={
+                'name': "Testtax",
+                'rate': 10,
+                'account': 10,
+            },
+        )
+
         self.assertNotEqual(data["object_pk"], 0)
         obj = self.get_latest_object()
         ct = ContentType.objects.get_for_model(self.model)
