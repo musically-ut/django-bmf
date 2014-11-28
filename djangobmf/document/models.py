@@ -25,8 +25,8 @@ class Document(models.Model):
 
     # this fields are added due to a soft dependency to customer and projects
     # because djangobmf can't relay on those models to be present!
-    customer_pk = models.PositiveIntegerField(null=True, blank=True, editable=False)
-    project_pk = models.PositiveIntegerField(null=True, blank=True, editable=False)
+    customer_pk = models.PositiveIntegerField(null=True, blank=True, editable=False, db_index=True)
+    project_pk = models.PositiveIntegerField(null=True, blank=True, editable=False, db_index=True)
 
     content_type = models.ForeignKey(
         ContentType,
