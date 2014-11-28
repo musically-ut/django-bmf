@@ -51,6 +51,16 @@ Default: ``False``
 
     Enables comments to models
 
+``only_related``
+-----------------
+
+Default: ``False``
+
+.. attribute:: Options.only_related
+
+    If enabled the model won't get a detail-view. This also overwrites all
+    features related to a detail-view, such as comments, files and logging.
+
 ``has_files``
 ---------------
 

@@ -508,17 +508,25 @@ class DjangoBMFSite(object):
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
             ct = ContentType.objects.get_for_model(module)
+
+            # set the apis
             urlpatterns += patterns(
                 '',
                 url(
                     r'^api/module/%s/' % ct.pk,
                     include((data.get_api_urls(), self.app_name, "moduleapi_%s_%s" % info))
                 ),
-                url(
-                    r'^detail/%s/%s/(?P<pk>[0-9]+)/' % (info[1], info[0]),
-                    include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
-                ),
             )
+
+            # Skip detail view if the model is marked as a only related model
+            if not module._bmfmeta.only_related:
+                urlpatterns += patterns(
+                    '',
+                    url(
+                        r'^detail/%s/%s/(?P<pk>[0-9]+)/' % (info[1], info[0]),
+                        include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
+                    ),
+                )
         return urlpatterns
 
 
