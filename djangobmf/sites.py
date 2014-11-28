@@ -142,7 +142,6 @@ class DjangoBMFModule(object):
 
     def get_detail_urls(self):
         reports = self.list_reports()
-        creates = self.list_creates()
 
         urlpatterns = patterns(
             '',
