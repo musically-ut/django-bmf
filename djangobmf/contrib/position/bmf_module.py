@@ -24,7 +24,7 @@ site.register(Position, **{
     'create': PositionCreateView,
     'update': PositionUpdateView,
     'detail': PositionDetailView,
-    'urlpatterns': patterns(
+    'api_urlpatterns': patterns(
         '',
         url(r'^api/$', PositionAPI.as_view(), name="api"),
     ),

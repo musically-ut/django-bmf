@@ -32,14 +32,14 @@ class TaskModuleTests(BMFModuleTestCase):
 
     def test_goal_views(self):
         self.model = Goal
-        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
-        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={'summary':'test'})
+        data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
         # self.autotest_get('index', 200)
 
         obj = self.get_latest_object()
         a = '%s'%obj # check if object name has any errors
 
-        self.autotest_get('detail', kwargs={'pk': obj.pk})
+        self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
         data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
        #self.autotest_get('delete', status_code=403, kwargs={'pk': obj.pk})
        #self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'complete'})
@@ -51,13 +51,13 @@ class TaskModuleTests(BMFModuleTestCase):
     def test_task_views(self):
         self.model = Task
         # self.autotest_get('index')
-        data = self.autotest_ajax_get('create', kwargs={'default': 'default'})
-        data = self.autotest_ajax_post('create', kwargs={'default': 'default'}, data={'summary':'test'})
+        data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
 
         obj = self.get_latest_object()
         a = '%s'%obj # check if object name has any errors
 
-        self.autotest_get('detail', kwargs={'pk': obj.pk})
+        self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
         data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
         self.autotest_get('delete', status_code=403, kwargs={'pk': obj.pk})
         self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'finish'})
@@ -183,7 +183,7 @@ class TaskModuleTests(BMFModuleTestCase):
  #      r = self.client.get(reverse(namespace + ':create'))
  #      self.assertEqual(r.status_code, 200)
 
-        namespace = Goal._bmfmeta.url_namespace
+        namespace = Goal._bmfmeta.namespace_api
 
         r = self.client.get(reverse(namespace+':workflow', None, None, {'pk': goal1.pk, 'transition': 'complete'}))
         self.assertEqual(r.status_code, 200)

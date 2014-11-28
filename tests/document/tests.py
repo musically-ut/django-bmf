@@ -22,14 +22,17 @@ class CoreTests(BMFModuleTestCase):
         """
 
         self.model = get_model_from_cfg("PROJECT")
-        self.autotest_ajax_post('create', data={
-            'customer': 1,
-            'name': "Testproject",
-            'employee': 1,
-        })
+        self.autotest_ajax_post(
+            'create',
+            kwargs={'key': 'default'},
+            data={
+                'customer': 1,
+                'name': "Testproject",
+                'employee': 1,
+            },
+        )
 
         model = get_model_from_cfg("PROJECT")
-        namespace = model._bmfmeta.url_namespace
 
         obj = model.objects.order_by('pk').last()
         ct = ContentType.objects.get_for_model(model)

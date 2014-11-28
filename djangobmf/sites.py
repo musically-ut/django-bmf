@@ -93,7 +93,8 @@ class DjangoBMFModule(object):
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
         self.report = options.get('report', None)
-        self.urlpatterns = options.get('urlpatterns', None)
+        self.detail_urlpatterns = options.get('detail_urlpatterns', None)
+        self.api_urlpatterns = options.get('api_urlpatterns', None)
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -124,11 +125,12 @@ class DjangoBMFModule(object):
         if isinstance(self.create, dict):
             for label, view in six.iteritems(self.create):
                 key = slugify(label)
+
                 if isinstance(view, (list, tuple)) and len(view) == 2:
                     # overwrite the label, and correct the view
                     label = slugify(view[0])
                     view = view[1]
-            self.listed_creates.append((key, label, view))
+                self.listed_creates.append((key, label, view))
 
         elif issubclass(self.create, ModuleCreateView):
             self.listed_creates.append(('default', 'default', self.create))
@@ -149,8 +151,8 @@ class DjangoBMFModule(object):
         )
 
         # add custom url patterns
-        if self.urlpatterns:
-            urlpatterns += self.urlpatterns
+        if self.detail_urlpatterns:
+            urlpatterns += self.detail_urlpatterns
 
         return urlpatterns
 
@@ -235,6 +237,10 @@ class DjangoBMFModule(object):
                     name='workflow',
                 ),
             )
+
+        # add custom url patterns
+        if self.api_urlpatterns:
+            urlpatterns += self.api_urlpatterns
 
         return urlpatterns
 

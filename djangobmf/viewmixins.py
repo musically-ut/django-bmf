@@ -406,7 +406,6 @@ class ModuleBaseMixin(object):
         info = self.model._meta.app_label, self.model._meta.model_name
         kwargs.update({
             'bmfmodule': {
-                'namespace_index': self.model._bmfmeta.url_namespace + ':index',
                 'verbose_name_plural': self.model._meta.verbose_name_plural,
                 'create_views': self.model._bmfmeta.create_views,
                 'model': self.model,
@@ -415,7 +414,6 @@ class ModuleBaseMixin(object):
                     '%s.view_%s' % info,
                     '%s.clone_%s' % info,
                 ]),
-                # 'namespace': self.model._bmfmeta.url_namespace,  # unused
                 # 'verbose_name': self.model._meta.verbose_name,  # unused
             },
         })
