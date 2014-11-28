@@ -200,12 +200,8 @@ class QuotationProduct(BMFModel):
     # unit = models.CharField() # TODO add units
     description = models.TextField(_("Description"), null=True, blank=True)
 
-    def __init__(self, *args, **kwargs):
-        super(QuotationProduct, self).__init__(*args, **kwargs)
-        self._calcs = None
-
     def calc_all(self):
-        if self._calcs:
+        if hasattr(self, '_calcs'):
             return self._calcs
         self._calcs = self.product.calc_tax(self.amount, self.price)
         return self._calcs

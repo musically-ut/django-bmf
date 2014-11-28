@@ -22,13 +22,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='customer_pk',
-            field=models.PositiveIntegerField(blank=True, editable=False, null=True),
+            field=models.PositiveIntegerField(db_index=True, editable=False, blank=True, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='document',
             name='project_pk',
-            field=models.PositiveIntegerField(blank=True, editable=False, null=True),
+            field=models.PositiveIntegerField(db_index=True, editable=False, blank=True, null=True),
             preserve_default=True,
         ),
     ]
