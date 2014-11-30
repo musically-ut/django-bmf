@@ -48,6 +48,7 @@ REPORTING_SERVER = getattr(settings, 'BMF_REPORTING_SERVER', None)
 
 HAYSTACK_DEFAULT_CONNECTION = getattr(settings, 'BMF_HAYSTACK_DEFAULT_CONNECTION', 'default')
 
+CACHE_DEFAULT_CONNECTION = getattr(settings, 'BMF_CACHE_DEFAULT_CONNECTION', 'default')
 
 # OLD below this line ---------------------------------------------------------
 
