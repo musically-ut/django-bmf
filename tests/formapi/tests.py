@@ -9,11 +9,11 @@ from django.contrib.contenttypes.models import ContentType
 from djangobmf.testcase import BMFModuleTestCase
 
 
-class FormTests(BMFModuleTestCase):
-
-    def test_forms(self):
-        """
-        """
+#class FormTests(BMFModuleTestCase):
+#
+#    def test_forms(self):
+#        """
+#        """
 #       self.model = get_model_from_cfg("POSITION")
 
 #       # don't accept get
