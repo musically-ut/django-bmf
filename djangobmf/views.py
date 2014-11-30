@@ -58,12 +58,16 @@ from djangobmf.viewmixins import ViewMixin
 
 import copy
 import datetime
+import logging
 import operator
 import re
 import types
 import warnings
+
 from functools import reduce
 from django_filters.views import FilterView
+
+logger = logging.getLogger(__name__)
 
 
 # --- list views --------------------------------------------------------------
@@ -637,6 +641,16 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             })
         return obj
 
+    def get_field(self, form, auto_id):
+        """
+        Get the field from the auto_id value of this form
+        needed for ajax-interaction (search)
+        """
+        for field in form:
+            if field.auto_id == auto_id:
+                return field
+        return None
+
     def get(self, request, *args, **kwargs):
         # dont react on get requests
         raise Http404
@@ -652,9 +666,9 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             # do form validation to fill form.instance with data
             valid = form.is_valid()
 
-            field = form.get_field(self.request.POST['field'])
+            field = self.get_field(form, self.request.POST['field'])
             if not field:
-                # TODO ADD LOGGING
+                logger.info("Field %s was not found" % self.request.POST['field'])
                 raise Http404
             qs = field.field.queryset
 

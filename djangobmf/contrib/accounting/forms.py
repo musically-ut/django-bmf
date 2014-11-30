@@ -9,7 +9,6 @@ from django.forms import FloatField
 from django.forms import BooleanField
 from django.utils.translation import ugettext_lazy as _
 
-# from djangobmf.forms import BMFForm
 from djangobmf.settings import CONTRIB_ACCOUNT
 from djangobmf.utils.model_from_name import model_from_name
 # from djangobmf.fields import CurrencyField
