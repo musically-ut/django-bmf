@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
 
-from djangobmf.utils import get_model_from_cfg
 from djangobmf.testcase import BMFModuleTestCase
 
 

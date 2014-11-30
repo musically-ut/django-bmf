@@ -8,8 +8,6 @@ from django.test import LiveServerTestCase
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 
-from djangobmf.utils import get_model_from_cfg
-
 from djangobmf.models import Report
 
 from djangobmf.testcase import BMFViewTestCase

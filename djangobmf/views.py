@@ -16,7 +16,6 @@ from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic.base import TemplateView
-# from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseFormView
 from django.views.generic.dates import BaseDateListView
 from django.views.generic.dates import YearMixin
@@ -39,15 +38,12 @@ from django.utils.translation import ugettext
 
 from djangobmf.document.forms import UploadDocument
 from djangobmf.document.models import Document
-# from djangobmf.document.views import DocumentCreateView
 from djangobmf.models import Report
 from djangobmf.notification.forms import HistoryCommentForm
 from djangobmf.notification.models import Activity
 from djangobmf.notification.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
-# from .signals import activity_workflow
-from djangobmf.utils import form_class_factory
 from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
 from djangobmf.viewmixins import ModuleClonePermissionMixin
 from djangobmf.viewmixins import ModuleCreatePermissionMixin
@@ -356,7 +352,7 @@ class ModuleFormMixin(object):
                 self.form_class = modelform_factory(model, fields=self.fields)
             else:
                 self.form_class = modelform_factory(model, exclude=self.exclude)
-        return form_class_factory(self.form_class)
+        return self.form_class
 
 
 class ModuleDetailView(

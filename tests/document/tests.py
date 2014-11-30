@@ -8,40 +8,39 @@ from django.test import LiveServerTestCase
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 
-from djangobmf.utils import get_model_from_cfg
-
 from djangobmf.models import Report
 from djangobmf.models import Document
 from djangobmf.testcase import BMFModuleTestCase
 
 
 class CoreTests(BMFModuleTestCase):
+    pass
 
-    def test_history_files(self):
-        """
-        """
+#   def test_history_files(self):
+#       """
+#       """
 
-        self.model = get_model_from_cfg("PROJECT")
-        self.autotest_ajax_post(
-            'create',
-            kwargs={'key': 'default'},
-            data={
-                'customer': 1,
-                'name': "Testproject",
-                'employee': 1,
-            },
-        )
+#       self.model = get_model_from_cfg("PROJECT")
+#       self.autotest_ajax_post(
+#           'create',
+#           kwargs={'key': 'default'},
+#           data={
+#               'customer': 1,
+#               'name': "Testproject",
+#               'employee': 1,
+#           },
+#       )
 
-        model = get_model_from_cfg("PROJECT")
+#       model = get_model_from_cfg("PROJECT")
 
-        obj = model.objects.order_by('pk').last()
-        ct = ContentType.objects.get_for_model(model)
+#       obj = model.objects.order_by('pk').last()
+#       ct = ContentType.objects.get_for_model(model)
 
-        r = self.client.get(reverse('djangobmf:document-add', None, None, {'pk': obj.pk, 'ct': ct.pk}))
-        self.assertEqual(r.status_code, 302)
+#       r = self.client.get(reverse('djangobmf:document-add', None, None, {'pk': obj.pk, 'ct': ct.pk}))
+#       self.assertEqual(r.status_code, 302)
 
-        r = self.client.post(reverse('djangobmf:document-add', None, None, {'pk': obj.pk, 'ct': ct.pk}), {})
-        self.assertEqual(r.status_code, 302)
+#       r = self.client.post(reverse('djangobmf:document-add', None, None, {'pk': obj.pk, 'ct': ct.pk}), {})
+#       self.assertEqual(r.status_code, 302)
 
 #       file = open('README.rst', 'rb')
 #       r = self.client.post(reverse('djangobmf:file_add', None, None, {'pk': obj.pk, 'ct': ct.pk}), {
