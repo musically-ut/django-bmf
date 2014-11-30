@@ -33,6 +33,100 @@ from .models import TestView
 
 class ViewsTests(TestCase):
 
+    def test_views_ModuleGenericBaseView_get_template_names_default(self):
+        obj = ModuleGenericBaseView()
+        obj.model = TestView
+        self.assertEqual(obj.get_template_names(), ['appapis/testview_bmfgeneric.html', 'djangobmf/module_generic_default.html'])
+
+    def test_views_ModuleGenericBaseView_get_template_names_fixed(self):
+        obj = ModuleGenericBaseView()
+        obj.model = TestView
+        obj.template_name = 'test.html'
+        self.assertEqual(obj.get_template_names(), ['test.html'])
+
+    def test_views_ModuleGenericBaseView_get_template_names_suffix(self):
+        obj = ModuleGenericBaseView()
+        obj.model = TestView
+        obj.template_name_suffix = 'test'
+        self.assertEqual(obj.get_template_names(), [
+            'appapis/testview_bmfgeneric_test.html',
+            'appapis/testview_bmfgeneric.html',
+            'djangobmf/module_generic_test.html',
+            'djangobmf/module_generic_default.html',
+        ])
+
     @expectedFailure
-    def test_viewmixins(self):
+    def test_views_ModuleListView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleFilterView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleTreeView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleCategoryView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleArchiveView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleLetterView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleActivityMixin(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleFilesMixin(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleFormMixin(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleDetailView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleAutoDetailView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleReportView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleCloneView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleUpdateView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleCreateView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleDeleteView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleWorkflowView(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleFormAPI(self):
+        self.assertTrue(False)  # TODO NOT IMPLEMENTED
+
+    @expectedFailure
+    def test_views_ModuleOverviewView(self):
         self.assertTrue(False)  # TODO NOT IMPLEMENTED
