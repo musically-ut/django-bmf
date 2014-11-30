@@ -11,8 +11,8 @@ from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleDetailView
 
-from .forms import BMFInvoiceUpdateForm
-from .forms import BMFInvoiceCreateForm
+from .forms import InvoiceUpdateForm
+from .forms import InvoiceCreateForm
 
 
 class AllInvoiceView(ModuleArchiveView):
@@ -27,12 +27,12 @@ class OpenInvoiceView(ModuleListView):
 
 
 class InvoiceCreateView(ModuleCreateView):
-    form_class = BMFInvoiceCreateForm
+    form_class = InvoiceCreateForm
 
 
 class InvoiceUpdateView(ModuleUpdateView):
-    form_class = BMFInvoiceUpdateForm
+    form_class = InvoiceUpdateForm
 
 
 class InvoiceDetailView(ModuleDetailView):
-    form_class = BMFInvoiceUpdateForm
+    pass

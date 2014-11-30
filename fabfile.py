@@ -84,7 +84,6 @@ def js():
             'js/bmf-autocomplete.js',
             'js/bmf-calendar.js',
             'js/bmf-editform.js',
-            'js/bmf-inlineform.js',
             'js/bmf-buildform.js',
             'js/menu.js',
         )
