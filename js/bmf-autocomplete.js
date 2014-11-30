@@ -104,7 +104,7 @@
       //console.log(data.form);
 
       $.ajax({
-        url: base.form.attr('action')+"form-api/?changed",
+        url: base.form.attr('action')+"form/?changed",
         dataType: 'json',
         type: 'post',
         data: data,
@@ -141,7 +141,7 @@
       };
 
       $.ajax({
-        url: base.form.attr('action')+"form-api/?search",
+        url: base.form.attr('action')+"form/?search",
         dataType: 'json',
         type: 'post',
         data: data,
@@ -169,7 +169,7 @@
         wait: 250,
         debug: true,
         // Which filter options are submitted
-        url: './form-api/',
+        url: './form/',
     };
 
     // register as jquery function
