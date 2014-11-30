@@ -13,8 +13,6 @@ import djangobmf.document.storage
 
 class Migration(migrations.Migration):
 
-    replaces = [('djangobmf', '0001_initial'), ('djangobmf', '0002_removed_notification_and_watch'), ('djangobmf', '0003_new_notifications'), ('djangobmf', '0004_added_workspace'), ('djangobmf', '0005_rm_dashboard_view'), ('djangobmf', '0006_document'), ('djangobmf', '0007_version_0_2_0')]
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('contenttypes', '0001_initial'),
