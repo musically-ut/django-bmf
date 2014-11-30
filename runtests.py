@@ -164,7 +164,7 @@ if __name__ == '__main__':
     options = parser.parse_args()
 
     if options.contrib:
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings_test'
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings_venv'
 
     if options.settings:
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings

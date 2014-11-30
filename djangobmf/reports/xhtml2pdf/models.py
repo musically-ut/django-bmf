@@ -7,8 +7,8 @@ from django.template.loader import select_template
 from django.template import Context
 
 from djangobmf.sites import site
+from djangobmf.models import Document
 from djangobmf.report.models import BaseReport
-from djangobmf.utils import get_model_from_cfg
 
 from io import BytesIO
 from xhtml2pdf import pisa
@@ -53,8 +53,6 @@ pdf_background_pk = None
         model = context['bmfmodule']['model']._meta
         template_name = '%s/%s_htmlreport.html' % (model.app_label, model.model_name)
 
-        document = get_model_from_cfg('DOCUMENT')
-
         pages_file = None
         letter_file = None
 
@@ -62,18 +60,18 @@ pdf_background_pk = None
             if self.options.getint('pages', 'pdf_background_pk'):
                 bg_pk = self.options.getint('pages', 'pdf_background_pk')
                 try:
-                    file = document.objects.get(pk=bg_pk)
+                    file = Document.objects.get(pk=bg_pk)
                     pages_file = ''.join(file.file.read().encode('base64').splitlines())
-                except document.DoesNotExist:
+                except Document.DoesNotExist:
                     pass
 
         if self.options.has_option('letter_page', 'pdf_background_pk'):
             if self.options.getint('letter_page', 'pdf_background_pk'):
                 bg_pk = self.options.getint('letter_page', 'pdf_background_pk')
                 try:
-                    file = document.objects.get(pk=bg_pk)
+                    file = Document.objects.get(pk=bg_pk)
                     letter_file = ''.join(file.file.read().encode('base64').splitlines())
-                except document.DoesNotExist:
+                except Document.DoesNotExist:
                     pass
 
         options = {

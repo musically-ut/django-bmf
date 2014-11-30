@@ -134,6 +134,7 @@ $.extend($.fn.treegrid.defaults, {
         base.input.attr('placeholder', $(this).html());
         base.destroyList();
         event.preventDefault();
+        base.changed();
       });
       base.dropdown.css("display","block");
     };
@@ -615,7 +616,6 @@ $(document).ready(function() {
 (function($){
     // register as jquery function
     $.fn.bmf_buildform = function(){
-        $(this).bmf_inlineform();
         $(this).bmf_autocomplete();
         $(this).bmf_calendar();
     };

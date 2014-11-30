@@ -8,6 +8,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.forms.fields import CharField
+from django.forms.fields import FloatField
+from django.forms.fields import DecimalField
+from django.forms.models import ModelChoiceField
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect, Http404, QueryDict
 from django.views.generic import View
@@ -16,7 +20,6 @@ from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic.base import TemplateView
-# from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseFormView
 from django.views.generic.dates import BaseDateListView
 from django.views.generic.dates import YearMixin
@@ -39,15 +42,12 @@ from django.utils.translation import ugettext
 
 from djangobmf.document.forms import UploadDocument
 from djangobmf.document.models import Document
-# from djangobmf.document.views import DocumentCreateView
 from djangobmf.models import Report
 from djangobmf.notification.forms import HistoryCommentForm
 from djangobmf.notification.models import Activity
 from djangobmf.notification.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
-# from .signals import activity_workflow
-from djangobmf.utils import form_class_factory
 from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
 from djangobmf.viewmixins import ModuleClonePermissionMixin
 from djangobmf.viewmixins import ModuleCreatePermissionMixin
@@ -62,12 +62,16 @@ from djangobmf.viewmixins import ViewMixin
 
 import copy
 import datetime
+import logging
 import operator
 import re
 import types
 import warnings
+
 from functools import reduce
 from django_filters.views import FilterView
+
+logger = logging.getLogger(__name__)
 
 
 # --- list views --------------------------------------------------------------
@@ -356,7 +360,7 @@ class ModuleFormMixin(object):
                 self.form_class = modelform_factory(model, fields=self.fields)
             else:
                 self.form_class = modelform_factory(model, exclude=self.exclude)
-        return form_class_factory(self.form_class)
+        return self.form_class
 
 
 class ModuleDetailView(
@@ -641,6 +645,55 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             })
         return obj
 
+    def get_field(self, form, auto_id):
+        """
+        Get the field from the auto_id value of this form
+        needed for ajax-interaction (search)
+        """
+        for field in form:
+            if field.auto_id == auto_id:
+                return field
+        return None
+
+    def get_all_fields(self, form):
+        """
+        Get all the fields in this form
+        needed for ajax-interaction (changed value)
+        """
+        return [field for field in form]
+
+    def get_changes(self, form):
+        """
+        needed for ajax calls. return fields, which changed between the validation
+        """
+        # do form validation
+        valid = form.is_valid()
+
+        # also do model clean's, which are usually done, if the model is valid
+        try:
+            form.instance.clean()
+        except ValidationError:
+            pass
+
+        data = []
+        for field in self.get_all_fields(form):
+            # input-type fields
+            val_instance = getattr(field.form.instance, field.name, None)
+
+            if isinstance(field.field, (CharField, DecimalField, FloatField)):
+                if not field.value() and val_instance:
+                    data.append({'field': field.auto_id, 'value': val_instance})
+                continue
+            if isinstance(field.field, ModelChoiceField):
+                try:  # inline formsets cause a attribute errors
+                    if val_instance and field.value() != str(val_instance.pk):
+                        data.append({'field': field.auto_id, 'value': val_instance.pk, 'name': str(val_instance)})
+                except AttributeError:
+                    pass
+                continue
+            logger.critical("Formatting is missing for %s" % field.field.__class__)
+        return valid, data
+
     def get(self, request, *args, **kwargs):
         # dont react on get requests
         raise Http404
@@ -656,9 +709,9 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             # do form validation to fill form.instance with data
             valid = form.is_valid()
 
-            field = form.get_field(self.request.POST['field'])
+            field = self.get_field(form, self.request.POST['field'])
             if not field:
-                # TODO ADD LOGGING
+                logger.info("Field %s was not found" % self.request.POST['field'])
                 raise Http404
             qs = field.field.queryset
 
@@ -683,7 +736,7 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             """
             validate one form and compare it to an new form created with the validated instance
             """
-            valid, data = form.get_changes()
+            valid, data = self.get_changes(form)
             return self.render_to_json_response(data)
         raise Http404
 

@@ -14,7 +14,7 @@ from djangobmf.views import ModuleCloneView
 
 from .filters import TaskFilter
 from .filters import GoalFilter
-from .forms import BMFGoalCloneForm
+from .forms import GoalCloneForm
 
 
 class ArchiveGoalView(ModuleArchiveView):
@@ -85,7 +85,7 @@ class TodoTaskView(ModuleListView):
 
 
 class GoalCloneView(ModuleCloneView):
-    form_class = BMFGoalCloneForm
+    form_class = GoalCloneForm
 
     def clone_object(self, formdata, instance):
         instance.completed = False
