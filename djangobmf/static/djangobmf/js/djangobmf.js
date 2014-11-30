@@ -134,6 +134,7 @@ $.extend($.fn.treegrid.defaults, {
         base.input.attr('placeholder', $(this).html());
         base.destroyList();
         event.preventDefault();
+        base.changed();
       });
       base.dropdown.css("display","block");
     };

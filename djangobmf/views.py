@@ -8,6 +8,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.forms.fields import CharField
+from django.forms.fields import FloatField
+from django.forms.fields import DecimalField
+from django.forms.models import ModelChoiceField
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect, Http404, QueryDict
 from django.views.generic import View
@@ -651,6 +655,45 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
                 return field
         return None
 
+    def get_all_fields(self, form):
+        """
+        Get all the fields in this form
+        needed for ajax-interaction (changed value)
+        """
+        return [field for field in form]
+
+    def get_changes(self, form):
+        """
+        needed for ajax calls. return fields, which changed between the validation
+        """
+        # do form validation
+        valid = form.is_valid()
+
+        # also do model clean's, which are usually done, if the model is valid
+        try:
+            form.instance.clean()
+        except ValidationError:
+            pass
+
+        data = []
+        for field in self.get_all_fields(form):
+            # input-type fields
+            val_instance = getattr(field.form.instance, field.name, None)
+
+            if isinstance(field.field, (CharField, DecimalField, FloatField)):
+                if not field.value() and val_instance:
+                    data.append({'field': field.auto_id, 'value': val_instance})
+                continue
+            if isinstance(field.field, ModelChoiceField):
+                try:  # inline formsets cause a attribute errors
+                    if val_instance and field.value() != str(val_instance.pk):
+                        data.append({'field': field.auto_id, 'value': val_instance.pk, 'name': str(val_instance)})
+                except AttributeError:
+                    pass
+                continue
+            logger.critical("Formatting is missing for %s" % field.field.__class__)
+        return valid, data
+
     def get(self, request, *args, **kwargs):
         # dont react on get requests
         raise Http404
@@ -693,7 +736,7 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             """
             validate one form and compare it to an new form created with the validated instance
             """
-            valid, data = form.get_changes()
+            valid, data = self.get_changes(form)
             return self.render_to_json_response(data)
         raise Http404
 
