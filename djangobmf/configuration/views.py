@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 from django import forms
 from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
-# from django.core import serializers
 from django.db import models
 from django.views.generic import TemplateView
 from django.views.generic import FormView
 
 from djangobmf.views.mixins import ViewMixin
 from djangobmf.models import Configuration
+from djangobmf.sites import site, SETTING_KEY
 
 import json
 

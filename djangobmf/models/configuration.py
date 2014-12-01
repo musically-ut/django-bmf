@@ -3,40 +3,56 @@
 
 from __future__ import unicode_literals
 
+from django.core.cache import caches
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.settings import CACHE_DEFAULT_CONNECTION
+
 import json
+
 
 CONFIGURATION_CACHE = {}
 
 
 class ConfigurationManager(models.Manager):
+
+    def get_key(self, app, name):
+        return 'bmfconfig.%s.%s' % (app, name)
+
+    def get_cache(self):
+        return caches[CACHE_DEFAULT_CONNECTION]
+
     def get_value(self, app, name):
         """
         Returns the current ``Configuration`` based on the app-label and
-        the name of the setting. The ``Configuration`` object is cached the first
-        time it's retrieved from the database.
+        the name of the setting. The ``Configuration`` object is cached in the
+        bmf default cache connection (which should be shared throughout all instances)
         """
+        cache = self.get_cache()
+        key = self.get_key(app, name)
 
-        try:
-            value = CONFIGURATION_CACHE[app][name]
-            return value
-        except KeyError:
+        value = cache.get(key)
+
+        if not value:
             value = json.loads(self.get(app_label=app, field_name=name).value)
-
-        if app in CONFIGURATION_CACHE:
-            CONFIGURATION_CACHE[app][name] = value
-        else:
-            CONFIGURATION_CACHE[app] = {name: value}
+            cache.set(key, value)
 
         return value
 
+    def remove_value(self, app, name):
+        """
+        removes the cache key to ensure it is reloaded if needed
+        """
+        cache = self.get_cache()
+        key = self.get_key(app, name)
+        cache.delete(key)
+
     def clear_cache(self):
         """Clears the ``Configuration`` object cache."""
-        global CONFIGURATION_CACHE
-        CONFIGURATION_CACHE = {}
+        cache = caches[CACHE_DEFAULT_CONNECTION]
+        cache.clear()
 
 
 @python_2_unicode_compatible
@@ -64,15 +80,12 @@ class Configuration(models.Model):
     def save(self, *args, **kwargs):
         super(Configuration, self).save(*args, **kwargs)
         # Cached information will likely be incorrect now.
-        if self.app_label in CONFIGURATION_CACHE:
-            if self.field_name in CONFIGURATION_CACHE[self.app_label]:
-                del CONFIGURATION_CACHE[self.app_label][self.field_name]
+        self.objects.remove_value(self.app_label, self.field_name)
 
     def delete(self):
         super(Configuration, self).delete()
-        if self.app_label in CONFIGURATION_CACHE:
-            if self.field_name in CONFIGURATION_CACHE[self.app_label]:
-                del CONFIGURATION_CACHE[self.app_label][self.field_name]
+        # Cached information will likely be incorrect now.
+        self.objects.remove_value(self.app_label, self.field_name)
 
     def __str__(self):
         return '%s.%s' % (self.app_label, self.field_name)

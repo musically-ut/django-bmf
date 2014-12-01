@@ -111,6 +111,9 @@
                                         </li>
                                         {% if request.user.is_staff %}
                                         <li>
+                                            <a href="{% url 'djangobmf:configuration' %}">{% trans "Configuration" %}</a>
+                                        </li>
+                                        <li>
                                             <a href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
                                         </li>
                                         {% endif %}
