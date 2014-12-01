@@ -691,7 +691,13 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
                 except AttributeError:
                     pass
                 continue
-            logger.critical("Formatting is missing for %s" % field.field.__class__)
+            logger.info("Formatting is missing for %s" % field.field.__class__)
+
+        logger.debug("Form (%s) changes: %s" % (
+            'valid' if valid else 'invalid',
+            data
+        ))
+
         return valid, data
 
     def get(self, request, *args, **kwargs):
@@ -737,6 +743,7 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             validate one form and compare it to an new form created with the validated instance
             """
             valid, data = self.get_changes(form)
+
             return self.render_to_json_response(data)
         raise Http404
 

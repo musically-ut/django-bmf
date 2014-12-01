@@ -104,12 +104,10 @@ class AbstractQuotation(BMFModel):
         return None
 
     def clean(self):
-        # if self.project and not self.customer_id:
-        #   self.customer = self.project.customer
-        # if self.project and not self.employee_id:
-        #   self.employee_id = self.project.employee_id
-        # if self.customer and not self.project_id:
-        #   self.project = self.customer.project
+        if self.project and not self.customer_id:
+            self.customer = self.project.customer
+        if self.customer and not self.project_id:
+            self.project = self.customer.project
         if self.customer and not self.invoice_address_id:
             self.invoice_address = \
                 self.customer.customer_address.filter(is_billing=True, default_billing=True).first()

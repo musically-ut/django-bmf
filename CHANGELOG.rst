@@ -8,6 +8,7 @@ Version 0.2.1 (currently in development)
 * Added the function to test a single module or only the core
 * Updates in ``contrib.accounting``
 * Updates in ``contrib.quotation``
+* Updates in ``contrib.invoice``
 
 Version 0.2.0
 ========================================

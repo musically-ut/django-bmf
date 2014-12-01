@@ -121,7 +121,7 @@ class MoneyField(models.DecimalField):
 
     def __init__(self, *args, **kwargs):
         defaults = {
-            'default': '0',
+            'default': None,
             'blank': True,
         }
         defaults.update(kwargs)

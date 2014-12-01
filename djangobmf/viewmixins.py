@@ -7,7 +7,6 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
-from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
@@ -21,6 +20,7 @@ from djangobmf import get_version
 from djangobmf.decorators import login_required
 from djangobmf.models import Notification
 from djangobmf.models import Workspace
+from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
 
 from collections import OrderedDict
@@ -257,7 +257,7 @@ class AjaxMixin(BaseMixin):
         return self.request.is_ajax() and super(AjaxMixin, self).check_permissions()
 
     def render_to_json_response(self, context, **response_kwargs):
-        data = json.dumps(context, cls=DjangoJSONEncoder)
+        data = json.dumps(context, cls=DjangoBMFEncoder)
         response_kwargs['content_type'] = 'application/json'
         return HttpResponse(data, **response_kwargs)
 
