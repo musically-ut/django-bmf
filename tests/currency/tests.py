@@ -19,28 +19,33 @@ from decimal import Decimal
 
 
 class ClassTests(TestCase):
-    def test_definitions(self):
+    def test_definitions_missing_iso(self):
         activate('en')
-
         msg = "missing iso"
         with self.assertRaises(ImproperlyConfigured, msg=msg):
             class TestCurrency(BaseCurrency):
                 name = 'Currency'
                 symbol = 'c'
 
+    def test_definitions_missing_name(self):
+        activate('en')
         msg = "missing name"
         with self.assertRaises(ImproperlyConfigured, msg=msg):
             class TestCurrency(BaseCurrency):
                 iso = "XTE"
                 symbol = 'c'
 
+    def test_definitions_missing_symbol(self):
+        activate('en')
         msg = "missing symbol"
         with self.assertRaises(ImproperlyConfigured, msg=msg):
             class TestCurrency(BaseCurrency):
                 iso = "XTE"
                 name = 'Currency'
 
-        msg = "invalid precision (A)"
+    def test_definitions_invalid_precision(self):
+        activate('en')
+        msg = "invalid precision"
         with self.assertRaises(ImproperlyConfigured, msg=msg):
             class TestCurrency(BaseCurrency):
                 iso = "XTE"
@@ -48,7 +53,9 @@ class ClassTests(TestCase):
                 symbol = 'c'
                 base_precision = 'invalid'
 
-        msg = "invalid precision (B)"
+    def test_definitions_negative_precision(self):
+        activate('en')
+        msg = "negative precision"
         with self.assertRaises(ImproperlyConfigured, msg=msg):
             class TestCurrency(BaseCurrency):
                 iso = "XTE"
