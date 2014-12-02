@@ -9,12 +9,7 @@ import os
 BASEDIR = os.path.dirname(env.real_fabfile)
 
 PYTHON = BASEDIR + "/virtenv/bin/python"
-DJANGO = BASEDIR + "/virtenv/bin/django-admin.py"
 DEVELOP = BASEDIR + "/develop.py"
-
-#PYTHON = "python"
-#DJANGO = "django-admin.py"
-#DEVELOP = BASEDIR + "/develop.py"
 
 FIXTURES = (
     'fixtures/sites.json',
@@ -127,24 +122,24 @@ def test_core(module=""):
 @task
 def locale():
     with lcd(BASEDIR + '/djangobmf'):
-        local('%s makemessages -l %s --domain django' % (DJANGO, 'en'))
-        local('%s makemessages -l %s --domain djangojs' % (DJANGO, 'en'))
+        local('%s %s makemessages -l %s --domain django' % (PYTHON, DEVELOP, 'en'))
+        local('%s %s makemessages -l %s --domain djangojs' % (PYTHON, DEVELOP, 'en'))
         check_locale()
 
     for app in APPS:
         with lcd(BASEDIR + '/djangobmf/contrib/' + app):
-            local('%s makemessages -l %s --domain django' % (DJANGO, 'en'))
+            local('%s %s makemessages -l %s --domain django' % (PYTHON, DEVELOP, 'en'))
             check_locale()
 
     with lcd(BASEDIR):
         local('tx pull')
 
     with lcd(BASEDIR + '/djangobmf'):
-        local('%s compilemessages' % DJANGO)
+        local('%s %s compilemessages' % (PYTHON, DEVELOP))
 
     for app in APPS:
         with lcd(BASEDIR + '/djangobmf/contrib/' + app):
-            local('%s compilemessages' % DJANGO)
+            local('%s %s compilemessages' % (PYTHON, DEVELOP))
 
     puts("Dont forget to run 'tx push -s' to push new source files")
 

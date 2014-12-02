@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-06 23:37+0200\n"
+"POT-Creation-Date: 2014-12-02 07:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,11 +25,11 @@ msgstr ""
 msgid "Tasks"
 msgstr ""
 
-#: forms.py:19
+#: forms.py:17
 msgid "Copy the Tasks"
 msgstr ""
 
-#: forms.py:20
+#: forms.py:18
 msgid "When copying unset the task's employee"
 msgstr ""
 
