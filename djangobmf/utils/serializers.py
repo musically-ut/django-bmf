@@ -5,6 +5,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from djangobmf.currencies import BaseCurrency
 
+
 class DjangoBMFEncoder(DjangoJSONEncoder):
     """
     JSONEncoder subclass that knows how to encode currencies
