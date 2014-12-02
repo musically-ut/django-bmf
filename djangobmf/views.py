@@ -82,6 +82,48 @@ logger = logging.getLogger(__name__)
 # --- list views --------------------------------------------------------------
 
 
+class ModuleGetView(ModuleViewPermissionMixin, ModuleViewMixin, MultipleObjectTemplateResponseMixin,
+                    MultipleObjectMixin, View):
+    """
+    """
+    model = None  # set by workspace.views
+    workspace = None  # set by workspace.views
+    context_object_name = 'objects'
+    template_name_suffix = None
+    template_name = None
+    allow_empty = True
+    name = None
+    slug = None
+    paginate_by = None
+
+    def get_template_names(self):
+        """
+        Return a list of template names to be used for the request. Must return
+        a list. May not be called if render_to_response is overridden.
+        """
+        if self.template_name:
+            return [self.template_name]
+
+        names = []
+        if self.template_name_suffix:
+            names.append("%s/%s_bmfgeneric_%s.html" % (
+                self.model._meta.app_label,
+                self.model._meta.model_name,
+                self.template_name_suffix
+            ))
+
+        names.append("%s/%s_bmfgeneric.html" % (
+            self.model._meta.app_label,
+            self.model._meta.model_name
+        ))
+        if self.template_name_suffix:
+            names.append("djangobmf/module_generic_%s.html" % self.template_name_suffix)
+
+        names.append("djangobmf/module_generic_default.html")
+
+        return names
+
+
 class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
     """
     """
