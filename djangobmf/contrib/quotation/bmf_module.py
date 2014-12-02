@@ -16,11 +16,9 @@ from .views import AllQuotationView
 from .views import QuotationCreateView
 from .views import QuotationDetailView
 from .views import QuotationUpdateView
-from .views import QuotationTableView
 
 
 site.register(Quotation, **{
-    'index': QuotationTableView,
     'create': QuotationCreateView,
     'detail': QuotationDetailView,
     'update': QuotationUpdateView,

@@ -48,7 +48,7 @@ from djangobmf.notification.models import Activity
 from djangobmf.notification.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
-from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
+# from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
 from djangobmf.viewmixins import ModuleClonePermissionMixin
 from djangobmf.viewmixins import ModuleCreatePermissionMixin
 from djangobmf.viewmixins import ModuleDeletePermissionMixin
@@ -66,7 +66,7 @@ import logging
 import operator
 import re
 import types
-import warnings
+# import warnings
 
 from functools import reduce
 from django_filters.views import FilterView
@@ -804,22 +804,3 @@ class ModuleOverviewView(ViewMixin, TemplateView):
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)
         context['modules'] = modules
         return context
-
-
-# --- old ---------------------------------------------------------------------
-
-
-class ModuleIndexView(ModuleListView):
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "ModuleIndexView is is deprecated - use ModuleListView",
-            RemovedInNextBMFVersionWarning, stacklevel=2)
-        super(ModuleIndexView, self).__init__(*args, **kwargs)
-
-
-class ModuleGenericListView(ModuleListView):
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "ModuleGenericListView is is deprecated - use ModuleListView",
-            RemovedInNextBMFVersionWarning, stacklevel=2)
-        super(ModuleGenericListView, self).__init__(*args, **kwargs)

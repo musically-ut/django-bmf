@@ -10,7 +10,6 @@ from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-from djangobmf.views import ModuleIndexView
 from djangobmf.views import ModuleDetailView
 
 from .forms import QuotationUpdateForm
@@ -52,7 +51,3 @@ class QuotationUpdateView(ModuleUpdateView):
 
 class QuotationDetailView(ModuleDetailView):
     pass
-
-
-class QuotationTableView(ModuleIndexView):
-    filterset_class = QuotationFilter

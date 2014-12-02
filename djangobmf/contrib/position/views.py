@@ -11,7 +11,6 @@ from django.views.generic import View
 
 from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
-from djangobmf.views import ModuleIndexView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleDetailView
@@ -56,10 +55,6 @@ class PositionUpdateView(ModuleUpdateView):
 
 class PositionDetailView(ModuleDetailView):
     form_class = PositionForm
-
-
-class PositionTableView(ModuleIndexView):
-    filterset_class = PositionFilter
 
 
 class PositionAPI(ModuleViewMixin, View):
