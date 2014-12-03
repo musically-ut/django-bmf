@@ -17,8 +17,6 @@ USE_CELERY = getattr(settings, 'BMF_USE_CELERY', True)
 
 
 def get_contrib(setting, model):
-    # we need to add the default model to the django settings. otherwise
-    # the migrations fail in django 1.7
     if not hasattr(settings, setting):
         setattr(settings, setting, model)
     return getattr(settings, setting)
@@ -69,21 +67,15 @@ bmf_modules = getattr(settings, 'BMF_MODULES', {})
 BASE_MODULE = {
     'ACCOUNT': 'djangobmf_accounting.Account',
     'ADDRESS': 'djangobmf_address.Address',
+    'EMPLOYEE': 'djangobmf_employee.Employee',
     'COMPANY': 'djangobmf_company.Company',
     'CUSTOMER': 'djangobmf_customer.Customer',
-    'EMPLOYEE': 'djangobmf_employee.Employee',
-    'GOAL': 'djangobmf_task.Goal',
     'INVOICE': 'djangobmf_invoice.Invoice',
-    'TAX': 'djangobmf_taxing.Tax',
-    'TASK': 'djangobmf_task.Task',
-    'TEAM': 'djangobmf_team.Team',
     'POSITION': 'djangobmf_position.Position',
     'PRODUCT': 'djangobmf_product.Product',
     'PROJECT': 'djangobmf_project.Project',
     'QUOTATION': 'djangobmf_quotation.Quotation',
-    'TIMESHEET': 'djangobmf_timesheet.Timesheet',
     'TRANSACTION': 'djangobmf_accounting.Transaction',
-    'TRANSACTION_ITEM': 'djangobmf_accounting.TransactionItem',  # TODO: check if i am needed
 }
 BASE_MODULE.update(bmf_modules)
 

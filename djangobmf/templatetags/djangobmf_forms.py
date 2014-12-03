@@ -29,27 +29,6 @@ class FormNode(Node):
         return t.render(context)
 
 
-class FormsetNode(Node):
-    def __init__(self, obj):
-        self.field = Variable(obj)
-
-    def render(self, context):
-        field = self.field.resolve(context)
-        template = "djangobmf/forms/base_formset.html"
-
-        context.update({
-            'formset': context['form'].forms[field.name],
-        })
-
-        try:
-            t = get_template(template)
-        except:
-            if settings.TEMPLATE_DEBUG:
-                raise
-            return ''
-        return t.render(context)
-
-
 class LayoutNode(Node):
     def __init__(self, obj):
         self.field = Variable(obj)
@@ -135,15 +114,6 @@ def bmflayout(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
     return LayoutNode(obj)
-
-
-@register.tag('bmfformset')
-def bmfformset(parser, token):
-    try:
-        tag_name, obj = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
-    return FormsetNode(obj)
 
 
 @register.simple_tag
