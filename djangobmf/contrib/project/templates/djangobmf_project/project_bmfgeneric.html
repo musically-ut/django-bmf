@@ -1,11 +1,36 @@
 {% extends "djangobmf/module_index.html" %}
 
-{% load i18n %}
+{% load sekizai_tags i18n %}
 
 {% block title %}{% trans "Projects" %}{% endblock %}
 
 {% block base_content %}
+<div ng-app="phonecatApp" ng-controller="PhoneListCtrl">
 <h1>{% trans "Projects" %}</h1>
+
+{% addtoblock "js" %}<script type="text/javascript"><!--
+    var phonecatApp = angular.module('phonecatApp', []);
+    phonecatApp.controller('PhoneListCtrl', function ($scope) {
+        $scope.phones = [
+            {'name': 'Nexus S', 'snippet': 'Fast just got faster with Nexus S.'},
+            {'name': 'Motorola XOOM™ with Wi-Fi', 'snippet': 'The Next, Next Generation tablet.'},
+            {'name': 'MOTOROLA XOOM™', 'snippet': 'The Next, Next Generation tablet.'}
+        ];
+    });
+--></script>{% endaddtoblock %}
+
+
+{% verbatim %}
+<p>1 + 2 = {{ 1 + 2 }}</p>
+
+<ul>
+    <li ng-repeat="phone in phones">
+        <span>{{phone.name}}</span>
+        <p>{{phone.snippet}}</p>
+    </li>
+</ul>
+<p>Total number of phones: {{phones.length}}</p>
+{% endverbatim %}
 
 <table class="table table-striped table-condensed table-hover">
   <thead>
@@ -38,4 +63,6 @@
   {% endfor %}
   </tbody>
 </table>
+
+</div>
 {% endblock %}
