@@ -23,10 +23,6 @@ CACHES = {
 BMF_DOCUMENT_ROOT = os.path.join(PROJECT_PATH, "bmf_documents")
 BMF_DOCUMENT_URL = '/bmf_documents/'
 
-#import djcelery
-#djcelery.setup_loader()
-#CELERY_SEND_TASK_ERROR_EMAIL=True # ?????
-
 # LOCAL SETTINGS ==================================================================
 
 DATABASES = {
@@ -41,7 +37,6 @@ DATABASES = {
 
 BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_ALWAYS_EAGER=False
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 HAYSTACK_CONNECTIONS = {
     'default': {

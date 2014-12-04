@@ -12,7 +12,7 @@ BMF_DOCUMENT_URL = '/documents/'
 
 INSTALLED_APPS += TEST_PROJECT_APPS
 
-CELERY_ALWAYS_EAGER=True # deactivate celery
+BMF_USE_CELERY = False
 
 DATABASES = {
     'default': {
