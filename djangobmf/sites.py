@@ -177,7 +177,7 @@ class DjangoBMFModule(object):
                 name='update',
             ),
             url(
-                r'^(?P<pk>[0-9]+)/update/form/$',
+                r'^update/(?P<pk>[0-9]+)/form/$',
                 ModuleFormAPI.as_view(
                     model=self.model,
                     form_view=self.update,
