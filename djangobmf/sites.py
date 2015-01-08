@@ -28,6 +28,7 @@ from .views import ModuleCloneView
 from .views import ModuleUpdateView
 from .views import ModuleWorkflowView
 from .views import ModuleFormAPI
+from .views import ModuleGetView
 
 import copy
 import sys
@@ -92,6 +93,7 @@ class DjangoBMFModule(object):
         self.update = options.get('update', ModuleUpdateView)
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
+        self.get = options.get('get', ModuleGetView)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
@@ -164,6 +166,11 @@ class DjangoBMFModule(object):
 
         urlpatterns = patterns(
             '',
+            url(
+                r'^get/$',
+                self.get.as_view(model=self.model),
+                name='get',
+            ),
             url(
                 r'^update/(?P<pk>[0-9]+)/$',
                 self.update.as_view(model=self.model),

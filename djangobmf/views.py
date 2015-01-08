@@ -7,6 +7,9 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms.fields import CharField
 from django.forms.fields import FloatField
@@ -14,11 +17,11 @@ from django.forms.fields import DecimalField
 from django.forms.models import ModelChoiceField
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect, Http404, QueryDict
-from django.views.generic import View
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
+from django.views.generic import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
 from django.views.generic.dates import BaseDateListView
@@ -462,6 +465,66 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
         context = super(ModuleReportView, self).get_context_data(**kwargs)
         context['request'] = self.request
         return context
+
+
+class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, MultipleObjectMixin, View):
+    """
+    """
+    model = None  # set by workspace.views
+    context_object_name = 'object'
+    # Limit Queryset length and activate pagination
+    limit = 100
+
+    def check_permissions(self):
+        return True
+
+    def get_list_data(self, data):
+        l = []
+        # TODO auto append data
+        for d in data:
+            l.append(d.pk)
+        return l
+
+    def get(self, request):
+        pk = int(self.request.GET.get('pk', 0))
+
+        # activate pagination
+        pagination = bool(self.request.GET.get('pagination', True))
+
+        search = self.request.GET.get('search', None)
+        page = self.request.GET.get('page', 1)
+
+        queryset = self.model.objects.all()
+
+        if pagination and self.limit:
+            paginator = Paginator(queryset, self.limit)
+            count = paginator.count
+            num_pages = paginator.num_pages
+
+            try:
+                qs_data = paginator.page(self.request.GET.get('page', 1))
+            except PageNotAnInteger:
+                qs_data = paginator.page(1)
+            except EmptyPage:
+                qs_data = paginator.page(num_pages)
+            page = qs_data.number
+
+        else:
+            count = queryset.count()
+            num_pages = 1
+            page = 1
+            qs_data = queryset
+
+        return self.render_to_json_response({
+            'model': str(self.model),
+            'count': count,
+            'pk': pk,
+            'pagination': pagination,
+            'page': page,
+            'num_pages': num_pages,
+            'search': search,
+            'list': self.get_list_data(qs_data),
+        })
 
 
 class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMixin, UpdateView):
