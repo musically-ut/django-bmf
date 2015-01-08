@@ -27,6 +27,7 @@ from collections import OrderedDict
 
 import json
 import datetime
+import re
 try:
     from urllib import parse
 except ImportError:
@@ -458,3 +459,34 @@ class ModuleViewMixin(ModuleBaseMixin, ViewMixin):
     variables for bmf-views
     """
     pass
+
+
+class ModuleSearchMixin(object):
+    """
+    Adds the methods ``normalize_query`` and ``construct_search``
+    """
+
+    def normalize_query(
+            self, query_string, findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+            normspace=re.compile(r'\s{2,}').sub):
+        '''
+        Splits the query string in invidual keywords, getting rid of unecessary spaces
+        and grouping quoted words together.
+
+        Example:
+        > self.normalize_query('  some random  words "with   quotes  " and   spaces')
+        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
+
+        '''
+        return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
+
+    # Apply keyword searches.
+    def construct_search(self, field_name):
+        if field_name.startswith('^'):
+            return "%s__istartswith" % field_name[1:]
+        elif field_name.startswith('='):
+            return "%s__iexact" % field_name[1:]
+        elif field_name.startswith('@'):
+            return "%s__search" % field_name[1:]
+        else:
+            return "%s__icontains" % field_name

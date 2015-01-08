@@ -56,6 +56,7 @@ from djangobmf.viewmixins import ModuleClonePermissionMixin
 from djangobmf.viewmixins import ModuleCreatePermissionMixin
 from djangobmf.viewmixins import ModuleDeletePermissionMixin
 from djangobmf.viewmixins import ModuleUpdatePermissionMixin
+from djangobmf.viewmixins import ModuleSearchMixin
 from djangobmf.viewmixins import ModuleViewPermissionMixin
 from djangobmf.viewmixins import ModuleAjaxMixin
 from djangobmf.viewmixins import ModuleBaseMixin
@@ -467,18 +468,19 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
         return context
 
 
-class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, MultipleObjectMixin, View):
+class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
     """
     """
     model = None  # set by workspace.views
-    context_object_name = 'object'
+
     # Limit Queryset length and activate pagination
     limit = 100
 
+    # TODO remove me
     def check_permissions(self):
         return True
 
-    def get_list_data(self, data):
+    def get_item_data(self, data):
         l = []
         # TODO auto append data
         for d in data:
@@ -489,12 +491,22 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, MultipleObjectMi
         pk = int(self.request.GET.get('pk', 0))
 
         # activate pagination
-        pagination = bool(self.request.GET.get('pagination', True))
+        pagination = not bool(self.request.GET.get('pagination', False))
 
         search = self.request.GET.get('search', None)
         page = self.request.GET.get('page', 1)
 
         queryset = self.model.objects.all()
+
+        # search
+        if search:
+            if self.model._bmfmeta.search_fields:
+                for bit in self.normalize_query(search):
+                    lookups = [self.construct_search(str(f)) for f in self.model._bmfmeta.search_fields]
+                    queries = [Q(**{l: bit}) for l in lookups]
+                    queryset = queryset.filter(reduce(operator.or_, queries))
+            else:
+                queryset = []
 
         if pagination and self.limit:
             paginator = Paginator(queryset, self.limit)
@@ -507,13 +519,14 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, MultipleObjectMi
                 qs_data = paginator.page(1)
             except EmptyPage:
                 qs_data = paginator.page(num_pages)
+
             page = qs_data.number
 
         else:
             count = queryset.count()
             num_pages = 1
-            page = 1
             qs_data = queryset
+            page = 1
 
         return self.render_to_json_response({
             'model': str(self.model),
@@ -523,7 +536,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, MultipleObjectMi
             'page': page,
             'num_pages': num_pages,
             'search': search,
-            'list': self.get_list_data(qs_data),
+            'items': self.get_item_data(qs_data),
         })
 
 
@@ -679,7 +692,7 @@ class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFormView):
+class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleObjectMixin, BaseFormView):
     """
     """
     model = None
@@ -816,31 +829,6 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             'instance': self.get_object(),
         })
         return kwargs
-
-    def normalize_query(
-            self, query_string, findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
-            normspace=re.compile(r'\s{2,}').sub):
-        '''
-        Splits the query string in invidual keywords, getting rid of unecessary spaces
-        and grouping quoted words together.
-
-        Example:
-        > self.normalize_query('  some random  words "with   quotes  " and   spaces')
-        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
-
-        '''
-        return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
-
-    # Apply keyword searches.
-    def construct_search(self, field_name):
-        if field_name.startswith('^'):
-            return "%s__istartswith" % field_name[1:]
-        elif field_name.startswith('='):
-            return "%s__iexact" % field_name[1:]
-        elif field_name.startswith('@'):
-            return "%s__search" % field_name[1:]
-        else:
-            return "%s__icontains" % field_name
 
 
 # --- misc --------------------------------------------------------------------
