@@ -470,6 +470,7 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
 
 class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
     """
+    Provides an API to get object data
     """
     model = None  # set by workspace.views
 
@@ -481,10 +482,12 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         return True
 
     def get_item_data(self, data):
-        l = []
-        # TODO auto append data
+        l = {}
         for d in data:
-            l.append(d.pk)
+            l[d.pk] = {
+                'name': str(d),
+                'url': d.bmfmodule_detail()
+            }
         return l
 
     def get(self, request):
@@ -496,7 +499,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         search = self.request.GET.get('search', None)
         page = self.request.GET.get('page', 1)
 
-        queryset = self.model.objects.all()
+        queryset = self.get_queryset()
 
         # search
         if search:
@@ -508,6 +511,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
             else:
                 queryset = []
 
+        # pagination
         if pagination and self.limit:
             paginator = Paginator(queryset, self.limit)
             count = paginator.count
