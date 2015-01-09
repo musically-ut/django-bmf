@@ -129,6 +129,12 @@ class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin,
     """
     template_name_suffix = 'list'
 
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'get_data_url': reverse('%s:get' % self.model._bmfmeta.namespace_api),
+        })
+        return super(ModuleListView, self).get_context_data(**kwargs)
+
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data(object_list=self.object_list)
@@ -483,12 +489,13 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         return True
 
     def get_item_data(self, data):
-        l = {}
+        l = []
         for d in data:
-            l[d.pk] = {
+            l.append({
+                'pk': d.pk,
                 'name': str(d),
                 'url': d.bmfmodule_detail()
-            }
+            })
         return l
 
     def get(self, request):
