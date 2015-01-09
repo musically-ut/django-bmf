@@ -21,7 +21,6 @@ from django.utils.text import slugify
 from .apps import BMFConfig
 from .models import Configuration
 from .views import ModuleCloneView
-from .views import ModuleGetView
 from .views import ModuleCreateView
 from .views import ModuleDeleteView
 from .views import ModuleDetailView
