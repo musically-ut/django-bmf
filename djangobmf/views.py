@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.fields import CharField
 from django.forms.fields import FloatField
@@ -853,6 +854,7 @@ class ModuleOverviewView(ViewMixin, TemplateView):
                 modules.append({
                     'category': key,
                     'model': model,
+                    'url': reverse('%s:list' % model._bmfmeta.namespace_api),
                     'name': model._meta.verbose_name_plural,
                 })
 

@@ -13,7 +13,7 @@
 <h2>{{ module.grouper }}</h2>
 <ul>
   {% for item in module.list|dictsort:"name" %}
-    <li>{{ item.name }}</li>
+  <li><a href="{{ item.url }}">{{ item.name }}</a></li>
   {% endfor %}
 </ul>
 {% empty %}

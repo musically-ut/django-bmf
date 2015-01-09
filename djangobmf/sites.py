@@ -20,15 +20,16 @@ from django.utils.text import slugify
 
 from .apps import BMFConfig
 from .models import Configuration
-from .views import ModuleCreateView
-from .views import ModuleDetailView
-from .views import ModuleDeleteView
-from .views import ModuleReportView
 from .views import ModuleCloneView
-from .views import ModuleUpdateView
-from .views import ModuleWorkflowView
+from .views import ModuleCreateView
+from .views import ModuleDeleteView
+from .views import ModuleDetailView
 from .views import ModuleFormAPI
 from .views import ModuleGetView
+from .views import ModuleListView
+from .views import ModuleReportView
+from .views import ModuleUpdateView
+from .views import ModuleWorkflowView
 
 import copy
 import sys
@@ -166,6 +167,11 @@ class DjangoBMFModule(object):
 
         urlpatterns = patterns(
             '',
+            url(
+                r'^$',
+                ModuleListView.as_view(model=self.model),
+                name='list',
+            ),
             url(
                 r'^get/$',
                 self.get.as_view(model=self.model),
