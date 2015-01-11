@@ -28,7 +28,6 @@ class BaseProject(BMFModel):
     )
 
     name = models.CharField(_("Name"), max_length=255, null=False, blank=False, editable=True, )
-    # is_bound = models.BooleanField(null=False, blank=True, editable=False, default=False)
     is_active = models.BooleanField(_("Is active"), null=False, blank=True, default=True)
 
     class Meta:  # only needed for abstract models
