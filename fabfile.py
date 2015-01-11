@@ -49,7 +49,7 @@ def static():
     js()
     css()
     with lcd(BASEDIR):
-        local('cp submodules/bootstrap/fonts/glyphicons* djangobmf/static/djangobmf/fonts/')
+        local('cp bower_components/bootstrap/fonts/glyphicons* djangobmf/static/djangobmf/fonts/')
 
 
 @task
@@ -70,9 +70,9 @@ def js():
     """
     with lcd(BASEDIR):
         js_ext = (
-            'submodules/jquery-cookie/src/jquery.cookie.js',
+            'bower_components/jquery-cookie/jquery.cookie.js',
             'submodules/jquery-treegrid/js/jquery.treegrid.js',
-            'submodules/bootstrap/dist/js/bootstrap.js',
+            'bower_components/bootstrap/dist/js/bootstrap.js',
         )
         js_own = (
             'js/variables.js',
@@ -83,8 +83,8 @@ def js():
             'js/menu.js',
         )
 
-        local('cp submodules/bootstrap/dist/js/bootstrap.min.js djangobmf/static/djangobmf/js/')
-        local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.cookie.min.js submodules/jquery-cookie/src/jquery.cookie.js')
+        local('cp bower_components/bootstrap/dist/js/bootstrap.min.js djangobmf/static/djangobmf/js/')
+        local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.cookie.min.js bower_components/jquery-cookie/jquery.cookie.js')
         local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.treegrid.min.js submodules/jquery-treegrid/js/jquery.treegrid.js')
 
         local('cat %s > djangobmf/static/djangobmf/js/djangobmf.js' % ' '.join(js_ext + js_own))
