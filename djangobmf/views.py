@@ -104,21 +104,11 @@ class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
             return [self.template_name]
 
         names = []
-        if self.template_name_suffix:
-            names.append("%s/%s_bmfgeneric_%s.html" % (
-                self.model._meta.app_label,
-                self.model._meta.model_name,
-                self.template_name_suffix
-            ))
-
         names.append("%s/%s_bmfgeneric.html" % (
             self.model._meta.app_label,
             self.model._meta.model_name
         ))
-        if self.template_name_suffix:
-            names.append("djangobmf/module_generic_%s.html" % self.template_name_suffix)
-
-        names.append("djangobmf/module_generic_default.html")
+        names.append("djangobmf/module_generic.html")
 
         return names
 

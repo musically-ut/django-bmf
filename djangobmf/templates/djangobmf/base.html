@@ -133,11 +133,13 @@
           {% endfor %}
         </div>
       </div>{% endif %}
-      {% block full_content %}{% endblock %}
+      <div{% block content_container %}{% endblock %}>
+        {% block full_content %}{% endblock %}
+      </div>
     </div> <!-- /container -->
     </div> <!-- /page-container -->
 {# NEW #}
-      </div>
+        </div>
 {# NEW #}
         <footer>
             <div class="container">
