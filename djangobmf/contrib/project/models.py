@@ -32,7 +32,7 @@ class BaseProject(BMFModel):
 
     class Meta:  # only needed for abstract models
         verbose_name = _('Project')
-        verbose_name_plural = _('Project')
+        verbose_name_plural = _('Projects')
         ordering = ['name']
         abstract = True
         permissions = (

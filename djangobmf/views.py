@@ -119,8 +119,15 @@ class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin,
     """
     template_name_suffix = 'list'
 
+    def get_view_name(self):
+        if self.name:
+            return self.name
+        else:
+            return self.model._meta.verbose_name_plural
+
     def get_context_data(self, **kwargs):
         kwargs.update({
+            'view_name': self.get_view_name(),
             'get_data_url': reverse('%s:get' % self.model._bmfmeta.namespace_api),
         })
         return super(ModuleListView, self).get_context_data(**kwargs)

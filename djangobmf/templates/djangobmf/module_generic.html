@@ -4,7 +4,7 @@
 
 {% load sekizai_tags i18n %}
 
-{% block title %}{% trans "Projects" %}{% endblock %}
+{% block title %}{{ view_name }}{% endblock %}
 
 {% block content_container %} ng-app="phonecatApp" ng-controller="PhoneListCtrl"{% endblock %}
 
@@ -51,7 +51,7 @@
 
 <hr>
 
-{% block headline %}<h1>Module name</h1>{% endblock %}
+{% block headline %}<h1>{{ view_name }}</h1>{% endblock %}
 
 {% block filter %}{% endblock %}
 
