@@ -9,7 +9,6 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
@@ -20,20 +19,17 @@ import re
 import datetime
 
 from .models import Position
-from .filters import PositionFilter
 from .forms import PositionForm
 
 
-class AllPositionView(ModuleArchiveView):
+class AllPositionView(ModuleListView):
     name = _("All Positions")
     slug = "all"
-    filterset_class = PositionFilter
 
 
 class OpenPositionView(ModuleListView):
     name = _("Open Positions")
     slug = "open"
-    filterset_class = PositionFilter
 
 
 class PositionCreateView(ModuleCreateView):

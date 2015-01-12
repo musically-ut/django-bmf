@@ -25,13 +25,13 @@ from django.views.generic import UpdateView
 from django.views.generic import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
-from django.views.generic.dates import BaseDateListView
-from django.views.generic.dates import YearMixin
-from django.views.generic.dates import MonthMixin
-from django.views.generic.dates import WeekMixin
-from django.views.generic.dates import DayMixin
-from django.views.generic.dates import _date_from_string
-from django.views.generic.dates import _get_next_prev
+# from django.views.generic.dates import BaseDateListView
+# from django.views.generic.dates import YearMixin
+# from django.views.generic.dates import MonthMixin
+# from django.views.generic.dates import WeekMixin
+# from django.views.generic.dates import DayMixin
+# from django.views.generic.dates import _date_from_string
+# from django.views.generic.dates import _get_next_prev
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
 from django.views.generic.list import MultipleObjectTemplateResponseMixin
@@ -39,8 +39,8 @@ from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils.encoding import force_text
-from django.utils.formats import get_format
-from django.utils.timezone import now
+# from django.utils.formats import get_format
+# from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -66,7 +66,7 @@ from djangobmf.viewmixins import NextMixin
 from djangobmf.viewmixins import ViewMixin
 
 import copy
-import datetime
+# import datetime
 import logging
 import operator
 import re
@@ -74,7 +74,7 @@ import types
 # import warnings
 
 from functools import reduce
-from django_filters.views import FilterView
+# from django_filters.views import FilterView
 
 logger = logging.getLogger(__name__)
 
@@ -82,18 +82,30 @@ logger = logging.getLogger(__name__)
 # --- list views --------------------------------------------------------------
 
 
-class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
+class ModuleListView(
+        ModuleViewPermissionMixin, ModuleViewMixin,
+        MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
     """
     """
     model = None  # set by workspace.views
     workspace = None  # set by workspace.views
-    context_object_name = 'objects'
-    template_name_suffix = None
-    template_name = None
-    allow_empty = True
+
     name = None
     slug = None
+
+    allow_empty = True
     paginate_by = None
+
+    date_field = 'modified'
+    date_resolution = 'year'
+    allow_future = False
+
+    # we are providing the view with the list of objects
+    # even if the data sould be streamed via angular/json
+    # because django querysets are lazy
+    context_object_name = 'objects'
+
+    template_name = None
 
     def get_template_names(self):
         """
@@ -104,68 +116,43 @@ class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
             return [self.template_name]
 
         names = []
-        if self.template_name_suffix:
-            names.append("%s/%s_bmfgeneric_%s.html" % (
-                self.model._meta.app_label,
-                self.model._meta.model_name,
-                self.template_name_suffix
-            ))
-
         names.append("%s/%s_bmfgeneric.html" % (
             self.model._meta.app_label,
             self.model._meta.model_name
         ))
-        if self.template_name_suffix:
-            names.append("djangobmf/module_generic_%s.html" % self.template_name_suffix)
-
-        names.append("djangobmf/module_generic_default.html")
+        names.append("djangobmf/module_generic.html")
 
         return names
 
+    def get_view_name(self):
+        if self.name:
+            return self.name
+        else:
+            return self.model._meta.verbose_name_plural
 
-class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
-    """
-    This view generates a simple parginated list
-    """
-    template_name_suffix = 'list'
+    def get_data_template(self):
+        return "%s/%s_bmflist.html" % (
+            self.model._meta.app_label,
+            self.model._meta.model_name
+        )
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'view_name': self.get_view_name(),
+            'data_template': select_template([
+                self.get_data_template(),
+                "djangobmf/module_list.html",
+            ]),
+            'get_data_url': reverse('%s:get' % self.model._bmfmeta.namespace_api),
+        })
+        return super(ModuleListView, self).get_context_data(**kwargs)
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data(object_list=self.object_list)
         return self.render_to_response(context)
 
-
-class ModuleFilterView(ModuleGenericBaseView, FilterView):
-    """
-    """
-    template_name_suffix = 'filter'
-
-    def get_context_data(self, **kwargs):
-        if self.filterset_class:
-            kwargs.update({
-                'has_filter': True,
-            })
-        else:
-            kwargs.update({
-                'has_filter': False,
-            })
-        return super(ModuleFilterView, self).get_context_data(**kwargs)
-
-
-class ModuleTreeView(ModuleGenericBaseView, FilterView):
-    """
-    This view generates a parginated list and tree navigation
-    """
-    template_name_suffix = 'tree'
-
-
-class ModuleCategoryView(ModuleGenericBaseView, FilterView):
-    """
-    TODO: Some mixin between Tree, List and Letter, probably with multiple categorie-items or workspace-states
-    """
-    template_name_suffix = 'category'
-
-
+'''
 class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
                         MultipleObjectTemplateResponseMixin, BaseDateListView):
     """
@@ -268,7 +255,7 @@ class ModuleLetterView(ModuleGenericBaseView, FilterView):
     navigation
     """
     template_name_suffix = 'letter'
-
+'''
 
 # --- detail, forms and api ---------------------------------------------------
 
@@ -478,17 +465,14 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
     # Limit Queryset length and activate pagination
     limit = 100
 
-    # TODO remove me
-    def check_permissions(self):
-        return True
-
     def get_item_data(self, data):
-        l = {}
+        l = []
         for d in data:
-            l[d.pk] = {
+            l.append({
+                'pk': d.pk,
                 'name': str(d),
                 'url': d.bmfmodule_detail()
-            }
+            })
         return l
 
     def get(self, request):

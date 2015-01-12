@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
@@ -18,7 +17,7 @@ from .forms import QuotationCreateForm
 from .filters import QuotationFilter
 
 
-class AllQuotationView(ModuleArchiveView):
+class AllQuotationView(ModuleListView):
     name = _("All Quotations")
     slug = "all"
     filterset_class = QuotationFilter

@@ -83,7 +83,11 @@ def js():
             'js/menu.js',
         )
 
+        local('cp bower_components/angular/angular.min.js djangobmf/static/djangobmf/js/')
+        local('cp bower_components/angular/angular.min.js.map djangobmf/static/djangobmf/js/')
+
         local('cp bower_components/bootstrap/dist/js/bootstrap.min.js djangobmf/static/djangobmf/js/')
+
         local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.cookie.min.js bower_components/jquery-cookie/jquery.cookie.js')
         local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.treegrid.min.js submodules/jquery-treegrid/js/jquery.treegrid.js')
 

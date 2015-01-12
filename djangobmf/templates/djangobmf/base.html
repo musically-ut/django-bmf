@@ -133,11 +133,13 @@
           {% endfor %}
         </div>
       </div>{% endif %}
-      {% block full_content %}{% endblock %}
+      <div{% block content_container %}{% endblock %}>
+        {% block full_content %}{% endblock %}
+      </div>
     </div> <!-- /container -->
     </div> <!-- /page-container -->
 {# NEW #}
-      </div>
+        </div>
 {# NEW #}
         <footer>
             <div class="container">
@@ -147,6 +149,7 @@
         {% endblock %}
         <script src="{% url "djangobmf:jsi18n" %}?v={{ djangobmf.version }}"></script>
         <script src="{% static "admin/js/jquery.min.js" %}"></script>
+        <script src="{% static "djangobmf/js/angular.min.js" %}"></script>
         {% if debug %}
         <script src="{% static "djangobmf/js/jquery.cookie.min.js" %}?v={{ djangobmf.version }}"></script>
         <script src="{% static "djangobmf/js/jquery.treegrid.min.js" %}?v={{ djangobmf.version }}"></script>

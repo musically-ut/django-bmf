@@ -15,7 +15,7 @@ from django.views.generic import DetailView
 from django.views.generic import RedirectView
 
 from djangobmf.viewmixins import ViewMixin
-from djangobmf.views import ModuleGenericBaseView
+from djangobmf.views import ModuleListView
 
 from .models import Workspace
 
@@ -60,8 +60,8 @@ def workspace_generic_view(request, *args, **kwargs):
         # TODO add logging
         raise Http404
 
-    if not issubclass(obj.module_cls, ModuleGenericBaseView):
-        raise ImproperlyConfigured("%s must be a subclass of ModuleGenericBaseView" % obj.module)
+    if not issubclass(obj.module_cls, ModuleListView):
+        raise ImproperlyConfigured("%s must be a subclass of ModuleListView" % obj.module)
 
     response_function = obj.module_cls.as_view(
         model=obj.ct.model_class(),

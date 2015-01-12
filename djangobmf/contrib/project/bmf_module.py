@@ -10,11 +10,13 @@ from djangobmf.categories import BaseCategory
 from djangobmf.categories import ProjectManagement
 
 from .models import Project
+from .views import ProjectGetView
 from .views import ActiveProjectView
 from .views import AllProjectView
 from .views import ProjectUpdateView
 
 site.register(Project, **{
+    'get': ProjectGetView,
     'update': ProjectUpdateView,
 })
 

@@ -44,14 +44,14 @@ setup(
     install_requires=[
         'django',
         'pytz',
-        'Pillow',
         'django-sekizai',
         'django-mptt',
-        'django-filter',
         'django-haystack',
+        'markdown',
+
+        'Pillow',
         'reportlab',
         'xhtml2pdf',
-        'markdown',
     ],
     include_package_data=True,
     zip_safe=False,

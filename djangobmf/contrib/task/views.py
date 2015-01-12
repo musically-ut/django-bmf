@@ -5,28 +5,21 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
-from djangobmf.views import ModuleLetterView
-
 from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleCloneView
 
-from .filters import TaskFilter
-from .filters import GoalFilter
 from .forms import GoalCloneForm
 
 
-class ArchiveGoalView(ModuleArchiveView):
+class ArchiveGoalView(ModuleListView):
     slug = "archive"
     name = _("Archive")
-    filterset_class = GoalFilter
 
 
 class ActiveGoalView(ModuleListView):
     slug = "active"
     name = _("Active Goals")
-    filterset_class = GoalFilter
 
     def get_queryset(self):  # noqa
         return super(ActiveGoalView, self).get_queryset().filter(completed=False)
@@ -41,17 +34,15 @@ class MyGoalView(ModuleListView):
             .filter(completed=False, referee=getattr(self.request.user, 'djangobmf_employee', -1))
 
 
-class ArchiveTaskView(ModuleArchiveView):
+class ArchiveTaskView(ModuleListView):
     slug = "archive"
     name = _("Archive")
     date_resolution = "month"
-    filterset_class = TaskFilter
 
 
-class OpenTaskView(ModuleLetterView):
+class OpenTaskView(ModuleListView):
     slug = "open"
     name = _("Open Tasks")
-    filterset_class = TaskFilter
 
     def get_queryset(self):  # noqa
         return super(OpenTaskView, self).get_queryset().filter(completed=False)

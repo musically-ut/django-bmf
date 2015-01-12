@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
@@ -15,7 +14,7 @@ from .forms import InvoiceUpdateForm
 from .forms import InvoiceCreateForm
 
 
-class AllInvoiceView(ModuleArchiveView):
+class AllInvoiceView(ModuleListView):
     name = _("All Invoices")
     slug = "all"
     date_resolution = "month"

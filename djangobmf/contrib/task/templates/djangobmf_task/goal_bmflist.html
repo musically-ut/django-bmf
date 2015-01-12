@@ -1,8 +1,4 @@
-{% extends "djangobmf/module_index.html" %}
-
 {% load i18n %}
-
-{% block base_content %}
 {% regroup object_list by project as projects %}
 {% for project in projects %}
 {% if project.grouper %}<h3>{% trans "Project" %}: <a href="{{ project.grouper.bmfmodule_detail }}">{{ project.grouper }}</a></h3>{% endif %}
@@ -56,4 +52,3 @@
   </tbody>
 </table>
 {% endfor %}
-{% endblock %}
