@@ -771,9 +771,10 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
 
     def post(self, request, *args, **kwargs):
         form_class = self.form_view(model=self.model, object=self.get_object()).get_form_class()
+        data = self.request.POST['form'].encode('ASCII')
         form = form_class(
             prefix=self.get_prefix(),
-            data=QueryDict(self.request.POST['form']),
+            data=QueryDict(data),
             instance=self.get_object())
 
         if "search" in self.request.GET:
