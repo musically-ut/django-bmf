@@ -89,6 +89,7 @@ class ModuleListView(
     """
     model = None  # set by workspace.views
     workspace = None  # set by workspace.views
+
     context_object_name = 'objects'
     template_name = None
     allow_empty = True
@@ -121,8 +122,8 @@ class ModuleListView(
 
     def get_data_template(self):
         return "%s/%s_bmflist.html" % (
-                self.model._meta.app_label,
-                self.model._meta.model_name
+            self.model._meta.app_label,
+            self.model._meta.model_name
         )
 
     def get_context_data(self, **kwargs):
@@ -142,37 +143,6 @@ class ModuleListView(
         return self.render_to_response(context)
 
 '''
-class ModuleFilterView(ModuleGenericBaseView, FilterView):
-    """
-    """
-    template_name_suffix = 'filter'
-
-    def get_context_data(self, **kwargs):
-        if self.filterset_class:
-            kwargs.update({
-                'has_filter': True,
-            })
-        else:
-            kwargs.update({
-                'has_filter': False,
-            })
-        return super(ModuleFilterView, self).get_context_data(**kwargs)
-
-
-class ModuleTreeView(ModuleGenericBaseView, FilterView):
-    """
-    This view generates a parginated list and tree navigation
-    """
-    template_name_suffix = 'tree'
-
-
-class ModuleCategoryView(ModuleGenericBaseView, FilterView):
-    """
-    TODO: Some mixin between Tree, List and Letter, probably with multiple categorie-items or workspace-states
-    """
-    template_name_suffix = 'category'
-
-
 class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
                         MultipleObjectTemplateResponseMixin, BaseDateListView):
     """
