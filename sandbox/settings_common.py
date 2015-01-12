@@ -127,11 +127,6 @@ TEST_PROJECT_APPS = (
     'djangobmf.currencies.EUR',
     'djangobmf.currencies.USD',
 )
-if six.PY2:
-    TEST_PROJECT_APPS += (
-        'djangobmf.reports.xhtml2pdf',
-    )
-
 
 INSTALLED_APPS = (
     'django.contrib.auth',

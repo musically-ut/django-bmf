@@ -42,6 +42,7 @@ CONTRIB_TRANSACTIONITEM = get_contrib('BMF_CONTRIB_TRANSACTIONITEM', 'djangobmf_
 
 # TEST CODE below this line ---------------------------------------------------
 
+REPORTING_SERVER = getattr(settings, 'BMF_REPORTING_SERVER', None)
 
 HAYSTACK_DEFAULT_CONNECTION = getattr(settings, 'BMF_HAYSTACK_DEFAULT_CONNECTION', 'default')
 

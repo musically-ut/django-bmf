@@ -14,19 +14,15 @@ from djangobmf.views import ModuleDetailView
 from .forms import QuotationUpdateForm
 from .forms import QuotationCreateForm
 
-from .filters import QuotationFilter
-
 
 class AllQuotationView(ModuleListView):
     name = _("All Quotations")
     slug = "all"
-    filterset_class = QuotationFilter
 
 
 class OpenQuotationView(ModuleListView):
     name = _("Open Quotations")
     slug = "open"
-    filterset_class = QuotationFilter
 
     def get_queryset(self):
         return super(OpenQuotationView, self).get_queryset().filter(completed=False)
@@ -40,7 +36,6 @@ class QuotationCreateView(ModuleCreateView):
             'date': now(),
             'employee': getattr(self.request, 'djangobmf_employee', None),
         })
-#       print(self.initial)
         return super(QuotationCreateView, self).get_initial()
 
 

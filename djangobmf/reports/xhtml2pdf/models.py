@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+'''
+
 from django.template.loader import select_template
 from django.template import Context
 
@@ -102,3 +104,5 @@ pdf_background_pk = None
 
 
 site.register_report('xhtml2pdf', Xhtml2PdfReport)
+
+'''
