@@ -6,13 +6,16 @@
 
 {% block title %}{{ view_name }}{% endblock %}
 
-{% block content_container %} ng-app="phonecatApp" ng-controller="PhoneListCtrl"{% endblock %}
+{% block content_container %} ng-app="bmfApp" ng-controller="bmfListCtrl"{% endblock %}
 
 {% block full_content %}
 
 {% block angular %}{% addtoblock "js" %}<script type="text/javascript"><!--
-    var phonecatApp = angular.module('phonecatApp', []);
-    phonecatApp.controller('PhoneListCtrl', function($scope, $http) {
+    var bmfApp = angular.module('bmfApp', []);
+    bmfApp.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    }]);
+    bmfApp.controller('bmfListCtrl', function($scope, $http) {
             $http.get('{{ get_data_url }}').then(function(artResponse){
                 $scope.data = artResponse.data;
             });

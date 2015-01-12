@@ -90,12 +90,22 @@ class ModuleListView(
     model = None  # set by workspace.views
     workspace = None  # set by workspace.views
 
-    context_object_name = 'objects'
-    template_name = None
-    allow_empty = True
     name = None
     slug = None
+
+    allow_empty = True
     paginate_by = None
+
+    date_field = 'modified'
+    date_resolution = 'year'
+    allow_future = False
+
+    # we are providing the view with the list of objects
+    # even if the data sould be streamed via angular/json
+    # because django querysets are lazy
+    context_object_name = 'objects'
+
+    template_name = None
 
     def get_template_names(self):
         """
@@ -454,10 +464,6 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
 
     # Limit Queryset length and activate pagination
     limit = 100
-
-    # TODO remove me
-    def check_permissions(self):
-        return True
 
     def get_item_data(self, data):
         l = []

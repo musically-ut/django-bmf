@@ -9,21 +9,17 @@ from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleCloneView
 
-from .filters import TaskFilter
-from .filters import GoalFilter
 from .forms import GoalCloneForm
 
 
 class ArchiveGoalView(ModuleListView):
     slug = "archive"
     name = _("Archive")
-    filterset_class = GoalFilter
 
 
 class ActiveGoalView(ModuleListView):
     slug = "active"
     name = _("Active Goals")
-    filterset_class = GoalFilter
 
     def get_queryset(self):  # noqa
         return super(ActiveGoalView, self).get_queryset().filter(completed=False)
@@ -42,13 +38,11 @@ class ArchiveTaskView(ModuleListView):
     slug = "archive"
     name = _("Archive")
     date_resolution = "month"
-    filterset_class = TaskFilter
 
 
 class OpenTaskView(ModuleListView):
     slug = "open"
     name = _("Open Tasks")
-    filterset_class = TaskFilter
 
     def get_queryset(self):  # noqa
         return super(OpenTaskView, self).get_queryset().filter(completed=False)
