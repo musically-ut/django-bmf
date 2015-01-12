@@ -119,9 +119,19 @@ class ModuleListView(
         else:
             return self.model._meta.verbose_name_plural
 
+    def get_data_template(self):
+        return "%s/%s_bmflist.html" % (
+                self.model._meta.app_label,
+                self.model._meta.model_name
+        )
+
     def get_context_data(self, **kwargs):
         kwargs.update({
             'view_name': self.get_view_name(),
+            'data_template': select_template([
+                self.get_data_template(),
+                "djangobmf/module_list.html",
+            ]),
             'get_data_url': reverse('%s:get' % self.model._bmfmeta.namespace_api),
         })
         return super(ModuleListView, self).get_context_data(**kwargs)
