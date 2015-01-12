@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 
-from djangobmf.views import ModuleGenericBaseView
+from djangobmf.views import ModuleListView
 
-class WorkspaceTestView(ModuleGenericBaseView):
+class WorkspaceTestView(ModuleListView):
     slug = "test"
     name = "test"

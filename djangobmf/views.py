@@ -25,13 +25,13 @@ from django.views.generic import UpdateView
 from django.views.generic import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
-from django.views.generic.dates import BaseDateListView
-from django.views.generic.dates import YearMixin
-from django.views.generic.dates import MonthMixin
-from django.views.generic.dates import WeekMixin
-from django.views.generic.dates import DayMixin
-from django.views.generic.dates import _date_from_string
-from django.views.generic.dates import _get_next_prev
+# from django.views.generic.dates import BaseDateListView
+# from django.views.generic.dates import YearMixin
+# from django.views.generic.dates import MonthMixin
+# from django.views.generic.dates import WeekMixin
+# from django.views.generic.dates import DayMixin
+# from django.views.generic.dates import _date_from_string
+# from django.views.generic.dates import _get_next_prev
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
 from django.views.generic.list import MultipleObjectTemplateResponseMixin
@@ -39,8 +39,8 @@ from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils.encoding import force_text
-from django.utils.formats import get_format
-from django.utils.timezone import now
+# from django.utils.formats import get_format
+# from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -66,7 +66,7 @@ from djangobmf.viewmixins import NextMixin
 from djangobmf.viewmixins import ViewMixin
 
 import copy
-import datetime
+# import datetime
 import logging
 import operator
 import re
@@ -74,7 +74,7 @@ import types
 # import warnings
 
 from functools import reduce
-from django_filters.views import FilterView
+# from django_filters.views import FilterView
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +82,14 @@ logger = logging.getLogger(__name__)
 # --- list views --------------------------------------------------------------
 
 
-class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
+class ModuleListView(
+        ModuleViewPermissionMixin, ModuleViewMixin,
+        MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
     """
     """
     model = None  # set by workspace.views
     workspace = None  # set by workspace.views
     context_object_name = 'objects'
-    template_name_suffix = None
     template_name = None
     allow_empty = True
     name = None
@@ -112,13 +113,6 @@ class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
 
         return names
 
-
-class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
-    """
-    This view generates a simple parginated list
-    """
-    template_name_suffix = 'list'
-
     def get_view_name(self):
         if self.name:
             return self.name
@@ -137,7 +131,7 @@ class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin,
         context = self.get_context_data(object_list=self.object_list)
         return self.render_to_response(context)
 
-
+'''
 class ModuleFilterView(ModuleGenericBaseView, FilterView):
     """
     """
@@ -271,7 +265,7 @@ class ModuleLetterView(ModuleGenericBaseView, FilterView):
     navigation
     """
     template_name_suffix = 'letter'
-
+'''
 
 # --- detail, forms and api ---------------------------------------------------
 

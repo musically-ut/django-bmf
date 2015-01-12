@@ -5,12 +5,9 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
-# from djangobmf.views import ModuleTreeView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-# from djangobmf.views import ModuleDetailView
 
 # from .models import Account
 
@@ -23,13 +20,13 @@ class AccountIndexView(ModuleListView):
     slug = "accounts"
 
 
-class AllTransactionView(ModuleArchiveView):
+class AllTransactionView(ModuleListView):
     name = _("All Transactions")
     slug = "transactions"
     date_resolution = "month"
 
 
-class ClosedTransactionView(ModuleArchiveView):
+class ClosedTransactionView(ModuleListView):
     name = _("Closed Transactions")
     slug = "closed"
     date_resolution = "week"
