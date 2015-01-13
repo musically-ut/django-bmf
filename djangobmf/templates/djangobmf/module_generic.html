@@ -61,23 +61,27 @@
 {% block content %}{% include data_template %}{% endblock %}
 
 {% block pagination %}
-<nav>
+<nav ng-if="data.pagination.enabled" class="text-center">
     <ul class="pagination">
-        <li class="disabled">
-            <a href="#" aria-label="Previous">
+
+        <li ng-if="data.pagination.previous">
+            <a href="#" aria-label="{% trans "Previous" %}">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
-        <li class="disabled"><a href="#">1</a></li>
-        <li class="disabled"><a href="#">2</a></li>
-        <li class="disabled"><a href="#">3</a></li>
-        <li class="disabled"><a href="#">4</a></li>
-        <li class="disabled"><a href="#">5</a></li>
-        <li class="disabled">
-            <a href="#" aria-label="Next">
+
+        {% verbatim %}
+        <li ng-repeat="page in data.pagination.pages" ng-class="{active: page==data.pagination.page}" class="pagination">
+            <a href="?page={{ page }}">{{ page }}</a>
+        </li>
+        {% endverbatim %}
+
+        <li ng-if="data.pagination.next">
+            <a href="#" aria-label="{% trans "Next" %}">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
+
     </ul>
 </nav>
 {% endblock %}

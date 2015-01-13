@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
@@ -38,6 +39,7 @@ from django.views.generic.list import MultipleObjectTemplateResponseMixin
 from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
+from django.utils import six
 from django.utils.encoding import force_text
 # from django.utils.formats import get_format
 # from django.utils.timezone import now
@@ -71,6 +73,7 @@ import logging
 import operator
 import re
 import types
+import urllib
 # import warnings
 
 from functools import reduce
@@ -99,6 +102,12 @@ class ModuleListView(
     date_field = 'modified'
     date_resolution = 'year'
     allow_future = False
+
+    # Use a different manager function, when available
+    manager = None
+
+    # use pagination
+    paginate = True
 
     # we are providing the view with the list of objects
     # even if the data sould be streamed via angular/json
@@ -130,6 +139,32 @@ class ModuleListView(
         else:
             return self.model._meta.verbose_name_plural
 
+    def get_data_url(self):
+        url = reverse('%s:get' % self.model._bmfmeta.namespace_api)
+        args = {}
+
+        page = self.request.GET.get('page')
+
+        if page:
+            try:
+                args['page'] = int(page)
+            except ValueError:
+                pass
+
+        if self.manager:
+            args['manager'] = self.manager
+
+        if not self.paginate:
+            args['paginate'] = 'no'
+
+        if args:
+            if six.PY2:
+                return url + '?' + urllib.urlencode(args)
+            else:
+                return url + '?' + urllib.parse.urlencode(args)
+        else:
+            return url
+
     def get_data_template(self):
         return "%s/%s_bmflist.html" % (
             self.model._meta.app_label,
@@ -143,7 +178,7 @@ class ModuleListView(
                 self.get_data_template(),
                 "djangobmf/module_list.html",
             ]),
-            'get_data_url': reverse('%s:get' % self.model._bmfmeta.namespace_api),
+            'get_data_url': self.get_data_url(),
         })
         return super(ModuleListView, self).get_context_data(**kwargs)
 
@@ -466,6 +501,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
     limit = 100
 
     def get_item_data(self, data):
+        # TODO write a more generic function, which provides basic data
         l = []
         for d in data:
             l.append({
@@ -474,6 +510,25 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
                 'url': d.bmfmodule_detail()
             })
         return l
+
+    def get_queryset(self, manager=None):
+        """
+        Return the list of items for this view.
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.model and manager and hasattr(self.model._default_manager, manager):
+            qs = getattr(self.model._default_manager, manager)(self.request)
+        elif self.model is not None:
+            qs = self.model._default_manager.all()
+        else:
+            raise ImproperlyConfigured(
+                "%(cls)s is missing a QuerySet. Define "
+                "%(cls)s.model " % {
+                    'cls': self.__class__.__name__
+                }
+            )
+
+        return qs
 
     def get(self, request):
         pk = int(self.request.GET.get('pk', 0))
@@ -484,7 +539,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         search = self.request.GET.get('search', None)
         page = self.request.GET.get('page', 1)
 
-        queryset = self.get_queryset()
+        queryset = self.get_queryset(self.request.GET.get('manager', None))
 
         # search
         if search:
@@ -496,11 +551,12 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
             else:
                 queryset = []
 
-        # pagination
         if pagination and self.limit:
+            # pagination
             paginator = Paginator(queryset, self.limit)
             count = paginator.count
             num_pages = paginator.num_pages
+            pages = paginator.page_range  # TODO move me to angular
 
             try:
                 qs_data = paginator.page(self.request.GET.get('page', 1))
@@ -512,18 +568,25 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
             page = qs_data.number
 
         else:
+            # no pagination
             count = queryset.count()
             num_pages = 1
             qs_data = queryset
             page = 1
+            pages = [1]  # TODO: move me to angular
 
         return self.render_to_json_response({
             'model': str(self.model),
             'count': count,
             'pk': pk,
-            'pagination': pagination,
-            'page': page,
-            'num_pages': num_pages,
+            'pagination': {
+                'enabled': pagination,
+                'page': page,
+                'pages': pages,  # TODO: move me to angular
+                'num_pages': num_pages,
+                'next': None,  # TODO: unused
+                'previous': None,  # TODO: unused
+            },
             'search': search,
             'items': self.get_item_data(qs_data),
         })

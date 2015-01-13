@@ -26,7 +26,20 @@ from math import floor
 class GoalManager(models.Manager):
 
     def get_queryset(self):
-        return super(GoalManager, self).get_queryset().select_related('project')
+        return super(GoalManager, self) \
+            .get_queryset() \
+            .select_related('project')
+
+    def active(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+        )
+
+    def mygoals(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+            referee=getattr(request.user, 'djangobmf_employee', -1),
+        )
 
 
 @python_2_unicode_compatible
@@ -156,13 +169,36 @@ class TaskManager(models.Manager):
 
     def get_queryset(self):
 
-        related = ['goal']
-        related.append('project')
+        related = ['goal', 'project']
 
         return super(TaskManager, self).get_queryset() \
             .annotate(due_count=models.Count('due_date')) \
             .order_by('-due_count', 'due_date', 'summary') \
             .select_related(*related)
+
+    def active(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+        )
+
+    def availalbe(self, request):
+        return self.get_queryset().filter(
+            employee=None,
+            completed=False,
+        )
+
+    def mytasks(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+            employee=getattr(request.user, 'djangobmf_employee', -1),
+        )
+
+    def todo(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+            state__in=["todo", "started", "review"],
+            employee=getattr(request.user, 'djangobmf_employee', -1),
+        )
 
 
 @python_2_unicode_compatible

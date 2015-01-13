@@ -27,6 +27,7 @@ class ProjectGetView(ModuleGetView):
 class ActiveProjectView(ModuleListView):
     slug = "active"
     name = _("Active Projects")
+    manager = "active"
 
     def get_queryset(self):
         return super(ActiveProjectView, self).get_queryset().filter(is_active=True)
