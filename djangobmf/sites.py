@@ -422,14 +422,13 @@ class DjangoBMFSite(object):
 
                     view_kwargs = {
                         'model': model,
-                        'name': viewdata.name,
+                        'name': viewdata['name'],
                         'manager': viewdata.get('manager', None),
                         'template_name': viewdata.get('template_name', None),
                     }
 
                     self.workspace[dashboard.slug][category.slug][key] = {
-                        'name': viewdata.name,
-                        'slug': viewdata.slug,
+                        'name': viewdata['name'],
                         'kwargs': view_kwargs,
                     }
 
