@@ -71,7 +71,7 @@
         </li>
 
         {% verbatim %}
-        <li ng-repeat="page in data.pagination.pages" ng-class="{active: page==data.pagination.page}" class="pagination">
+        <li ng-repeat="page in data.pagination.pages" ng-class="{active: page==data.pagination.page, disabled: data.pagination.num_pages==1}" class="pagination">
             <a href="?page={{ page }}">{{ page }}</a>
         </li>
         {% endverbatim %}
