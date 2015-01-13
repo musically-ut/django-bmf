@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
+# from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage
@@ -90,11 +90,12 @@ class ModuleListView(
         MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
     """
     """
-    model = None  # set by workspace.views
-    workspace = None  # set by workspace.views
+    model = None  # set by workspace.views # TODO remove me
+    workspace = None  # set by workspace.views # TODO remove me
+    slug = None  # TODO: remove me
 
+    model = None  # set by sites
     name = None
-    slug = None
 
     allow_empty = True
     paginate_by = None
@@ -406,6 +407,7 @@ class ModuleDetailView(
         open = self.request.GET.get("open", None)
         self._related_views = {}
         for rel in self.model._meta.get_all_related_objects():
+            # TODO add rel.field.name to reponse
             template = '%s/%s_bmfrelated_%s.html' % (
                 rel.model._meta.app_label,
                 rel.model._meta.model_name,
@@ -427,6 +429,7 @@ class ModuleDetailView(
 
     def get_context_data(self, **kwargs):
         kwargs.update({
+            'open_view': self.request.GET.get("open", None),
             'related_views': self.get_related_views(),
             'parent_template': select_template(self.get_template_names(related=False)),
             'related_objects': self.get_related_objects(),  # TODO add pagination
@@ -511,25 +514,6 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
             })
         return l
 
-    def get_queryset(self, manager=None):
-        """
-        Return the list of items for this view.
-        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
-        """
-        if self.model and manager and hasattr(self.model._default_manager, manager):
-            qs = getattr(self.model._default_manager, manager)(self.request)
-        elif self.model is not None:
-            qs = self.model._default_manager.all()
-        else:
-            raise ImproperlyConfigured(
-                "%(cls)s is missing a QuerySet. Define "
-                "%(cls)s.model " % {
-                    'cls': self.__class__.__name__
-                }
-            )
-
-        return qs
-
     def get(self, request):
         pk = int(self.request.GET.get('pk', 0))
 
@@ -540,6 +524,19 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         page = self.request.GET.get('page', 1)
 
         queryset = self.get_queryset(self.request.GET.get('manager', None))
+
+        # select only models connected to a related model
+        # defined by the models contenttype and pk
+        # the contentype pk and the objects id
+        # and the related fields name
+        related_field = self.request.GET.get('rel', None)
+        # related_ct = self.request.GET.get('relct', 0)
+        related_pk = self.request.GET.get('relpk', 0)
+        # related_model = None
+
+        if related_field and related_pk:
+            if hasattr(self.model, related_field):
+                queryset = queryset.filter(**{related_field: related_pk})
 
         # search
         if search:

@@ -46,5 +46,6 @@ urlpatterns = patterns(
     url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),
     url(r'^notifications/', include('djangobmf.notification.urls')),
     url(r'^wizard/', include('djangobmf.wizard.urls')),
+    #   r'^workspace/' also via sites
     url(r'^workspace/', include('djangobmf.workspace.urls')),
 )

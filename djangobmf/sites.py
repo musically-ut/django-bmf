@@ -10,6 +10,7 @@ from django.conf.urls import patterns, url, include
 from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.admin.sites import NotRegistered
 from django.contrib.contenttypes.models import ContentType
+# from django.core.exceptions import AppRegistryNotReady
 from django.core.exceptions import ImproperlyConfigured
 from django.db.utils import OperationalError
 from django.db.utils import ProgrammingError
@@ -30,6 +31,8 @@ from .views import ModuleListView
 from .views import ModuleReportView
 from .views import ModuleUpdateView
 from .views import ModuleWorkflowView
+
+from collections import OrderedDict
 
 import copy
 import sys
@@ -280,6 +283,9 @@ class DjangoBMFSite(object):
         # all reports should be stored here
         self.reports = {}
 
+        # all workspaces are stored here
+        self.workspace = OrderedDict()
+
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
         self.settings_valid = False
@@ -391,6 +397,42 @@ class DjangoBMFSite(object):
 
     # --- workspace -----------------------------------------------------------
 
+    def register_workspace_views(self, app_config):
+        # try:
+        #     app_config.check_models_ready()
+        # except AppRegistryNotReady:
+        #     return False
+
+        if not hasattr(app_config, 'bmf_views'):
+            return False
+
+        for dashboard in app_config.bmf_views:
+            # create dictionary
+            if dashboard.slug not in self.workspace:
+                self.workspace[dashboard.slug] = OrderedDict()
+
+            for category in dashboard.data:
+                # create dictionary
+                if category.slug not in self.workspace[dashboard.slug]:
+                    self.workspace[dashboard.slug][category.slug] = OrderedDict()
+
+                for key, viewdata in category.data.items():
+                    # TODO add validation
+                    model = app_config.get_model(viewdata['model'])
+
+                    view_kwargs = {
+                        'model': model,
+                        'name': viewdata.name,
+                        'manager': viewdata.get('manager', None),
+                        'template_name': viewdata.get('template_name', None),
+                    }
+
+                    self.workspace[dashboard.slug][category.slug][key] = {
+                        'name': viewdata.name,
+                        'slug': viewdata.slug,
+                        'kwargs': view_kwargs,
+                    }
+
     def register_dashboard(self, dashboard):
 
         obj = dashboard()
@@ -478,10 +520,6 @@ class DjangoBMFSite(object):
     # --- misc methods --------------------------------------------------------
 
     @property
-    def is_ready(self):
-        return apps.get_app_config(APP_LABEL).is_ready
-
-    @property
     def urls(self):
         return self.get_urls(), self.app_name, self.name
 
@@ -553,14 +591,17 @@ class DjangoBMFSite(object):
 
 def autodiscover():
     for app_config in apps.get_app_configs():
+        before_import_m = copy.copy(site.modules)
+        before_import_c = copy.copy(site.currencies)
+        before_import_s = copy.copy(site.settings)
+        before_import_p = copy.copy(site.reports)
+        before_import_w = copy.copy(site.workspace)
+
         try:
             # get a copy of old site configuration
-            before_import_m = copy.copy(site.modules)
-            before_import_c = copy.copy(site.currencies)
-            before_import_s = copy.copy(site.settings)
-            before_import_p = copy.copy(site.reports)
             import_module('%s.%s' % (app_config.name, "bmf_module"))
             logger.debug('bmf_module from %s loaded' % app_config.name)
+            site.register_workspace_views(app_config)
         except:
             # Reset the model registry to the state before the last import
             # skiping this may result in an AlreadyRegistered Error
@@ -568,6 +609,7 @@ def autodiscover():
             site.currencies = before_import_c
             site.settings = before_import_s
             site.reports = before_import_p
+            site.workspace = before_import_w
 
             # Decide whether to bubble up this error
             if module_has_submodule(app_config.module, "bmf_module"):
