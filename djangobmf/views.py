@@ -47,11 +47,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
 from djangobmf.document.forms import UploadDocument
-from djangobmf.document.models import Document
+from djangobmf.models import Document
 from djangobmf.models import Report
 from djangobmf.notification.forms import HistoryCommentForm
-from djangobmf.notification.models import Activity
-from djangobmf.notification.models import Notification
+from djangobmf.models import Activity
+from djangobmf.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 # from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
@@ -66,6 +66,7 @@ from djangobmf.viewmixins import ModuleBaseMixin
 from djangobmf.viewmixins import ModuleViewMixin
 from djangobmf.viewmixins import NextMixin
 from djangobmf.viewmixins import ViewMixin
+# from djangobmf.sites import get_site
 
 import copy
 # import datetime
@@ -888,20 +889,19 @@ class ModuleOverviewView(ViewMixin, TemplateView):
     template_name = "djangobmf/modules.html"
 
     def get_context_data(self, **kwargs):
-        from .sites import site
 
-        modules = []
-        for ct, model in site.models.items():
-            info = model._meta.app_label, model._meta.model_name
-            perm = '%s.view_%s' % info
-            if self.request.user.has_perms([perm, ]):
-                key = force_text(model._bmfmeta.category)
-                modules.append({
-                    'category': key,
-                    'model': model,
-                    'url': reverse('%s:list' % model._bmfmeta.namespace_api),
-                    'name': model._meta.verbose_name_plural,
-                })
+#       modules = []
+#       for ct, model in get_site().models.items():
+#           info = model._meta.app_label, model._meta.model_name
+#           perm = '%s.view_%s' % info
+#           if self.request.user.has_perms([perm, ]):
+#               key = force_text(model._bmfmeta.category)
+#               modules.append({
+#                   'category': key,
+#                   'model': model,
+#                   'url': reverse('%s:list' % model._bmfmeta.namespace_api),
+#                   'name': model._meta.verbose_name_plural,
+#               })
 
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)
         context['modules'] = modules

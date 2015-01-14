@@ -23,6 +23,8 @@ from django.utils.text import slugify
 
 from djangobmf.categories import BaseDashboard
 from djangobmf.categories import BaseCategory
+from djangobmf.core.module import Module
+from djangobmf.core.setting import Setting
 from djangobmf.models import Configuration
 from djangobmf.settings import APP_LABEL
 from djangobmf.urls import urlpatterns
@@ -57,131 +59,123 @@ class Site(object):
     def __init__(self, namespace=None, app_name=None):
         self.namespace = namespace or "djangobmf"
         self.app_name = app_name or "djangobmf"
-#       self.clear()
+        self.clear()
 
-#   def clear(self):
-#       # combine all registered modules here
-#       self.modules = {}
+    def register(self, *args, **kwargs):
+        pass
 
-#       # all currencies should be stored here
-#       self.currencies = {}
+    def clear(self):
+        # combine all registered modules here
+        self.modules = {}
 
-#       # all reports should be stored here
-#       self.reports = {}
+        # all currencies should be stored here
+        self.currencies = {}
 
-#       # all workspaces are stored here
-#       self.workspace = OrderedDict()
+        # all reports should be stored here
+        self.reports = {}
 
-#       # if a module requires a custom setting, it can be stored here
-#       self.settings = {}
-#       self.settings_valid = False
-#       self.register_settings(APP_LABEL, {
-#           'company_name': forms.CharField(max_length=100, required=True,),
-#           'company_email': forms.EmailField(required=True,),
-#           'currency': forms.CharField(max_length=10, required=True,),  # TODO add validation / use dropdown
-#       })
+        # all workspaces are stored here
+        self.workspace = OrderedDict()
+
+        # if a module requires a custom setting, it can be stored here
+        self.settings = {}
+        self.settings_valid = False
+        self.register_settings(APP_LABEL, {
+            'company_name': forms.CharField(max_length=100, required=True,),
+            'company_email': forms.EmailField(required=True,),
+            'currency': forms.CharField(max_length=10, required=True,),  # TODO add validation / use dropdown
+        })
 
 #   # --- modules -------------------------------------------------------------
 
-#   def register_module(self, module, **options):
-#       if not hasattr(module, '_bmfmeta'):
-#           raise ImproperlyConfigured(
-#               'The module %s needs to be an BMF-Model in order to be'
-#               'registered with django BMF.' % module.__name__
-#           )
-#       if module in self.modules:
-#           raise AlreadyRegistered('The module %s is already registered' % module.__name__)
-#       self.modules[module] = DjangoBMFModule(module, **options)
-#       logger.debug('registered module %s' % module.__name__)
+    def register_module(self, module, **options):
+        if not hasattr(module, '_bmfmeta'):
+            raise ImproperlyConfigured(
+                'The module %s needs to be an BMF-Model in order to be'
+                'registered with django BMF.' % module.__name__
+            )
+        if module in self.modules:
+            raise AlreadyRegistered('The module %s is already registered' % module.__name__)
+        self.modules[module] = Module(module, **options)
 
-#   def unregister_module(self, module):
-#       if module not in self.modules:
-#           raise NotRegistered('The model %s is not registered' % module.__name__)
-#       del self.modules[module]
-#       logger.debug('deleted module %s' % module.__name__)
+    def unregister_module(self, module):
+        if module not in self.modules:
+            raise NotRegistered('The model %s is not registered' % module.__name__)
+        del self.modules[module]
 
-#   # --- models --------------------------------------------------------------
+    # --- currencies ----------------------------------------------------------
 
-#   # TODO REMOVE ME
-#   def register(self, module, **options):
-#       self.register_module(module, **options)
+    def register_currency(self, currency):
+        if currency.iso in self.currencies:
+            raise AlreadyRegistered('The currency %s is already registered' % currency.__name__)
+        self.currencies[currency.iso] = currency
 
-#   # TODO REMOVE ME
-#   def unregister(self, module):
-#       self.unregister_model(module)
+    def unregister_currency(self, currency):
+        if currency.iso not in self.currencies:
+            raise NotRegistered('The currency %s is not registered' % currency.__name__)
+        del self.currencies[currency.iso]
 
-#   # --- currencies ----------------------------------------------------------
+    # --- reports -------------------------------------------------------------
 
-#   def register_currency(self, currency):
-#       if currency.iso in self.currencies:
-#           raise AlreadyRegistered('The currency %s is already registered' % currency.__name__)
-#       self.currencies[currency.iso] = currency
+    def register_report(self, name, cls):
+        if name in self.reports:
+            raise AlreadyRegistered('The report %s is already registered' % name)
+        self.reports[name] = cls
 
-#   def unregister_currency(self, currency):
-#       if currency.iso not in self.currencies:
-#           raise NotRegistered('The currency %s is not registered' % currency.__name__)
-#       del self.currencies[currency.iso]
+    def unregister_report(self, name):
+        if name not in self.reports:
+            raise NotRegistered('The currency %s is not registered' % name)
+        del self.reports[name]
 
-#   # --- reports -------------------------------------------------------------
+    # --- settings ------------------------------------------------------------
 
-#   def register_report(self, name, cls):
-#       if name in self.reports:
-#           raise AlreadyRegistered('The report %s is already registered' % name)
-#       self.reports[name] = cls
+    # TODO move settings to cache backend!
+    def register_settings(self, app_label, settings_dict):
+        pass
+        for setting_name, options in settings_dict.items():
+            self.register_setting(app_label, setting_name, options)
 
-#   def unregister_report(self, name):
-#       if name not in self.reports:
-#           raise NotRegistered('The currency %s is not registered' % name)
-#       del self.reports[name]
+    # TODO move settings to cache backend!
+    def register_setting(self, app_label, setting_name, options):
+        name = SETTING_KEY % (app_label, setting_name)
+        if name in self.settings:
+            raise AlreadyRegistered('The setting %s is already registered' % name)
+        self.settings[name] = Setting(app_label, setting_name, options)
 
-#   # --- settings ------------------------------------------------------------
+    # TODO move settings to cache backend!
+    def unregister_setting(self, app_label, setting_name):
+        name = SETTING_KEY % (app_label, setting_name)
+        if name not in self.settings:
+            raise NotRegistered('The setting %s is not registered' % name)
+        del self.settings[name]
 
-#   # TODO move settings to cache backend!
-#   def register_settings(self, app_label, settings_dict):
-#       for setting_name, options in settings_dict.items():
-#           self.register_setting(app_label, setting_name, options)
+    # TODO move settings to cache backend!
+    def check_settings(self):
+        self.settings_valid = False
+        for key, setting in self.settings:
+            if not setting.value and setting.field.required:
+                self.settings_valid = False
+                return False
+        return True
 
-#   # TODO move settings to cache backend!
-#   def register_setting(self, app_label, setting_name, options):
-#       name = SETTING_KEY % (app_label, setting_name)
-#       if name in self.settings:
-#           raise AlreadyRegistered('The setting %s is already registered' % name)
-#       self.settings[name] = DjangoBMFSetting(app_label, setting_name, options)
+    # TODO move settings to cache backend!
+    def get_lazy_setting(self, app_label, setting_name):
+        """
+        will allways return None, if the django apps are not ready
+        """
+        if apps.ready:
+            return self.get_setting(app_label, setting_name)
+        return None
 
-#   # TODO move settings to cache backend!
-#   def unregister_setting(self, app_label, setting_name):
-#       name = SETTING_KEY % (app_label, setting_name)
-#       if name not in self.settings:
-#           raise NotRegistered('The setting %s is not registered' % name)
-#       del self.settings[name]
+    # TODO move settings to cache backend!
+    def get_setting(self, app_label, setting_name):
+        name = SETTING_KEY % (app_label, setting_name)
+        try:
+            return self.settings[name].value
+        except KeyError:
+            raise NotRegistered('The setting %s is not registered' % name)
 
-#   # TODO move settings to cache backend!
-#   def check_settings(self):
-#       self.settings_valid = False
-#       for key, setting in self.settings:
-#           if not setting.value and setting.field.required:
-#               self.settings_valid = False
-#               return False
-#       return True
-
-#   # TODO move settings to cache backend!
-#   def get_lazy_setting(self, app_label, setting_name):
-#       """
-#       will allways return None, if the django apps are not ready
-#       """
-#       if apps.ready:
-#           return self.get_setting(app_label, setting_name)
-#       return None
-
-#   # TODO move settings to cache backend!
-#   def get_setting(self, app_label, setting_name):
-#       name = SETTING_KEY % (app_label, setting_name)
-#       try:
-#           return self.settings[name].value
-#       except KeyError:
-#           raise NotRegistered('The setting %s is not registered' % name)
-
-#   # --- workspace -----------------------------------------------------------
+    # --- workspace -----------------------------------------------------------
 
 #   def register_workspace_views(self, app_config):
 #       # try:
@@ -243,206 +237,149 @@ class Site(object):
 #   #                 )
 #   #     return urlpatterns
 
-#   def register_dashboard(self, dashboard):
+    def register_dashboard(self, dashboard):
 
-#       if isinstance(dashboard, BaseDashboard):
-#           obj = dashboard
-#       else:
-#           obj = dashboard()
+        if isinstance(dashboard, BaseDashboard):
+            obj = dashboard
+        else:
+            obj = dashboard()
 
-#       label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-#       workspace = apps.get_model(APP_LABEL, "Workspace")
+        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
+        workspace = apps.get_model(APP_LABEL, "Workspace")
 
-#       try:
-#           ws, created = workspace.objects.get_or_create(module=label, level=0)
-#       except (OperationalError, ProgrammingError):
-#           logger.debug('Database not ready, skipping registration of Dashboard %s' % label)
-#           return False
+        try:
+            ws, created = workspace.objects.get_or_create(module=label, level=0)
+        except (OperationalError, ProgrammingError):
+            logger.debug('Database not ready, skipping registration of Dashboard %s' % label)
+            return False
 
-#       if created or ws.slug != obj.slug or ws.url != obj.slug:
-#           ws.slug = obj.slug
-#           ws.url = obj.slug
-#           ws.editable = False
-#           ws.save()
-#           logger.debug('Dashboard %s registered' % label)
+        if created or ws.slug != obj.slug or ws.url != obj.slug:
+            ws.slug = obj.slug
+            ws.url = obj.slug
+            ws.editable = False
+            ws.save()
+            logger.debug('Dashboard %s registered' % label)
 
-#       return True
+        return True
 
-#   def register_category(self, dashboard, category):
+    def register_category(self, dashboard, category):
 
-#       if isinstance(dashboard, BaseDashboard):
-#           parent = dashboard
-#       else:
-#           parent = dashboard()
+        if isinstance(dashboard, BaseDashboard):
+            parent = dashboard
+        else:
+            parent = dashboard()
 
-#       if isinstance(category, BaseCategory):
-#           obj = category
-#       else:
-#           obj = category()
+        if isinstance(category, BaseCategory):
+            obj = category
+        else:
+            obj = category()
 
-#       label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-#       parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
-#       workspace = apps.get_model(APP_LABEL, "Workspace")
+        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
+        parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
+        workspace = apps.get_model(APP_LABEL, "Workspace")
 
-#       try:
-#           parent_workspace = workspace.objects.get(module=parent_label)
-#       except (OperationalError, ProgrammingError):
-#           logger.debug('Database not ready, skipping registration of Category %s' % label)
-#           return False
-#       except workspace.DoesNotExist:
-#           logger.error('%s does not exist - skipping registration of Category %s' % (parent_label, label))
-#           return False
+        try:
+            parent_workspace = workspace.objects.get(module=parent_label)
+        except (OperationalError, ProgrammingError):
+            logger.debug('Database not ready, skipping registration of Category %s' % label)
+            return False
+        except workspace.DoesNotExist:
+            logger.error('%s does not exist - skipping registration of Category %s' % (parent_label, label))
+            return False
 
-#       ws, created = workspace.objects \
-#           .select_related('parent') \
-#           .get_or_create(module=label, parent=parent_workspace)
+        ws, created = workspace.objects \
+            .select_related('parent') \
+            .get_or_create(module=label, parent=parent_workspace)
 
-#       if created or ws.slug != obj.slug or ws.url != ws.get_url():
-#           ws.slug = obj.slug
-#           ws.editable = False
-#           ws.update_url()
-#           ws.save()
-#           logger.debug('Category %s registered' % label)
+        if created or ws.slug != obj.slug or ws.url != ws.get_url():
+            ws.slug = obj.slug
+            ws.editable = False
+            ws.update_url()
+            ws.save()
+            logger.debug('Category %s registered' % label)
 
-#       return True
+        return True
 
-#   def register_view(self, model, category, view, **kwargs):
+    def register_view(self, model, category, view, **kwargs):
 
-#       parent = category()
-#       obj = view()
-#       label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-#       parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
-#       workspace = apps.get_model(APP_LABEL, "Workspace")
+        parent = category()
+        obj = view()
+        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
+        parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
+        workspace = apps.get_model(APP_LABEL, "Workspace")
 
-#       try:
-#           parent_workspace = workspace.objects.get(module=parent_label)
-#       except (OperationalError, ProgrammingError):
-#           logger.debug('Database not ready, skipping registration of View %s' % label)
-#           return False
-#       except workspace.DoesNotExist:
-#           logger.error('%s does not exist - skipping registration of View %s' % (parent_label, label))
-#           return False
+        try:
+            parent_workspace = workspace.objects.get(module=parent_label)
+        except (OperationalError, ProgrammingError):
+            logger.debug('Database not ready, skipping registration of View %s' % label)
+            return False
+        except workspace.DoesNotExist:
+            logger.error('%s does not exist - skipping registration of View %s' % (parent_label, label))
+            return False
 
-#       ct = ContentType.objects.get_for_model(model)
+        ct = ContentType.objects.get_for_model(model)
 
-#       ws, created = workspace.objects \
-#           .select_related('parent') \
-#           .get_or_create(module=label, parent=parent_workspace)
+        ws, created = workspace.objects \
+            .select_related('parent') \
+            .get_or_create(module=label, parent=parent_workspace)
 
-#       if created or ws.slug != obj.slug or ws.url != ws.get_url() or ws.ct != ct:
-#           ws.ct = ct
-#           ws.slug = obj.slug
-#           ws.editable = False
-#           ws.update_url()
-#           ws.save()
-#           logger.debug('View %s registered' % label)
+        if created or ws.slug != obj.slug or ws.url != ws.get_url() or ws.ct != ct:
+            ws.ct = ct
+            ws.slug = obj.slug
+            ws.editable = False
+            ws.update_url()
+            ws.save()
+            logger.debug('View %s registered' % label)
 
-#       return True
+        return True
 
-#   # --- misc methods --------------------------------------------------------
+    # --- misc methods --------------------------------------------------------
 
     @property
     def urls(self):
         return self.get_urls(), self.app_name, self.namespace
 
-#   @property
-#   def models(self):
-#       models = {}
-#       for model in self.modules.keys():
-#           ct = ContentType.objects.get_for_model(model)
-#           models[ct.pk] = model
-#       return models
-
-#   def check_dependencies(self):
-#       """
-#       Check that all things needed to run the admin have been correctly installed.
-
-#       The default implementation checks that admin and contenttypes apps are
-#       installed, as well as the auth context processor.
-#       """
-#       # TODO: Check out django's system checks framework and redo checks
-#       # https://docs.djangoproject.com/en/1.7/topics/checks/
-#       if not apps.is_installed('django.contrib.admin'):
-#           raise ImproperlyConfigured(
-#               "Put 'django.contrib.admin' in "
-#               "your INSTALLED_APPS setting in order to use the bmf."
-#           )
-#       if not apps.is_installed('django.contrib.contenttypes'):
-#           raise ImproperlyConfigured(
-#               "Put 'django.contrib.contenttypes' in "
-#               "your INSTALLED_APPS setting in order to use the bmf."
-#           )
-#       if 'django.contrib.auth.context_processors.auth' not in settings.TEMPLATE_CONTEXT_PROCESSORS:
-#           raise ImproperlyConfigured(
-#               "Put 'django.contrib.auth.context_processors.auth' "
-#               "in your TEMPLATE_CONTEXT_PROCESSORS setting in order to use the bmf."
-#           )
+    @property
+    def models(self):
+        models = {}
+        for model in self.modules.keys():
+            ct = ContentType.objects.get_for_model(model)
+            models[ct.pk] = model
+        return models
 
     def get_urls(self):
+        from djangobmf.urls import urlpatterns
 
-#       if not apps.ready or "migrate" in sys.argv:
-#           return urlpatterns
+        for module, data in self.modules.items():
+            info = (module._meta.app_label, module._meta.model_name)
+            ct = ContentType.objects.get_for_model(module)
 
-#       if settings.DEBUG:
-#           self.check_dependencies()
+            # set the apis
+            urlpatterns += patterns(
+                '',
+                url(
+                    r'^api/module/%s/' % ct.pk,
+                    include((data.get_api_urls(), self.app_name, "moduleapi_%s_%s" % info))
+                ),
+            )
 
-#       for module, data in self.modules.items():
-#           info = (module._meta.app_label, module._meta.model_name)
-#           ct = ContentType.objects.get_for_model(module)
+            # Skip detail view if the model is marked as a only related model
+            if not module._bmfmeta.only_related:
+                urlpatterns += patterns(
+                    '',
+                    url(
+                        r'^detail/%s/%s/(?P<pk>[0-9]+)/' % (info[1], info[0]),
+                        include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
+                    ),
+                )
 
-#           # set the apis
-#           urlpatterns += patterns(
-#               '',
-#               url(
-#                   r'^api/module/%s/' % ct.pk,
-#                   include((data.get_api_urls(), self.app_name, "moduleapi_%s_%s" % info))
-#               ),
-#           )
-
-#           # Skip detail view if the model is marked as a only related model
-#           if not module._bmfmeta.only_related:
-#               urlpatterns += patterns(
-#                   '',
-#                   url(
-#                       r'^detail/%s/%s/(?P<pk>[0-9]+)/' % (info[1], info[0]),
-#                       include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
-#                   ),
-#               )
-
-##      # build workspaces
-##      urlpatterns += patterns(
-##          '',
-##          url(
-##              r'^workspace',
-##              include((self.get_workspace_urls(), self.app_name, "workspace"))
-##          ),
-##      )
+#       # build workspaces
+#       urlpatterns += patterns(
+#           '',
+#           url(
+#               r'^workspace',
+#               include((self.get_workspace_urls(), self.app_name, "workspace"))
+#           ),
+#       )
 
         return urlpatterns
-
-
-#def autodiscover():
-#   for app_config in apps.get_app_configs():
-#       before_import_m = copy.copy(site.modules)
-#       before_import_c = copy.copy(site.currencies)
-#       before_import_s = copy.copy(site.settings)
-#       before_import_p = copy.copy(site.reports)
-#       before_import_w = copy.copy(site.workspace)
-
-#       try:
-#           # get a copy of old site configuration
-#           import_module('%s.%s' % (app_config.name, "bmf_module"))
-#           logger.debug('bmf_module from %s loaded' % app_config.name)
-#           site.register_workspace_views(app_config)
-#       except:
-#           # Reset the model registry to the state before the last import
-#           # skiping this may result in an AlreadyRegistered Error
-#           site.modules = before_import_m
-#           site.currencies = before_import_c
-#           site.settings = before_import_s
-#           site.reports = before_import_p
-#           site.workspace = before_import_w
-
-#           # Decide whether to bubble up this error
-#           if module_has_submodule(app_config.module, "bmf_module"):
-#               raise

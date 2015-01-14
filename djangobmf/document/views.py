@@ -14,9 +14,9 @@ from django.views.static import serve
 
 from djangobmf.signals import activity_addfile
 from djangobmf.viewmixins import BaseMixin
+from djangobmf.models import Document
 
 from .forms import UploadDocument
-from .models import Document
 
 '''
 from django.conf import settings

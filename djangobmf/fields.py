@@ -8,7 +8,7 @@ from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
-from .currencies import BaseCurrency
+from .currency import BaseCurrency
 
 
 class OptionalForeignKey(models.ForeignKey):
@@ -48,6 +48,8 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
 
 
 def get_default_currency():
+    # FIXME when settings are properly cached
+    return 'EUR'
     from .sites import site
     return site.get_lazy_setting('djangobmf', 'currency')
 

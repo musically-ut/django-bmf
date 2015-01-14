@@ -251,7 +251,6 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
 
     class Meta:
         abstract = True
-        default_permissions = ('add', 'change', 'delete', 'view')
 
     def __init__(self, *args, **kwargs):
         super(BMFModel, self).__init__(*args, **kwargs)
