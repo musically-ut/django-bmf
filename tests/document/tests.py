@@ -10,10 +10,10 @@ from django.contrib.contenttypes.models import ContentType
 
 from djangobmf.models import Report
 from djangobmf.models import Document
-from djangobmf.testcase import BMFModuleTestCase
+from djangobmf.utils.testcases import BaseTestCase
 
 
-class CoreTests(BMFModuleTestCase):
+class CoreTests(BaseTestCase):
     pass
 
 #   def test_history_files(self):

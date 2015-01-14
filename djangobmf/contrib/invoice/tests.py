@@ -11,8 +11,9 @@ from factory.django import DjangoModelFactory
 from unittest import expectedFailure
 
 from .models import Invoice
-from djangobmf.utils.testcases import ModuleTestCase
-from djangobmf.utils.testcases import WorkflowTestCase
+from djangobmf.utils.testcases import BaseTestCase
+from djangobmf.utils.testcases import ModuleMixin
+# from djangobmf.utils.testcases import WorkflowTestCase
 
 
 class InvoiceFactory(DjangoModelFactory):
@@ -27,7 +28,7 @@ class InvoiceFactory(DjangoModelFactory):
    #invoice_number = "TEST INVOICE"
 
 
-class InvoiceModuleTests(ModuleTestCase):
+class InvoiceModuleTests(ModuleMixin, BaseTestCase):
 
     def test_urls_user(self):
         """
@@ -40,9 +41,9 @@ class InvoiceModuleTests(ModuleTestCase):
        #data = self.autotest_get('index')
 
 
-@expectedFailure
-class InvoiceWorkflowTests(WorkflowTestCase):
-    pass
+#@expectedFailure
+#class InvoiceWorkflowTests(WorkflowTestCase):
+#    pass
 
    #def test_invoice_workflow(self):
    #    self.object = InvoiceFactory()

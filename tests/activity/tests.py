@@ -8,10 +8,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 
 from djangobmf.models import Activity
-from djangobmf.testcase import BMFModuleTestCase
+from djangobmf.utils.testcases import BaseTestCase
 
 
-class CoreTests(BMFModuleTestCase):
+class CoreTests(BaseTestCase):
     pass
 
 #   def test_history(self):
