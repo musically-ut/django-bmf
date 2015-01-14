@@ -11,24 +11,22 @@ from django.db import models
 from django.db.models import signals
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
-
 from django.utils.translation import ugettext_lazy as _
-
-import json
 
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 from djangobmf.signals import activity_addfile
 from djangobmf.signals import activity_workflow
-
 from djangobmf.settings import ACTIVITY_WORKFLOW
 from djangobmf.settings import ACTIVITY_COMMENT
 from djangobmf.settings import ACTIVITY_UPDATED
 from djangobmf.settings import ACTIVITY_FILE
 from djangobmf.settings import ACTIVITY_CREATED
 from djangobmf.settings import ACTIVITY_UNKNOWN
-
 from djangobmf.tasks import djangobmf_user_watch
+
+import json
+
 
 ACTION_COMMENT = 1
 ACTION_CREATED = 2
