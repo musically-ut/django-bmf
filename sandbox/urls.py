@@ -4,12 +4,10 @@ from django.conf.urls.i18n import i18n_patterns
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-admin.autodiscover()
+# admin.autodiscover()
 
 from djangobmf import sites as djangobmf
-djangobmf.autodiscover()
-
-from django.views.generic.base import RedirectView
+# djangobmf.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^jsi18n/(?P<packages>\S+?)/$', 'django.views.i18n.javascript_catalog'),

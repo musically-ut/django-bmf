@@ -21,7 +21,7 @@ from .models import Account
 from .views import AccountIndexView
 
 
-site.register(Account, **{
+site.register_module(Account, **{
     'index': AccountIndexView,
 })
 
@@ -32,7 +32,7 @@ from .views import ClosedTransactionView
 from .views import TransactionCreateView
 from .views import TransactionUpdateView
 
-site.register(Transaction, **{
+site.register_module(Transaction, **{
     'create': TransactionCreateView,
     'update': TransactionUpdateView,
 })
@@ -41,7 +41,7 @@ from .models import TransactionItem
 from .views import AllTransactionView
 
 
-site.register(TransactionItem)
+site.register_module(TransactionItem)
 
 
 SETTINGS = {

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 from django.core.urlresolvers import reverse
 
-from djangobmf.testcase import BMFViewTestCase
+from djangobmf.utils.testcases import BaseTestCase
 
 #class DashboardTests(BMFViewTestCase):
 #

@@ -8,10 +8,11 @@ from django.test import LiveServerTestCase
 from django.core.urlresolvers import reverse
 
 from .models import Quotation, QuotationProduct
-from ...testcase import BMFModuleTestCase
+from djangobmf.utils.testcases import BaseTestCase
+from djangobmf.utils.testcases import ModuleMixin
 
 
-class QuotationModuleTests(BMFModuleTestCase):
+class QuotationModuleTests(ModuleMixin, BaseTestCase):
 
     def test_urls_user(self):
         """

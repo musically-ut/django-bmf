@@ -17,23 +17,21 @@ from django.views.generic import CreateView
 from django.views.generic import ListView
 from django.views.generic import UpdateView
 
-from .models import Activity
-from .models import Notification
+from djangobmf.models import Activity
+from djangobmf.models import Notification
+
+from djangobmf.viewmixins import ViewMixin
+from djangobmf.viewmixins import AjaxMixin
+
+from djangobmf.settings import ACTIVITY_WORKFLOW
+from djangobmf.settings import ACTIVITY_COMMENT
+from djangobmf.settings import ACTIVITY_UPDATED
+from djangobmf.settings import ACTIVITY_FILE
+from djangobmf.settings import ACTIVITY_CREATED
+
+from djangobmf.signals import activity_comment
+
 from .forms import HistoryCommentForm
-
-
-from ..viewmixins import ViewMixin
-from ..viewmixins import AjaxMixin
-
-from ..settings import ACTIVITY_WORKFLOW
-from ..settings import ACTIVITY_COMMENT
-from ..settings import ACTIVITY_UPDATED
-from ..settings import ACTIVITY_FILE
-from ..settings import ACTIVITY_CREATED
-
-from ..signals import activity_comment
-
-from ..sites import site
 
 import logging
 logger = logging.getLogger(__name__)
@@ -51,6 +49,8 @@ class NotificationView(ViewMixin, ListView):
 
         # Dict with all items of right navigation
         navigation = {}
+
+        from djangobmf.sites import site
 
         # prefill
         for ct, model in site.models.items():

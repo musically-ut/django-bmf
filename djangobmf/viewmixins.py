@@ -4,11 +4,12 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+# from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse_lazy
-from django.db.models.query import QuerySet
+# from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -42,12 +43,15 @@ class BaseMixin(object):
     provides functionality used in EVERY view throughout the application.
     this is used so we don't neet to define a middleware
     """
+    permissions = []
 
     def get_permissions(self, permissions=[]):
         """
         returns a list of (django) permissions and use them in dispatch to
         determinate if the user can view the page, he requested
         """
+        for perm in self.permissions:
+            permissions.append(perm)
         return permissions
 
     def check_permissions(self):
@@ -377,26 +381,45 @@ class ModuleDeletePermissionMixin(object):
 class ModuleBaseMixin(object):
     model = None
 
-    def get_queryset(self):
-        if self.queryset is not None:
-            queryset = self.queryset
-            if isinstance(queryset, QuerySet):
-                queryset = queryset.all()
+    def get_queryset(self, manager=None):
+        """
+        Return the list of items for this view.
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.model and manager and hasattr(self.model._default_manager, manager):
+            qs = getattr(self.model._default_manager, manager)(self.request)
         elif self.model is not None:
-            queryset = self.model._default_manager.all()
+            qs = self.model._default_manager.all()
         else:
             raise ImproperlyConfigured(
                 "%(cls)s is missing a QuerySet. Define "
-                "%(cls)s.model, %(cls)s.queryset, or override "
-                "%(cls)s.get_queryset()." % {
+                "%(cls)s.model " % {
                     'cls': self.__class__.__name__
                 }
             )
 
+#       return qs
+
+#   def get_queryset(self):
+#       if self.queryset is not None:
+#           queryset = self.queryset
+#           if isinstance(queryset, QuerySet):
+#               queryset = queryset.all()
+#       elif self.model is not None:
+#           queryset = self.model._default_manager.all()
+#       else:
+#           raise ImproperlyConfigured(
+#               "%(cls)s is missing a QuerySet. Define "
+#               "%(cls)s.model, %(cls)s.queryset, or override "
+#               "%(cls)s.get_queryset()." % {
+#                   'cls': self.__class__.__name__
+#               }
+#           )
+
         # load employee and team data into user
         user_add_bmf(self.request.user)
 
-        return self.model.has_permissions(queryset, self.request.user)
+        return self.model.has_permissions(qs, self.request.user)
 
     def get_object(self):
         if hasattr(self, 'object'):
@@ -410,6 +433,7 @@ class ModuleBaseMixin(object):
                 'verbose_name_plural': self.model._meta.verbose_name_plural,
                 'create_views': self.model._bmfmeta.create_views,
                 'model': self.model,
+                # 'contenttype': ContentType.objects.get_for_model(self.model).pk,
                 'has_report': self.model._bmfmeta.has_report,
                 'can_clone': self.model._bmfmeta.can_clone and self.request.user.has_perms([
                     '%s.view_%s' % info,

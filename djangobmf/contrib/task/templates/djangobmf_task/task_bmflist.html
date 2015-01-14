@@ -27,7 +27,7 @@
                     {% endverbatim %}{% trans "completed" %}{% verbatim %}
                 </span>
                 {{ obj.state }}
-                <br><small>{{ obj.modified }}</small>
+                <br><small>{{ obj.modified | date : 'mediumDate' }}</small>
             </td>
         </tr>
     {% endverbatim %}

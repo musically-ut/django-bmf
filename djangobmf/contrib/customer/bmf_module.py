@@ -18,7 +18,7 @@ from .views import CustomerCreateView
 from .views import CompanyCreateView
 from .views import UpdateView
 
-site.register(Customer, **{
+site.register_module(Customer, **{
     'create': {
         u'company': (_('Company'), CompanyCreateView),
         u'customer': (_('Customer'), CustomerCreateView),

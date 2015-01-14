@@ -14,12 +14,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
-from .apps import BMFConfig
-from .fields import WorkflowField
-from .notification.models import Activity
-from .notification.models import Notification
-from .signals import activity_workflow
-from .workflows import DefaultWorkflow
+from djangobmf.fields import WorkflowField
+from djangobmf.models.activity import Activity
+from djangobmf.models.notification import Notification
+from djangobmf.signals import activity_workflow
+from djangobmf.workflows import DefaultWorkflow
 
 import types
 import inspect
@@ -27,7 +26,7 @@ import inspect
 from mptt.managers import TreeManager
 from mptt.models import MPTTModelBase, MPTTModel
 
-APP_LABEL = BMFConfig.label
+APP_LABEL = "djangobmf"
 
 
 def add_signals(cls):
@@ -233,8 +232,7 @@ class BMFModelBase(ModelBase):
         return cls
 
 
-# TODO: rename to BMFModel
-class BMFSimpleModel(six.with_metaclass(BMFModelBase, models.Model)):
+class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
     """
     Base class for BMF models.
     """
@@ -253,10 +251,9 @@ class BMFSimpleModel(six.with_metaclass(BMFModelBase, models.Model)):
 
     class Meta:
         abstract = True
-        default_permissions = ('add', 'change', 'delete', 'view')
 
     def __init__(self, *args, **kwargs):
-        super(BMFSimpleModel, self).__init__(*args, **kwargs)
+        super(BMFModel, self).__init__(*args, **kwargs)
         # update the state of the workflow with object data
         if self._bmfmeta.workflow_field:
             if hasattr(self, self._bmfmeta.workflow_field):
@@ -340,28 +337,11 @@ class BMFSimpleModel(six.with_metaclass(BMFModelBase, models.Model)):
         return self.bmfmodule_detail()
 
 
-# TODO: RENAME
-class BMFModelUUID(BMFSimpleModel):
-    """
-    BMFModel with uuid. A uuid is used to identify an entry in an syncronisation
-    """
-    uuid = models.CharField("UUID", max_length=100, null=True, blank=True, editable=False, db_index=True)
-
-    class Meta:
-        abstract = True
-
-
-# TODO: DELETE IF BMFSimpleModel is renamed
-class BMFModel(BMFModelUUID):
-    class Meta:
-        abstract = True
-
-
-class BMFMPTTModelBase(MPTTModelBase, BMFModelBase):
+class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
     pass
 
 
-class BMFMPTTModel(six.with_metaclass(BMFMPTTModelBase, BMFModelUUID, MPTTModel)):
+class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
     objects = TreeManager()
 
     class Meta:

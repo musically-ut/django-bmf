@@ -10,9 +10,9 @@ from django.contrib.contenttypes.models import ContentType
 
 from djangobmf.models import Report
 
-from djangobmf.testcase import BMFViewTestCase
+from djangobmf.utils.testcases import BaseTestCase
 
-class CoreTests(BMFViewTestCase):
+class CoreTests(BaseTestCase):
     pass
 
 #   def test_reports(self):

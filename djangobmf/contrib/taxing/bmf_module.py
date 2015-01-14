@@ -7,4 +7,4 @@ from djangobmf.sites import site
 
 from .models import Tax
 
-site.register(Tax)
+site.register_module(Tax)

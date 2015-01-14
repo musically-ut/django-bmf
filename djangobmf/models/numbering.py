@@ -9,7 +9,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import now, get_default_timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .validators import template_name_validator, match_y, match_m
+from djangobmf.numbering.validators import template_name_validator, match_y, match_m
 
 import datetime
 import re

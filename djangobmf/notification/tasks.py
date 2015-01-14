@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 def djangobmf_user_watch(pk):
-    from .models import Activity
-    from .models import Notification
+    from djangobmf.models import Activity
+    from djangobmf.models import Notification
 
-    from .models import ACTION_COMMENT
-    from .models import ACTION_CREATED
-    from .models import ACTION_UPDATED
-    from .models import ACTION_WORKFLOW
-    from .models import ACTION_FILE
+    from djangobmf.models import ACTION_COMMENT
+    from djangobmf.models import ACTION_CREATED
+    from djangobmf.models import ACTION_UPDATED
+    from djangobmf.models import ACTION_WORKFLOW
+    from djangobmf.models import ACTION_FILE
 
     object = Activity.objects.get(pk=pk)
 

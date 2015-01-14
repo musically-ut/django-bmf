@@ -10,6 +10,8 @@ overwrites bmf settings from django's settings
 from django.conf import settings
 
 
+APP_LABEL = getattr(settings, 'BMF_APP_LABEL', 'djangobmf')
+
 USE_CELERY = getattr(settings, 'BMF_USE_CELERY', True)
 
 
@@ -38,7 +40,6 @@ CONTRIB_QUOTATION = get_contrib('BMF_CONTRIB_QUOTATION', 'djangobmf_quotation.Qu
 CONTRIB_TIMESHEET = get_contrib('BMF_CONTRIB_TIMESHEET', 'djangobmf_timesheet.Timesheet')
 CONTRIB_TRANSACTION = get_contrib('BMF_CONTRIB_TRANSACTION', 'djangobmf_accounting.Transaction')
 CONTRIB_TRANSACTIONITEM = get_contrib('BMF_CONTRIB_TRANSACTIONITEM', 'djangobmf_accounting.TransactionItem')
-
 
 # TEST CODE below this line ---------------------------------------------------
 

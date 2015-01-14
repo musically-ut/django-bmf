@@ -18,14 +18,14 @@ from .views import InvoiceUpdateView
 from .views import InvoiceDetailView
 
 
-site.register(Invoice, **{
+site.register_module(Invoice, **{
     'create': InvoiceCreateView,
     'detail': InvoiceDetailView,
     'update': InvoiceUpdateView,
     'report': True,
 })
 
-site.register(InvoiceProduct, **{
+site.register_module(InvoiceProduct, **{
 })
 
 

@@ -11,17 +11,19 @@ from django.db import models
 from django.views.generic import TemplateView
 from django.views.generic import FormView
 
-from ..viewmixins import ViewMixin
-from ..models import Configuration
-from ..sites import site, SETTING_KEY
+from djangobmf.viewmixins import ViewMixin
+from djangobmf.models import Configuration
 
 import json
+
+SETTING_KEY = "%s.%s"
 
 
 class ConfigurationView(ViewMixin, TemplateView):
     template_name = "djangobmf/configuration/index.html"
 
     def get_context_data(self, **kwargs):
+        from djangobmf.sites import site
         kwargs.update({
             'settings': site.settings,
         })
@@ -32,6 +34,8 @@ class ConfigurationEdit(ViewMixin, FormView):
     template_name = "djangobmf/configuration/edit.html"
 
     def get_form_class(self):
+        from djangobmf.sites import site
+
         key = SETTING_KEY % (self.kwargs['app_label'], self.kwargs['name'])
         name = self.kwargs['name']
 

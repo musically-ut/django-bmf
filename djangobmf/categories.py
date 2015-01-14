@@ -5,6 +5,9 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
+from collections import OrderedDict
+
+
 SETTINGS = _('Settings')  # OLD
 CR = _('Customer Relationship')  # OLD
 HR = _('Human Resources')  # OLD
@@ -18,11 +21,30 @@ PROJECT = _('Projects')  # OLD
 
 
 class BaseDashboard(object):
-    pass
+    name = None
+    slug = None
+
+    def __init__(self, *args):
+        # TODO add validation
+        # if not self.name or not name self.slug:
+        #     raise
+
+        self.data = args
 
 
 class BaseCategory(object):
-    pass
+    name = None
+    slug = None
+
+    def __init__(self, **kwargs):
+        # TODO add validation
+        # if not self.name or not name self.slug:
+        #     raise
+
+        self.data = OrderedDict()
+
+        for key, item in kwargs.items():
+            self.data[key] = item
 
 
 # --- Predefined Dashboards ---------------------------------------------------

@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 
 from .models import Customer
-from ...testcase import BMFModuleTestCase
+from djangobmf.utils.testcases import BaseTestCase
+from djangobmf.utils.testcases import ModuleMixin
 
-class CustomerTests(BMFModuleTestCase):
+class CustomerTests(ModuleMixin, BaseTestCase):
 
     def test_get_urls(self):
         """

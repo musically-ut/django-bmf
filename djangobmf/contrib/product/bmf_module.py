@@ -15,7 +15,7 @@ from .views import ProductCreateView
 from .views import ProductDetailView
 from .views import ProductUpdateView
 
-site.register(Product, **{
+site.register_module(Product, **{
     'create': ProductCreateView,
     'detail': ProductDetailView,
     'update': ProductUpdateView,
