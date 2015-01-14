@@ -33,14 +33,18 @@ class ModuleTemplate(AppConfig):
     bmf_label = APP_LABEL
 
     def ready(self):
-        bmf_config = apps.get_app_config(self.bmf_label)
+        # if ready was already called
+        if hasattr(self, 'bmf_config'):
+            return True
 
-        if not hasattr(bmf_config, 'site'):
+        self.bmf_config = apps.get_app_config(self.bmf_label)
+
+        if not hasattr(self.bmf_config, 'site'):
             raise ImproperlyConfigured(
                 "Can not find a site attribute in %(cls)s. "
                 "Please import the BMF-Framework before you "
                 "import any BMF-Modules in your INSTALLED_APPS." % {
-                    'cls': bmf_config.__class__.__name__
+                    'cls': self.bmf_config.__class__.__name__
                 }
             )
 
@@ -50,9 +54,9 @@ class ModuleTemplate(AppConfig):
             # load instructions of bmf_module.py
             import_module('%s.%s' % (self.name, "bmf_module"))
 
-        #   # see if model needs a number_cycle
-        #   for model in [m for m in self.models.values() if hasattr(m, '_bmfmeta') and m._bmfmeta.number_cycle]:
-        #       bmf_config.site.register_numbercycle(model)
+            # see if model needs a number_cycle
+            for model in [m for m in self.models.values() if hasattr(m, '_bmfmeta') and m._bmfmeta.number_cycle]:
+                self.bmf_config.site.register_numbercycle(model)
 
         #     copy = self.bmfsite.copy()
         # try:

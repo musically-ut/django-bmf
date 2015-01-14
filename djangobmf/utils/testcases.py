@@ -13,12 +13,14 @@ from django.test import TestCase as DjangoTestCase
 from django.utils.translation import activate
 
 from djangobmf.settings import CONTRIB_EMPLOYEE
+from djangobmf.sites import site
 
 import json
 
 
 class BaseTestCase(object):
     def setUp(self):  # noqa
+        site.activate(test=True)
         activate('en')
 
         super(BaseTestCase, self).setUp()

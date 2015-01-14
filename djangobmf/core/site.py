@@ -19,7 +19,7 @@ from djangobmf.categories import BaseDashboard
 from djangobmf.categories import BaseCategory
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
-# from djangobmf.models import NumberCycle
+from djangobmf.models import NumberCycle
 from djangobmf.settings import APP_LABEL
 
 from collections import OrderedDict
@@ -40,15 +40,22 @@ class Site(object):
         self.app_name = app_name or "djangobmf"
         self.clear()
 
+    # TODO add some generic register function, which functions as a decorator and can be used on different objects
     def register(self, *args, **kwargs):
         pass
 
     def clear(self):
+        # true if the site is active, ie loaded
+        self.is_active = False
+
         # combine all registered modules here
         self.modules = {}
 
         # all currencies should be stored here
         self.currencies = {}
+
+        # all numbercycles are here
+        self.numbercycles = []
 
         # all reports should be stored here
         self.reports = {}
@@ -65,7 +72,27 @@ class Site(object):
             'currency': forms.CharField(max_length=10, required=True,),  # TODO add validation / use dropdown
         })
 
-#   # --- modules -------------------------------------------------------------
+    def activate(self, test=False):
+
+        if self.is_active or not test:
+            return True
+
+        # ~~~~ numbercycles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        for model in self.numbercycles:
+            ct = ContentType.objects.get_for_model(model)
+            count = NumberCycle.objects.filter(ct=ct).count()
+            if not count:
+                obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
+                obj.save()
+                logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
+
+        # ~~~~ END ~ acticate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        self.is_active = True
+        return True
+
+    # --- modules -------------------------------------------------------------
 
     def register_module(self, module, **options):
         if not hasattr(module, '_bmfmeta'):
@@ -156,17 +183,8 @@ class Site(object):
 
     # --- number cycle --------------------------------------------------------
 
-#   def register_numbercycle(self, model):
-#       # TODO this is bad ...
-#       try:
-#           ct = ContentType.objects.get_for_model(model)
-#           count = NumberCycle.objects.filter(ct=ct).count()
-#           if not count:
-#               obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
-#               obj.save()
-#               logger.debug('Numbercycle for model %s created' % model)
-#       except:
-#           pass
+    def register_numbercycle(self, model):
+        self.numbercycles.append(model)
 
     # --- workspace -----------------------------------------------------------
 
@@ -342,6 +360,8 @@ class Site(object):
 
     def get_urls(self):
         from djangobmf.urls import urlpatterns
+
+        self.activate()
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
