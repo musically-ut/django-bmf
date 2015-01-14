@@ -47,7 +47,7 @@ class WorkspaceDashboardView(ViewMixin, DetailView):
             self.workspace = obj
         else:
             self.workspace = None
-        return obj
+        return self.workspace
 
 
 def workspace_generic_view(request, *args, **kwargs):

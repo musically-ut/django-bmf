@@ -19,7 +19,7 @@ from djangobmf.categories import BaseDashboard
 from djangobmf.categories import BaseCategory
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
-from djangobmf.models import NumberCycle
+# from djangobmf.models import NumberCycle
 from djangobmf.settings import APP_LABEL
 
 from collections import OrderedDict
@@ -156,17 +156,17 @@ class Site(object):
 
     # --- number cycle --------------------------------------------------------
 
-    def register_numbercycle(self, model):
-        # TODO this is bad ...
-        try:
-            ct = ContentType.objects.get_for_model(model)
-            count = NumberCycle.objects.filter(ct=ct).count()
-            if not count:
-                obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
-                obj.save()
-                logger.debug('Numbercycle for model %s created' % model)
-        except:
-            pass
+#   def register_numbercycle(self, model):
+#       # TODO this is bad ...
+#       try:
+#           ct = ContentType.objects.get_for_model(model)
+#           count = NumberCycle.objects.filter(ct=ct).count()
+#           if not count:
+#               obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
+#               obj.save()
+#               logger.debug('Numbercycle for model %s created' % model)
+#       except:
+#           pass
 
     # --- workspace -----------------------------------------------------------
 
