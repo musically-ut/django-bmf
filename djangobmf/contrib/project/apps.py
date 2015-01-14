@@ -16,18 +16,18 @@ class ProjectConfig(ContribTemplate):
     name = 'djangobmf.contrib.project'
     label = "djangobmf_project"
 
-    bmf_views = {
-        ProjectManagement(
-            ProjectCategory(
-                active={
-                    'model': "Project",
-                    'name': _("Active Projects"),
-                    'manager': "active",
-                },
-                all={
-                    'model': "Project",
-                    'name': _("All Projects"),
-                },
-            ),
-        ),
-    }
+#   bmf_views = {
+#       ProjectManagement(
+#           ProjectCategory(
+#               active={
+#                   'model': "Project",
+#                   'name': _("Active Projects"),
+#                   'manager': "active",
+#               },
+#               all={
+#                   'model': "Project",
+#                   'name': _("All Projects"),
+#               },
+#           ),
+#       ),
+#   }

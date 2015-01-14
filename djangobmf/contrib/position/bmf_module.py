@@ -18,7 +18,7 @@ from .views import PositionUpdateView
 from .views import PositionCreateView
 from .views import PositionAPI
 
-site.register(Position, **{
+site.register_module(Position, **{
     'create': PositionCreateView,
     'update': PositionUpdateView,
     'detail': PositionDetailView,

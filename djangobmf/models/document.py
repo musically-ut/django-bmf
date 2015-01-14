@@ -10,7 +10,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from .storage import BMFStorage
+from djangobmf.document.storage import BMFStorage
 
 from djangobmf.utils.generate_filename import generate_filename
 

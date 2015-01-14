@@ -43,12 +43,15 @@ class BaseMixin(object):
     provides functionality used in EVERY view throughout the application.
     this is used so we don't neet to define a middleware
     """
+    permissions = []
 
     def get_permissions(self, permissions=[]):
         """
         returns a list of (django) permissions and use them in dispatch to
         determinate if the user can view the page, he requested
         """
+        for perm in self.permissions:
+            permissions.append(perm)
         return permissions
 
     def check_permissions(self):

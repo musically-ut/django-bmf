@@ -13,7 +13,6 @@
   "notes": "",
   "team": null,
   "customer": 1,
-  "uuid": null,
   "is_active": true,
   "employees": [
    2
@@ -34,7 +33,6 @@
   "notes": "",
   "team": 1,
   "customer": 2,
-  "uuid": null,
   "is_active": true,
   "employees": []
  }

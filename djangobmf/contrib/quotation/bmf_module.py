@@ -18,7 +18,7 @@ from .views import QuotationDetailView
 from .views import QuotationUpdateView
 
 
-site.register(Quotation, **{
+site.register_module(Quotation, **{
     'create': QuotationCreateView,
     'detail': QuotationDetailView,
     'update': QuotationUpdateView,
@@ -26,7 +26,7 @@ site.register(Quotation, **{
 })
 
 
-site.register(QuotationProduct, **{
+site.register_module(QuotationProduct, **{
 })
 
 

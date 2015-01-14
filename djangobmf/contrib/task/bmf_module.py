@@ -29,12 +29,12 @@ from .views import GoalDetailView
 from .views import GoalGetView
 
 
-site.register(Task, **{
+site.register_module(Task, **{
     'get': TaskGetView,
 })
 
 
-site.register(Goal, **{
+site.register_module(Goal, **{
     'get': GoalGetView,
     'clone': GoalCloneView,
     'detail': GoalDetailView,

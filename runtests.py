@@ -15,7 +15,7 @@ from django.test.utils import get_runner
 from django.utils import six
 
 from djangobmf import contrib as bmfcontrib
-from djangobmf import currencies as bmfcurrencies
+from djangobmf import currency as bmfcurrencies
 from djangobmf import reports as bmfreports
 
 from argparse import ArgumentParser

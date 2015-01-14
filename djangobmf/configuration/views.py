@@ -11,9 +11,9 @@ from django.db import models
 from django.views.generic import TemplateView
 from django.views.generic import FormView
 
-from ..viewmixins import ViewMixin
-from ..models import Configuration
-from ..sites import site, SETTING_KEY
+from djangobmf.viewmixins import ViewMixin
+from djangobmf.models import Configuration
+from djangobmf.sites import site
 
 import json
 

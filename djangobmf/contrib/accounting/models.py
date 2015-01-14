@@ -12,12 +12,12 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.currencies import Wallet
+from djangobmf.currency import Wallet
 from djangobmf.categories import ACCOUNTING
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
 from djangobmf.fields import WorkflowField
-from djangobmf.models import BMFMPTTModel
+from djangobmf.models import BMFModelMPTT
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_ACCOUNT
 from djangobmf.settings import CONTRIB_PROJECT
@@ -50,7 +50,7 @@ ACCOUNTING_TYPES = (
 
 
 @python_2_unicode_compatible
-class BaseAccount(BMFMPTTModel):
+class BaseAccount(BMFModelMPTT):
     """
     Accounts
 

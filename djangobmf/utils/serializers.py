@@ -3,7 +3,7 @@
 
 from django.core.serializers.json import DjangoJSONEncoder
 
-from djangobmf.currencies import BaseCurrency
+from djangobmf.currency import BaseCurrency
 
 
 class DjangoBMFEncoder(DjangoJSONEncoder):

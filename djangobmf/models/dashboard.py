@@ -4,8 +4,6 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-# from django.contrib.auth.models import Group
-# from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -17,7 +15,6 @@ class Dashboard(models.Model):
         getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), blank=True,
         null=True, related_name="+", on_delete=models.CASCADE,
     )
-    # group = models.ForeignKey(Group, blank=True, null=True, related_name="+", on_delete=models.CASCADE)
     name = models.CharField(
         _("Name"),
         max_length=100, null=True, blank=False,

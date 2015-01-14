@@ -124,8 +124,8 @@ TEST_PROJECT_APPS = (
     'djangobmf.contrib.taxing',
     'djangobmf.contrib.team',
     'djangobmf.contrib.timesheet',
-    'djangobmf.currencies.EUR',
-    'djangobmf.currencies.USD',
+    'djangobmf.currency.EUR',
+    'djangobmf.currency.USD',
 )
 
 INSTALLED_APPS = (

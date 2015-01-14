@@ -13,11 +13,11 @@ from .views import TeamDetailView
 from .views import TeamUpdateView
 
 
-site.register(Team, **{
+site.register_module(Team, **{
     'create': TeamCreateView,
     'detail': TeamDetailView,
     'update': TeamUpdateView,
 })
 
-site.register(TeamMember, **{
+site.register_module(TeamMember, **{
 })

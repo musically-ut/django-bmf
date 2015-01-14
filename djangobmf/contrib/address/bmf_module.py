@@ -7,4 +7,4 @@ from djangobmf.sites import site
 
 from .models import Address
 
-site.register(Address)
+site.register_module(Address)

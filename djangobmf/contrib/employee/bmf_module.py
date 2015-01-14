@@ -8,6 +8,6 @@ from djangobmf.sites import site
 from .models import Employee
 from .views import EmployeeCreateView
 
-site.register(Employee, **{
+site.register_module(Employee, **{
     'create': EmployeeCreateView,
 })

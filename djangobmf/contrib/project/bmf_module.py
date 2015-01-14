@@ -15,13 +15,12 @@ from .views import ProjectGetView
 # from .views import AllProjectView
 from .views import ProjectUpdateView
 
-site.register(Project, **{
+site.register_module(Project, **{
     'get': ProjectGetView,
     'update': ProjectUpdateView,
 })
 
 
-# TODO Remove me
 class ProjectCategory(BaseCategory):
     name = _('Projects')
     slug = "projects"
