@@ -93,7 +93,7 @@ def main(modules, verbosity=2, failfast=False, contrib=None, nocontrib=False):
             if os.path.isdir(os.path.join(path, module)):
                 if module[0] == '_':
                     continue
-                settings.INSTALLED_APPS += ('djangobmf.currencies.%s' % module, )
+                settings.INSTALLED_APPS += ('djangobmf.currency.%s' % module, )
 
         # add reports to INSTALLED_APPS
         if six.PY2:

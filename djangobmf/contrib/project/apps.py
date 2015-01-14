@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 
-from django.utils.translation import ugettext_lazy as _
+# from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.apps import ContribTemplate
-from djangobmf.categories import BaseCategory
-from djangobmf.categories import ProjectManagement
+# from djangobmf.categories import BaseCategory
+# from djangobmf.categories import ProjectManagement
 
 
-class ProjectCategory(BaseCategory):
-    name = _('Projects')
-    slug = "projects"
+# class ProjectCategory(BaseCategory):
+#     name = _('Projects')
+#     slug = "projects"
 
 
 class ProjectConfig(ContribTemplate):

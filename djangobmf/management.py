@@ -3,17 +3,16 @@
 
 from __future__ import unicode_literals
 
-from django.db.models import get_models
-from django.db.models.signals import post_syncdb
-from django.contrib.contenttypes.models import ContentType
+# from django.db.models import get_models
+# from django.db.models.signals import post_syncdb
+# from django.contrib.contenttypes.models import ContentType
 
 # from . import models as bmfcore
 # from .numbering.models import NumberCycle
 
 
 # FIXME: Check if this is still needed or can be achieved otherwise
-def install(sender, created_models, **kwargs):
-    pass
+# def install(sender, created_models, **kwargs):
 #   for model in get_models():  # TODO change to django.apps
 #       if getattr(model, 'BMFMeta', False):
 

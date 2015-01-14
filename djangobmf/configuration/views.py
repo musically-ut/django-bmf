@@ -16,6 +16,8 @@ from djangobmf.models import Configuration
 
 import json
 
+SETTING_KEY = "%s.%s"
+
 
 class ConfigurationView(ViewMixin, TemplateView):
     template_name = "djangobmf/configuration/index.html"

@@ -50,6 +50,8 @@ class NotificationView(ViewMixin, ListView):
         # Dict with all items of right navigation
         navigation = {}
 
+        from djangobmf.sites import site
+
         # prefill
         for ct, model in site.models.items():
             info = model._meta.app_label, model._meta.model_name

@@ -40,7 +40,6 @@ from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils import six
-from django.utils.encoding import force_text
 # from django.utils.formats import get_format
 # from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -890,18 +889,18 @@ class ModuleOverviewView(ViewMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
 
-#       modules = []
-#       for ct, model in get_site().models.items():
-#           info = model._meta.app_label, model._meta.model_name
-#           perm = '%s.view_%s' % info
-#           if self.request.user.has_perms([perm, ]):
-#               key = force_text(model._bmfmeta.category)
-#               modules.append({
-#                   'category': key,
-#                   'model': model,
-#                   'url': reverse('%s:list' % model._bmfmeta.namespace_api),
-#                   'name': model._meta.verbose_name_plural,
-#               })
+        modules = []
+        # for ct, model in get_site().models.items():
+        #     info = model._meta.app_label, model._meta.model_name
+        #     perm = '%s.view_%s' % info
+        #     if self.request.user.has_perms([perm, ]):
+        #         key = force_text(model._bmfmeta.category)
+        #         modules.append({
+        #             'category': key,
+        #             'model': model,
+        #             'url': reverse('%s:list' % model._bmfmeta.namespace_api),
+        #             'name': model._meta.verbose_name_plural,
+        #         })
 
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)
         context['modules'] = modules

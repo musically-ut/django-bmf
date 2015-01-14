@@ -5,50 +5,28 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.apps import apps
-from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.admin.sites import NotRegistered
 from django.contrib.contenttypes.models import ContentType
-# from django.core.exceptions import AppRegistryNotReady
 from django.core.exceptions import ImproperlyConfigured
 from django.db.utils import OperationalError
 from django.db.utils import ProgrammingError
-from django.utils.module_loading import module_has_submodule
-from django.utils.module_loading import import_module
-from django.utils import six
-from django.utils.text import slugify
 
 from djangobmf.categories import BaseDashboard
 from djangobmf.categories import BaseCategory
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
-from djangobmf.models import Configuration
 from djangobmf.settings import APP_LABEL
-from djangobmf.urls import urlpatterns
-from djangobmf.views import ModuleCloneView
-from djangobmf.views import ModuleCreateView
-from djangobmf.views import ModuleDeleteView
-from djangobmf.views import ModuleDetailView
-from djangobmf.views import ModuleFormAPI
-from djangobmf.views import ModuleGetView
-from djangobmf.views import ModuleListView
-from djangobmf.views import ModuleReportView
-from djangobmf.views import ModuleUpdateView
-from djangobmf.views import ModuleWorkflowView
 
 from collections import OrderedDict
-
-import copy
-import sys
 
 import logging
 logger = logging.getLogger(__name__)
 
 SETTING_KEY = "%s.%s"
-APP_LABEL = "djangobmf"  # TODO remove me
 
 
 class Site(object):
