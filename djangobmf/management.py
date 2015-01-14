@@ -7,8 +7,8 @@ from __future__ import unicode_literals
 # from django.db.models.signals import post_syncdb
 # from django.contrib.contenttypes.models import ContentType
 
-# from . import models as bmfcore
-# from .numbering.models import NumberCycle
+# from djangobmf import models as bmfmodels
+# from djangobmf.models import NumberCycle
 
 
 # FIXME: Check if this is still needed or can be achieved otherwise

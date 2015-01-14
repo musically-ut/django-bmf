@@ -19,8 +19,6 @@ import json
 
 class BaseTestCase(object):
     def setUp(self):  # noqa
-        from djangobmf import sites
-        sites.autodiscover()
         activate('en')
 
         super(BaseTestCase, self).setUp()
@@ -180,8 +178,6 @@ class BMFViewTestCase(LiveServerTestCase):
     ]
 
     def setUp(self):  # noqa
-        from djangobmf import sites
-        sites.autodiscover()
         self.client.login(username='admin', password='admin')
         activate('en')
 

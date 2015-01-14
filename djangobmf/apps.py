@@ -45,10 +45,14 @@ class ModuleTemplate(AppConfig):
             )
 
         # autodiscover bmf modules ============================================
-
         if module_has_submodule(self.module, "bmf_module"):
 
+            # load instructions of bmf_module.py
             import_module('%s.%s' % (self.name, "bmf_module"))
+
+            # see if model needs a number_cycle
+            for model in [m for m in self.models.values() if hasattr(m, '_bmfmeta') and m._bmfmeta.number_cycle]:
+                bmf_config.site.register_numbercycle(model)
 
         #     copy = self.bmfsite.copy()
         # try:

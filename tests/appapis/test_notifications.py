@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
-from djangobmf.notification.models import Notification
+from djangobmf.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 from djangobmf.utils.testcases import TestCase

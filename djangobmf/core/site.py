@@ -19,6 +19,7 @@ from djangobmf.categories import BaseDashboard
 from djangobmf.categories import BaseCategory
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
+from djangobmf.models import NumberCycle
 from djangobmf.settings import APP_LABEL
 
 from collections import OrderedDict
@@ -153,6 +154,20 @@ class Site(object):
         except KeyError:
             raise NotRegistered('The setting %s is not registered' % name)
 
+    # --- number cycle --------------------------------------------------------
+
+    def register_numbercycle(self, model):
+        # TODO this is bad ...
+        try:
+            ct = ContentType.objects.get_for_model(model)
+            count = NumberCycle.objects.filter(ct=ct).count()
+            if not count:
+                obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
+                obj.save()
+                logger.debug('Numbercycle for model %s created' % model)
+        except:
+            pass
+
     # --- workspace -----------------------------------------------------------
 
 #   def register_workspace_views(self, app_config):
@@ -227,7 +242,7 @@ class Site(object):
 
         try:
             ws, created = workspace.objects.get_or_create(module=label, level=0)
-        except (OperationalError, ProgrammingError):
+        except (OperationalError, ProgrammingError, ImproperlyConfigured):
             logger.debug('Database not ready, skipping registration of Dashboard %s' % label)
             return False
 
@@ -258,7 +273,7 @@ class Site(object):
 
         try:
             parent_workspace = workspace.objects.get(module=parent_label)
-        except (OperationalError, ProgrammingError):
+        except (OperationalError, ProgrammingError, ImproperlyConfigured):
             logger.debug('Database not ready, skipping registration of Category %s' % label)
             return False
         except workspace.DoesNotExist:
@@ -288,7 +303,7 @@ class Site(object):
 
         try:
             parent_workspace = workspace.objects.get(module=parent_label)
-        except (OperationalError, ProgrammingError):
+        except (OperationalError, ProgrammingError, ImproperlyConfigured):
             logger.debug('Database not ready, skipping registration of View %s' % label)
             return False
         except workspace.DoesNotExist:

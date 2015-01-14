@@ -11,7 +11,7 @@ from django.test import TestCase
 
 from djangobmf.categories import BaseDashboard
 from djangobmf.categories import BaseCategory
-from djangobmf.workspace.models import Workspace
+from djangobmf.models import Workspace
 
 from djangobmf import sites
 
@@ -43,7 +43,6 @@ class WorkspaceTests(TestCase):
     urls = 'tests.workspace.urls'
 
     def setUp(self):
-        sites.autodiscover()
         Workspace.objects.all().delete()
         sites.site.register_dashboard(TestDashboard1)
         sites.site.register_category(TestDashboard1, TestCategory1)
