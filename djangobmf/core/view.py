@@ -11,14 +11,15 @@ from djangobmf.views import ModuleListView
 # logger = logging.getLogger(__name__)
 
 
-class Workspace(object):
+class View(object):
     """
     Object internally used to register modules
     """
 
-    def __init__(self, model, name=None, slug=None, view=None, **kwargs):
+    def __init__(self, model, name, slug, view=None, **kwargs):
         self.model = model
         self.name = name
         self.slug = slug
+        self.key = slug
         self.view = view or ModuleListView
         self.kwargs = kwargs

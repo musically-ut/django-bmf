@@ -85,6 +85,35 @@ class Site(object):
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
 
+        # ~~~~ workspaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        for dashboard in self.workspaces:
+
+            workspace = apps.get_model(APP_LABEL, "Workspace")
+
+            label = '%s.%s' % (dashboard.__module__, dashboard.__class__.__name__)
+
+            d_obj, created = workspace.objects.get_or_create(module=label, level=0)
+
+            if created or d_obj.slug != obj.slug or d_obj.url != dashboard.slug:
+                d_obj.slug = dashboard.slug
+                d_obj.url = dashboard.slug
+                d_obj.editable = False
+                d_obj.save()
+                logger.debug('Dashboard %s registered or updated' % label)
+
+            for category in dashboard:
+                c_obj, created = workspace.objects \
+                    .select_related('parent') \
+                    .get_or_create(module=label, parent=d_obj)
+
+                if created or c_obj.slug != category.slug or c_obj.url != c_obj.get_url():
+                    c_obj.slug = category.slug
+                    c_obj.editable = False
+                    c_obj.update_url()
+                    c_obj.save()
+                    logger.debug('Category %s registered or updated' % label)
+
         # ~~~~ END ~ acticate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.is_active = True
@@ -185,66 +214,6 @@ class Site(object):
         self.numbercycles.append(model)
 
     # --- workspace -----------------------------------------------------------
-
-#   def register_workspace_views(self, app_config):
-#       # try:
-#       #     app_config.check_models_ready()
-#       # except AppRegistryNotReady:
-#       #     return False
-
-#       if not hasattr(app_config, 'bmf_views'):
-#           return False
-
-#       for dashboard in app_config.bmf_views:
-#           self.register_dashboard(dashboard)
-
-#           for category in dashboard.data:
-#               self.register_category(dashboard, category)
-
-#   #           for key, viewdata in category.data.items():
-#   #               model = app_config.get_model(viewdata['model'])
-#   #               self.register_view(self, model, category, view, **kwargs)
-
-#   #     for dashboard in app_config.bmf_views:
-#   #         # create dictionary
-#   #         if dashboard.slug not in self.workspace:
-#   #             self.workspace[dashboard.slug] = OrderedDict()
-
-#   #         for category in dashboard.data:
-#   #             # create dictionary
-#   #             if category.slug not in self.workspace[dashboard.slug]:
-#   #                 self.workspace[dashboard.slug][category.slug] = OrderedDict()
-
-#   #             for key, viewdata in category.data.items():
-#   #                 # TODO add validation
-#   #                 model = app_config.get_model(viewdata['model'])
-
-#   #                 view_kwargs = {
-#   #                     'model': model,
-#   #                     'name': viewdata['name'],
-#   #                     'manager': viewdata.get('manager', None),
-#   #                     'template_name': viewdata.get('template_name', None),
-#   #                 }
-
-#   #                 self.workspace[dashboard.slug][category.slug][key] = {
-#   #                     'name': viewdata['name'],
-#   #                     'slug': key,
-#   #                     'kwargs': view_kwargs,
-#   #                 }
-
-#   # def get_workspace_urls(self):
-#   #     urlpatterns = patterns('')
-#   #     for slug1, dashboard in self.workspace.items():
-#   #         for slug2, category in dashboard.items():
-#   #             for slug3, view in category.items():
-#   #                 urlpatterns += patterns(
-#   #                     '',
-#   #                     url(
-#   #                         r'^%s/%s/%s/$' % (slug1, slug2, slug3),
-#   #                         ModuleListView(**view['kwargs']),
-#   #                     ),
-#   #                 )
-#   #     return urlpatterns
 
     def register_dashboards(self, *args):
         for dashboard in args:

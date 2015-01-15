@@ -173,3 +173,15 @@ class ClassTests(TestCase):
 
         with self.assertRaises(KeyError):
             test = td['test3']
+
+    def test_iter(self):
+        class TestDashboard(Dashboard):
+            name = "test"
+            slug = "test"
+        td = TestDashboard(self.cat1)
+
+        for i in td:
+            self.assertEqual(i, self.cat1)
+
+        td = TestDashboard(self.cat1, self.cat2)
+        self.assertEqual([i for i in td], [self.cat1, self.cat2])

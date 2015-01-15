@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from .category import Category
 
 
+# TODO add validation for name and slug
 class Dashboard(object):
     # Names are passed through to the views they are also translated
     name = None
@@ -39,11 +40,14 @@ class Dashboard(object):
         else:
             return False
 
+    def __iter__(self):
+        return self.data.__iter__()
+
     def __getitem__(self, key):
         data = [i for i in self.data if i.key == key]
         if len(data) == 1:
             return data[0]
-        raise KeyError('key')
+        raise KeyError(key)
 
     def __contains__(self, item):
         if isinstance(item, Category):

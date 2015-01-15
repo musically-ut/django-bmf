@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.sites import site
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import ProjectManagement
 
 from .models import Project
@@ -14,6 +15,7 @@ from .views import ProjectGetView
 from .views import ActiveProjectView
 from .views import AllProjectView
 from .views import ProjectUpdateView
+
 
 site.register_module(Project, **{
     'get': ProjectGetView,
@@ -30,8 +32,17 @@ class ProjectCategory(BaseCategory):
 site.register_dashboards(
     ProjectManagement(
         ProjectCategory(
-            #   active = View(
-            #   ),
+            ViewFactory(
+                model=Project,
+                name=_("Active projects"),
+                slug="active",
+                manager="active",
+            ),
+            ViewFactory(
+                model=Project,
+                name=_("All projects"),
+                slug="all",
+            ),
         ),
     ),
 )
