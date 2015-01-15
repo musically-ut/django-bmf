@@ -18,7 +18,7 @@ from djangobmf.fields import WorkflowField
 from djangobmf.models.activity import Activity
 from djangobmf.models.notification import Notification
 from djangobmf.signals import activity_workflow
-from djangobmf.workflows import DefaultWorkflow
+from djangobmf.workflow import DefaultWorkflow
 
 import types
 import inspect

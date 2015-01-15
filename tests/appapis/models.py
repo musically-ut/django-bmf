@@ -7,7 +7,9 @@ from django.db import models
 
 from djangobmf.models import BMFModel
 from djangobmf.fields import WorkflowField
-from djangobmf.workflows import Workflow, State, Transition
+from djangobmf.workflow import Workflow
+from djangobmf.workflow import State
+from djangobmf.workflow import Transition
 
 
 class TestWorkflow(Workflow):

@@ -9,7 +9,10 @@ from django.test import TestCase
 from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ValidationError
 
-from djangobmf.workflows import State, Transition, Workflow, DefaultWorkflow
+from djangobmf.workflow import DefaultWorkflow
+from djangobmf.workflow import State
+from djangobmf.workflow import Transition
+from djangobmf.workflow import Workflow
 
 from django.contrib.auth.models import User
 
