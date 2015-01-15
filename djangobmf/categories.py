@@ -5,46 +5,21 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from collections import OrderedDict
+from djangobmf.core.dashboard import Dashboard as BaseDashboard
+from djangobmf.core.category import Category as BaseCategory
 
 
-SETTINGS = _('Settings')  # OLD
-CR = _('Customer Relationship')  # OLD
-HR = _('Human Resources')  # OLD
-SALES = _('Sales')  # OLD
-ACCOUNTING = _('Accounting')  # OLD
-PURCHASES = _('Purchases')  # OLD
-WAREHOUSE = _('Warehouse')  # OLD
-KNOWLEDGE = _('Knowledge')  # OLD AND UNUSED
-DOCUMENT = _('Documents')  # OLD
-PROJECT = _('Projects')  # OLD
-
-
-class BaseDashboard(object):
-    name = None
-    slug = None
-
-    def __init__(self, *args):
-        # TODO add validation
-        # if not self.name or not name self.slug:
-        #     raise
-
-        self.data = args
-
-
-class BaseCategory(object):
-    name = None
-    slug = None
-
-    def __init__(self, **kwargs):
-        # TODO add validation
-        # if not self.name or not name self.slug:
-        #     raise
-
-        self.data = OrderedDict()
-
-        for key, item in kwargs.items():
-            self.data[key] = item
+__all__ = [
+    'BaseDashboard',
+    'BaseCategory',
+    'ProjectManagement',
+    'DocumentManagement',
+    'Sales',
+    'CustomerRelationship',
+    'Accounting',
+    'Warehouse',
+    'TimeAndAttendance',
+]
 
 
 # --- Predefined Dashboards ---------------------------------------------------
@@ -83,3 +58,8 @@ class Accounting(BaseDashboard):
 class Warehouse(BaseDashboard):
     name = _('Warehouse')
     slug = "warehouse"
+
+
+class TimeAndAttendance(BaseDashboard):
+    name = _('Time and attendance')
+    slug = "attendance"

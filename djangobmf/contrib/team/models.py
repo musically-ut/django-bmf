@@ -10,7 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_TEAM
 from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.categories import HR
 
 
 @python_2_unicode_compatible
@@ -35,7 +34,6 @@ class AbstractTeam(BMFModel):
     class BMFMeta:
         search_fields = ['name']
         has_logging = False
-        category = HR
 
     def __str__(self):
         return self.name
@@ -56,7 +54,6 @@ class TeamMember(BMFModel):
     class BMFMeta:
         search_fields = ['name']
         has_logging = False
-        category = HR
 
 
 class Team(AbstractTeam):

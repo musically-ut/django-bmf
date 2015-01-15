@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import ACCOUNTING
 from djangobmf.settings import CONTRIB_CUSTOMER
 from djangobmf.settings import CONTRIB_PRODUCT
 from djangobmf.settings import CONTRIB_PROJECT
@@ -59,7 +58,6 @@ class BaseInvoice(BMFModel):
         return '%s' % self.invoice_number
 
     class BMFMeta:
-        category = ACCOUNTING
         number_cycle = "INV{year}/{month}-{counter:04d}"
         workflow = InvoiceWorkflow
         workflow_field = 'state'

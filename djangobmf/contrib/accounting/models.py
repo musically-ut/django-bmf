@@ -13,7 +13,6 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.currency import Wallet
-from djangobmf.categories import ACCOUNTING
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
 from djangobmf.fields import WorkflowField
@@ -91,7 +90,6 @@ class BaseAccount(BMFModelMPTT):
         swappable = "BMF_CONTRIB_ACCOUNT"
 
     class BMFMeta:
-        category = ACCOUNTING
         observed_fields = ['name', ]
 
     class MPTTMeta:
@@ -166,7 +164,6 @@ class BaseTransaction(BMFModel):
         swappable = "BMF_CONTRIB_TRANSACTION"
 
     class BMFMeta:
-        category = ACCOUNTING
         observed_fields = ['expensed', 'text']
         has_files = True
         workflow = TransactionWorkflow
@@ -243,7 +240,6 @@ class BaseTransactionItem(BMFModel):
         swappable = "BMF_CONTRIB_TRANSACTIONITEM"
 
     class BMFMeta:
-        category = ACCOUNTING
         has_logging = False
 
 # def set_debit(self, amount):

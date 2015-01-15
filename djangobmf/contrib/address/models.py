@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_CUSTOMER
-from djangobmf.categories import SALES
 
 
 class BaseAddress(BMFModel):
@@ -35,9 +34,6 @@ class BaseAddress(BMFModel):
         ordering = ['name']
         abstract = True
         swappable = "BMF_CONTRIB_ADDRESS"
-
-    class BMFMeta:
-        category = SALES
 
     def bmfget_customer(self):
         return self.customer
@@ -71,8 +67,7 @@ class AbstractAddress(BaseAddress):
             }
         )
 
-    class BMFMeta(BaseAddress.BMFMeta):
-        category = SALES
+    class BMFMeta:
         observed_fields = ['name', 'name2', 'street', 'zip', 'city', 'state', 'country']
 
     def __str__(self):

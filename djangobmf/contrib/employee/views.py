@@ -3,7 +3,15 @@
 
 from __future__ import unicode_literals
 
+from django.utils.translation import ugettext_lazy as _
+
 from djangobmf.views import ModuleCreateView
+from djangobmf.views import ModuleListView
+
+
+class EmployeeIndexView(ModuleListView):
+    name = _("All Employees")
+    slug = "all"
 
 
 class EmployeeCreateView(ModuleCreateView):

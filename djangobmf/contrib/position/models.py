@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import SALES
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_INVOICE
@@ -95,7 +94,6 @@ class AbstractPosition(BMFModel):
         swappable = "BMF_CONTRIB_POSITION"
 
     class BMFMeta:
-        category = SALES
         has_logging = False
 
 

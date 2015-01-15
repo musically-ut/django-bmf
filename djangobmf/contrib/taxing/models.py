@@ -7,7 +7,6 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.categories import SETTINGS
 from djangobmf.contrib.accounting.models import ACCOUNTING_LIABILITY
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_ACCOUNT
@@ -43,7 +42,6 @@ class AbstractTax(BMFModel):
         swappable = "BMF_CONTRIB_TAX"
 
     class BMFMeta:
-        category = SETTINGS
         observed_fields = ['name', 'invoice_name', 'rate']
 
     def __str__(self):

@@ -15,7 +15,6 @@ from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_TEAM
 from djangobmf.settings import CONTRIB_GOAL
-from djangobmf.categories import PROJECT
 
 from .workflows import GoalWorkflow
 from .workflows import TaskWorkflow
@@ -155,7 +154,6 @@ class AbstractGoal(BMFModel):
 
     class BMFMeta:
         has_logging = False
-        category = PROJECT
         workflow = GoalWorkflow
         workflow_field = 'state'
         can_clone = True
@@ -293,7 +291,6 @@ class AbstractTask(BMFModel):
         has_comments = True
         workflow = TaskWorkflow
         workflow_field = 'state'
-        category = PROJECT
 
 
 class Task(AbstractTask):

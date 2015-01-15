@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import PROJECT
 from djangobmf.settings import CONTRIB_CUSTOMER
 from djangobmf.settings import CONTRIB_TEAM
 from djangobmf.settings import CONTRIB_EMPLOYEE
@@ -50,9 +49,6 @@ class BaseProject(BMFModel):
         )
         swappable = "BMF_CONTRIB_PROJECT"
 
-    class BMFMeta:
-        category = PROJECT
-
     def __str__(self):
         return self.name
 
@@ -88,7 +84,7 @@ class AbstractProject(BaseProject):
     class Meta(BaseProject.Meta):
         abstract = True
 
-    class BMFMeta(BaseProject.BMFMeta):
+    class BMFMeta:
         search_fields = ['name']
         has_logging = True
         has_comments = True

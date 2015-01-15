@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import SALES
 from djangobmf.settings import CONTRIB_CUSTOMER
 from djangobmf.settings import CONTRIB_QUOTATION
 from djangobmf.settings import CONTRIB_PROJECT
@@ -165,7 +164,6 @@ class AbstractQuotation(BMFModel):
         swappable = "BMF_CONTRIB_QUOTATION"
 
     class BMFMeta:
-        category = SALES
         observed_fields = ['quotation_number', 'net', 'state']
         has_files = True
         has_comments = True
