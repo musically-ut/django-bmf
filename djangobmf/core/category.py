@@ -16,6 +16,10 @@ class Category(object):
         #     raise
 
         self.data = OrderedDict()
+        self.key = self.slug
 
         for key, item in kwargs.items():
             self.data[key] = item
+
+    def merge(self, other):
+        pass
