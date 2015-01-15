@@ -1,4 +1,9 @@
-Version 0.2.1 (currently in development)
+Version 0.2.2 (currently in development)
+========================================
+
+
+
+Version 0.2.1 (2015-01-15)
 ========================================
 
 * Added docker Support
