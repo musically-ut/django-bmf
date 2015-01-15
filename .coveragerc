@@ -1,6 +1,7 @@
 [run]
 source=djangobmf
 branch=True
+omit=djangobmf/contrib/*/test*py
 
 [report]
 precision = 2
