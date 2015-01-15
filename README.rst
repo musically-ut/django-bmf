@@ -56,9 +56,7 @@ Credits
 ===========================
 
 * `django`_
-* django-filter
 * `django-mptt`_
-* xhtml2pdf
 
 .. _Github: https://github.com/django-bmf/django-bmf
 .. _Issue Tracker: https://github.com/django-bmf/django-bmf/issues
