@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
-"PO-Revision-Date: 2014-09-27 14:09+0000\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"PO-Revision-Date: 2015-01-15 05:10+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -18,34 +18,38 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:30
-msgid "Employee"
-msgstr "Mitarbeiter"
-
-#: models.py:31
+#: bmf_module.py:22 models.py:30
 msgid "Employees"
 msgstr "Mitarbeiter"
 
-#: models.py:62
+#: models.py:29
+msgid "Employee"
+msgstr "Mitarbeiter"
+
+#: models.py:58
 msgid "Name"
 msgstr "Name"
 
-#: models.py:63
+#: models.py:59
 msgid "Email"
 msgstr "Email"
 
-#: models.py:65
+#: models.py:61
 msgid "Phone office"
 msgstr "Telefon Büro"
 
-#: models.py:68
+#: models.py:64
 msgid "Phone mobile"
 msgstr "Handy"
 
-#: models.py:71
+#: models.py:67
 msgid "Fax"
 msgstr "Fax"
 
-#: models.py:77
+#: models.py:73
 msgid "Supervisor"
 msgstr "Vorgesetzter"
+
+#: views.py:13
+msgid "All Employees"
+msgstr ""

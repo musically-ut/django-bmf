@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
-"PO-Revision-Date: 2014-09-27 14:08+0000\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"PO-Revision-Date: 2015-01-15 05:10+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -17,20 +17,24 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:30
+#: bmf_module.py:20 models.py:39
+msgid "Taxes"
+msgstr "Steuern"
+
+#: models.py:29
 msgid ""
 "Tax is allways included in the product price and never visible to the "
 "customer"
 msgstr ""
 
-#: models.py:33
+#: models.py:32
 msgid "Is active"
 msgstr "Ist aktiv"
 
-#: models.py:39
+#: models.py:38
 msgid "Tax"
 msgstr "Steuer"
 
-#: models.py:40
-msgid "Taxes"
-msgstr "Steuern"
+#: views.py:12
+msgid "All Taxes"
+msgstr ""

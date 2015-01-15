@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
-"PO-Revision-Date: 2014-09-27 14:07+0000\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"PO-Revision-Date: 2015-01-15 05:10+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -18,54 +18,58 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:28
-msgid "Service"
-msgstr "Dienstleistung"
-
-#: models.py:36
-msgid "Has batch number"
-msgstr "Hat eine Chargennummer"
-
-#: models.py:37
-msgid "Has serial number"
-msgstr "Hat eine Seriennummer"
-
-#: models.py:48
-msgid "Name"
-msgstr "Name"
-
-#: models.py:54
-msgid "Product Code"
-msgstr ""
-
-#: models.py:61
-msgid "Product type"
-msgstr ""
-
-#: models.py:68
-msgid "Can be sold"
-msgstr ""
-
-#: models.py:71
-msgid "Can be purchased"
-msgstr ""
-
-#: models.py:73
-msgid "Description"
-msgstr "Beschreibung"
-
-#: models.py:78
-msgid "Price"
-msgstr "Preis"
-
-#: models.py:156
-msgid "Product"
-msgstr "Produkt"
-
-#: models.py:157
+#: bmf_module.py:36 models.py:156
 msgid "Products"
 msgstr "Produkte"
 
-#: models.py:224
+#: models.py:27
+msgid "Service"
+msgstr "Dienstleistung"
+
+#: models.py:35
+msgid "Has batch number"
+msgstr "Hat eine Chargennummer"
+
+#: models.py:36
+msgid "Has serial number"
+msgstr "Hat eine Seriennummer"
+
+#: models.py:47
+msgid "Name"
+msgstr "Name"
+
+#: models.py:53
+msgid "Product Code"
+msgstr ""
+
+#: models.py:60
+msgid "Product type"
+msgstr ""
+
+#: models.py:67
+msgid "Can be sold"
+msgstr ""
+
+#: models.py:70
+msgid "Can be purchased"
+msgstr ""
+
+#: models.py:72
+msgid "Description"
+msgstr "Beschreibung"
+
+#: models.py:77
+msgid "Price"
+msgstr "Preis"
+
+#: models.py:155
+msgid "Product"
+msgstr "Produkt"
+
+#: models.py:222
 msgid "Is the tax included in the price?"
+msgstr ""
+
+#: views.py:18
+msgid "All Products"
 msgstr ""

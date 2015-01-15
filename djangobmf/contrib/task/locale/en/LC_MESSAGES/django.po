@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-02 07:53+0100\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bmf_module.py:41 models.py:63
+#: bmf_module.py:45 models.py:75
 msgid "Goals"
 msgstr ""
 
-#: bmf_module.py:46 models.py:198
+#: bmf_module.py:50 models.py:232
 msgid "Tasks"
 msgstr ""
 
@@ -33,27 +33,27 @@ msgstr ""
 msgid "When copying unset the task's employee"
 msgstr ""
 
-#: models.py:38 models.py:175
+#: models.py:50 models.py:209
 msgid "Title"
 msgstr ""
 
-#: models.py:39 models.py:176
+#: models.py:51 models.py:210
 msgid "Description"
 msgstr ""
 
-#: models.py:57 models.py:192 workflows.py:23
+#: models.py:69 models.py:226 workflows.py:23
 msgid "Completed"
 msgstr ""
 
-#: models.py:62
+#: models.py:74
 msgid "Goal"
 msgstr ""
 
-#: models.py:177
+#: models.py:211
 msgid "Due date"
 msgstr ""
 
-#: models.py:197
+#: models.py:231
 msgid "Task"
 msgstr ""
 
@@ -70,27 +70,23 @@ msgstr ""
 msgid "Accomplished Tasks"
 msgstr ""
 
-#: templates/djangobmf_task/goal_bmfgeneric.html:8
-msgid "Project"
-msgstr ""
-
-#: templates/djangobmf_task/goal_bmfgeneric.html:12
+#: templates/djangobmf_task/goal_bmflist.html:5
 msgid "Summary"
 msgstr ""
 
-#: templates/djangobmf_task/goal_bmfgeneric.html:13
+#: templates/djangobmf_task/goal_bmflist.html:6
 msgid "Referee"
 msgstr ""
 
-#: templates/djangobmf_task/goal_bmfgeneric.html:14
+#: templates/djangobmf_task/goal_bmflist.html:7
 msgid "Current State"
 msgstr ""
 
-#: templates/djangobmf_task/goal_bmfgeneric.html:33
+#: templates/djangobmf_task/goal_bmflist.html:25
 msgid "completed"
 msgstr ""
 
-#: templates/djangobmf_task/goal_bmfrelated_project.html:7
+#: templates/djangobmf_task/goal_bmfrelated_project.html:10
 msgid "Current goals"
 msgstr ""
 
@@ -122,31 +118,31 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: views.py:22 views.py:46
+#: views.py:50 views.py:76
 msgid "Archive"
 msgstr ""
 
-#: views.py:28
+#: views.py:55
 msgid "Active Goals"
 msgstr ""
 
-#: views.py:37
+#: views.py:65
 msgid "My Goals"
 msgstr ""
 
-#: views.py:53
+#: views.py:82
 msgid "Open Tasks"
 msgstr ""
 
-#: views.py:62
+#: views.py:91
 msgid "Available Tasks"
 msgstr ""
 
-#: views.py:70
+#: views.py:100
 msgid "My Tasks"
 msgstr ""
 
-#: views.py:79
+#: views.py:110
 msgid "Todolist"
 msgstr ""
 
