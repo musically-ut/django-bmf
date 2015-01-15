@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # ex:set fileencoding=utf-8:
 # flake8: noqa
+# pragma: no cover
 
 from __future__ import unicode_literals
 

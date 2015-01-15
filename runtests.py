@@ -19,7 +19,6 @@ from djangobmf import currency as bmfcurrencies
 from djangobmf import reports as bmfreports
 
 from argparse import ArgumentParser
-from coverage import coverage
 from importlib import import_module
 from flake8.engine import get_style_guide
 

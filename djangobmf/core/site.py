@@ -22,8 +22,6 @@ from djangobmf.core.setting import Setting
 from djangobmf.models import NumberCycle
 from djangobmf.settings import APP_LABEL
 
-from collections import OrderedDict
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -61,7 +59,7 @@ class Site(object):
         self.reports = {}
 
         # all workspaces are stored here
-        self.workspace = OrderedDict()
+        self.workspaces = []
 
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
@@ -74,7 +72,7 @@ class Site(object):
 
     def activate(self, test=False):
 
-        if self.is_active or not test:
+        if self.is_active or not test:  # pragma: no cover
             return True
 
         # ~~~~ numbercycles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +80,7 @@ class Site(object):
         for model in self.numbercycles:
             ct = ContentType.objects.get_for_model(model)
             count = NumberCycle.objects.filter(ct=ct).count()
-            if not count:
+            if not count:  # pragma: no branch
                 obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
@@ -247,6 +245,16 @@ class Site(object):
 #   #                     ),
 #   #                 )
 #   #     return urlpatterns
+
+    def register_dashboards(self, *args):
+        for dashboard in args:
+            if dashboard in self.workspaces:
+                # merge
+                i = self.workspace.index(dashboard)
+                self.workspace[i].merge(dashboard)
+            else:
+                # append
+                self.workspaces.append(dashboard)
 
     def register_dashboard(self, dashboard):
 
