@@ -5,86 +5,117 @@ from __future__ import unicode_literals
 
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+# from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
+from django.core.paginator import Paginator
+from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.forms.fields import CharField
+from django.forms.fields import FloatField
+from django.forms.fields import DecimalField
+from django.forms.models import ModelChoiceField
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect, Http404, QueryDict
-from django.views.generic import View
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
+from django.views.generic import View
 from django.views.generic.base import TemplateView
-# from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseFormView
-from django.views.generic.dates import BaseDateListView
-from django.views.generic.dates import YearMixin
-from django.views.generic.dates import MonthMixin
-from django.views.generic.dates import WeekMixin
-from django.views.generic.dates import DayMixin
-from django.views.generic.dates import _date_from_string
-from django.views.generic.dates import _get_next_prev
+# from django.views.generic.dates import BaseDateListView
+# from django.views.generic.dates import YearMixin
+# from django.views.generic.dates import MonthMixin
+# from django.views.generic.dates import WeekMixin
+# from django.views.generic.dates import DayMixin
+# from django.views.generic.dates import _date_from_string
+# from django.views.generic.dates import _get_next_prev
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
 from django.views.generic.list import MultipleObjectTemplateResponseMixin
 from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
-from django.utils.encoding import force_text
-from django.utils.formats import get_format
-from django.utils.timezone import now
+from django.utils import six
+# from django.utils.formats import get_format
+# from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
 from djangobmf.document.forms import UploadDocument
-from djangobmf.document.models import Document
-# from djangobmf.document.views import DocumentCreateView
+from djangobmf.models import Document
 from djangobmf.models import Report
 from djangobmf.notification.forms import HistoryCommentForm
-from djangobmf.notification.models import Activity
-from djangobmf.notification.models import Notification
+from djangobmf.models import Activity
+from djangobmf.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
-# from .signals import activity_workflow
-from djangobmf.utils import form_class_factory
-from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
+# from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
 from djangobmf.viewmixins import ModuleClonePermissionMixin
 from djangobmf.viewmixins import ModuleCreatePermissionMixin
 from djangobmf.viewmixins import ModuleDeletePermissionMixin
 from djangobmf.viewmixins import ModuleUpdatePermissionMixin
+from djangobmf.viewmixins import ModuleSearchMixin
 from djangobmf.viewmixins import ModuleViewPermissionMixin
 from djangobmf.viewmixins import ModuleAjaxMixin
 from djangobmf.viewmixins import ModuleBaseMixin
 from djangobmf.viewmixins import ModuleViewMixin
 from djangobmf.viewmixins import NextMixin
 from djangobmf.viewmixins import ViewMixin
+# from djangobmf.sites import get_site
 
 import copy
-import datetime
+# import datetime
+import logging
 import operator
 import re
 import types
-import warnings
+import urllib
+# import warnings
+
 from functools import reduce
-from django_filters.views import FilterView
+# from django_filters.views import FilterView
+
+logger = logging.getLogger(__name__)
 
 
 # --- list views --------------------------------------------------------------
 
 
-class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
+class ModuleListView(
+        ModuleViewPermissionMixin, ModuleViewMixin,
+        MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
     """
     """
-    model = None  # set by workspace.views
-    workspace = None  # set by workspace.views
-    context_object_name = 'objects'
-    template_name_suffix = None
-    template_name = None
-    allow_empty = True
+    model = None  # set by workspace.views # TODO remove me
+    workspace = None  # set by workspace.views # TODO remove me
+    slug = None  # TODO: remove me
+
+    model = None  # set by sites
     name = None
-    slug = None
+
+    allow_empty = True
     paginate_by = None
+
+    date_field = 'modified'
+    date_resolution = 'year'
+    allow_future = False
+
+    # Use a different manager function, when available
+    manager = None
+
+    # use pagination
+    paginate = True
+
+    # we are providing the view with the list of objects
+    # even if the data sould be streamed via angular/json
+    # because django querysets are lazy
+    context_object_name = 'objects'
+
+    template_name = None
 
     def get_template_names(self):
         """
@@ -95,68 +126,69 @@ class ModuleGenericBaseView(ModuleViewPermissionMixin, ModuleViewMixin):
             return [self.template_name]
 
         names = []
-        if self.template_name_suffix:
-            names.append("%s/%s_bmfgeneric_%s.html" % (
-                self.model._meta.app_label,
-                self.model._meta.model_name,
-                self.template_name_suffix
-            ))
-
         names.append("%s/%s_bmfgeneric.html" % (
             self.model._meta.app_label,
             self.model._meta.model_name
         ))
-        if self.template_name_suffix:
-            names.append("djangobmf/module_generic_%s.html" % self.template_name_suffix)
-
-        names.append("djangobmf/module_generic_default.html")
+        names.append("djangobmf/module_generic.html")
 
         return names
 
+    def get_view_name(self):
+        if self.name:
+            return self.name
+        else:
+            return self.model._meta.verbose_name_plural
 
-class ModuleListView(ModuleGenericBaseView, MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
-    """
-    This view generates a simple parginated list
-    """
-    template_name_suffix = 'list'
+    def get_data_url(self):
+        url = reverse('%s:get' % self.model._bmfmeta.namespace_api)
+        args = {}
+
+        page = self.request.GET.get('page')
+
+        if page:
+            try:
+                args['page'] = int(page)
+            except ValueError:
+                pass
+
+        if self.manager:
+            args['manager'] = self.manager
+
+        if not self.paginate:
+            args['paginate'] = 'no'
+
+        if args:
+            if six.PY2:
+                return url + '?' + urllib.urlencode(args)
+            else:
+                return url + '?' + urllib.parse.urlencode(args)
+        else:
+            return url
+
+    def get_data_template(self):
+        return "%s/%s_bmflist.html" % (
+            self.model._meta.app_label,
+            self.model._meta.model_name
+        )
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'view_name': self.get_view_name(),
+            'data_template': select_template([
+                self.get_data_template(),
+                "djangobmf/module_list.html",
+            ]),
+            'get_data_url': self.get_data_url(),
+        })
+        return super(ModuleListView, self).get_context_data(**kwargs)
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data(object_list=self.object_list)
         return self.render_to_response(context)
 
-
-class ModuleFilterView(ModuleGenericBaseView, FilterView):
-    """
-    """
-    template_name_suffix = 'filter'
-
-    def get_context_data(self, **kwargs):
-        if self.filterset_class:
-            kwargs.update({
-                'has_filter': True,
-            })
-        else:
-            kwargs.update({
-                'has_filter': False,
-            })
-        return super(ModuleFilterView, self).get_context_data(**kwargs)
-
-
-class ModuleTreeView(ModuleGenericBaseView, FilterView):
-    """
-    This view generates a parginated list and tree navigation
-    """
-    template_name_suffix = 'tree'
-
-
-class ModuleCategoryView(ModuleGenericBaseView, FilterView):
-    """
-    TODO: Some mixin between Tree, List and Letter, probably with multiple categorie-items or workspace-states
-    """
-    template_name_suffix = 'category'
-
-
+'''
 class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
                         MultipleObjectTemplateResponseMixin, BaseDateListView):
     """
@@ -259,7 +291,7 @@ class ModuleLetterView(ModuleGenericBaseView, FilterView):
     navigation
     """
     template_name_suffix = 'letter'
-
+'''
 
 # --- detail, forms and api ---------------------------------------------------
 
@@ -356,7 +388,7 @@ class ModuleFormMixin(object):
                 self.form_class = modelform_factory(model, fields=self.fields)
             else:
                 self.form_class = modelform_factory(model, exclude=self.exclude)
-        return form_class_factory(self.form_class)
+        return self.form_class
 
 
 class ModuleDetailView(
@@ -366,6 +398,7 @@ class ModuleDetailView(
     """
     context_object_name = 'object'
     template_name_suffix = '_bmfdetail'
+    reports = []
 
     def get_related_views(self):
         # TODO: maybe cache this
@@ -374,6 +407,7 @@ class ModuleDetailView(
         open = self.request.GET.get("open", None)
         self._related_views = {}
         for rel in self.model._meta.get_all_related_objects():
+            # TODO add rel.field.name to reponse
             template = '%s/%s_bmfrelated_%s.html' % (
                 rel.model._meta.app_label,
                 rel.model._meta.model_name,
@@ -395,6 +429,7 @@ class ModuleDetailView(
 
     def get_context_data(self, **kwargs):
         kwargs.update({
+            'open_view': self.request.GET.get("open", None),
             'related_views': self.get_related_views(),
             'parent_template': select_template(self.get_template_names(related=False)),
             'related_objects': self.get_related_objects(),  # TODO add pagination
@@ -457,6 +492,101 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
         context = super(ModuleReportView, self).get_context_data(**kwargs)
         context['request'] = self.request
         return context
+
+
+class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
+    """
+    Provides an API to get object data
+    """
+    model = None  # set by workspace.views
+
+    # Limit Queryset length and activate pagination
+    limit = 100
+
+    def get_item_data(self, data):
+        # TODO write a more generic function, which provides basic data
+        l = []
+        for d in data:
+            l.append({
+                'pk': d.pk,
+                'name': str(d),
+                'url': d.bmfmodule_detail()
+            })
+        return l
+
+    def get(self, request):
+        pk = int(self.request.GET.get('pk', 0))
+
+        # activate pagination
+        pagination = not bool(self.request.GET.get('pagination', False))
+
+        search = self.request.GET.get('search', None)
+        page = self.request.GET.get('page', 1)
+
+        queryset = self.get_queryset(self.request.GET.get('manager', None))
+
+        # select only models connected to a related model
+        # defined by the models contenttype and pk
+        # the contentype pk and the objects id
+        # and the related fields name
+        related_field = self.request.GET.get('rel', None)
+        # related_ct = self.request.GET.get('relct', 0)
+        related_pk = self.request.GET.get('relpk', 0)
+        # related_model = None
+
+        if related_field and related_pk:
+            if hasattr(self.model, related_field):
+                queryset = queryset.filter(**{related_field: related_pk})
+
+        # search
+        if search:
+            if self.model._bmfmeta.search_fields:
+                for bit in self.normalize_query(search):
+                    lookups = [self.construct_search(str(f)) for f in self.model._bmfmeta.search_fields]
+                    queries = [Q(**{l: bit}) for l in lookups]
+                    queryset = queryset.filter(reduce(operator.or_, queries))
+            else:
+                queryset = []
+
+        if pagination and self.limit:
+            # pagination
+            paginator = Paginator(queryset, self.limit)
+            count = paginator.count
+            num_pages = paginator.num_pages
+            pages = paginator.page_range  # TODO move me to angular
+
+            try:
+                qs_data = paginator.page(self.request.GET.get('page', 1))
+            except PageNotAnInteger:
+                qs_data = paginator.page(1)
+            except EmptyPage:
+                qs_data = paginator.page(num_pages)
+
+            page = qs_data.number
+
+        else:
+            # no pagination
+            count = queryset.count()
+            num_pages = 1
+            qs_data = queryset
+            page = 1
+            pages = [1]  # TODO: move me to angular
+
+        return self.render_to_json_response({
+            'model': str(self.model),
+            'count': count,
+            'pk': pk,
+            'pagination': {
+                'enabled': pagination,
+                'page': page,
+                'pages': pages,  # TODO: move me to angular
+                'num_pages': num_pages,
+                'next': None,  # TODO: unused
+                'previous': None,  # TODO: unused
+            },
+            'search': search,
+            'items': self.get_item_data(qs_data),
+        })
 
 
 class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMixin, UpdateView):
@@ -611,7 +741,7 @@ class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFormView):
+class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleObjectMixin, BaseFormView):
     """
     """
     model = None
@@ -640,24 +770,80 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             })
         return obj
 
+    def get_field(self, form, auto_id):
+        """
+        Get the field from the auto_id value of this form
+        needed for ajax-interaction (search)
+        """
+        for field in form:
+            if field.auto_id == auto_id:
+                return field
+        return None
+
+    def get_all_fields(self, form):
+        """
+        Get all the fields in this form
+        needed for ajax-interaction (changed value)
+        """
+        return [field for field in form]
+
+    def get_changes(self, form):
+        """
+        needed for ajax calls. return fields, which changed between the validation
+        """
+        # do form validation
+        valid = form.is_valid()
+
+        # also do model clean's, which are usually done, if the model is valid
+        try:
+            form.instance.clean()
+        except ValidationError:
+            pass
+
+        data = []
+        for field in self.get_all_fields(form):
+            # input-type fields
+            val_instance = getattr(field.form.instance, field.name, None)
+
+            if isinstance(field.field, (CharField, DecimalField, FloatField)):
+                if not field.value() and val_instance:
+                    data.append({'field': field.auto_id, 'value': val_instance})
+                continue
+            if isinstance(field.field, ModelChoiceField):
+                try:  # inline formsets cause a attribute errors
+                    if val_instance and field.value() != str(val_instance.pk):
+                        data.append({'field': field.auto_id, 'value': val_instance.pk, 'name': str(val_instance)})
+                except AttributeError:
+                    pass
+                continue
+            logger.info("Formatting is missing for %s" % field.field.__class__)
+
+        logger.debug("Form (%s) changes: %s" % (
+            'valid' if valid else 'invalid',
+            data
+        ))
+
+        return valid, data
+
     def get(self, request, *args, **kwargs):
         # dont react on get requests
         raise Http404
 
     def post(self, request, *args, **kwargs):
         form_class = self.form_view(model=self.model, object=self.get_object()).get_form_class()
+        data = self.request.POST['form'].encode('ASCII')
         form = form_class(
             prefix=self.get_prefix(),
-            data=QueryDict(self.request.POST['form']),
+            data=QueryDict(data),
             instance=self.get_object())
 
         if "search" in self.request.GET:
             # do form validation to fill form.instance with data
             valid = form.is_valid()
 
-            field = form.get_field(self.request.POST['field'])
+            field = self.get_field(form, self.request.POST['field'])
             if not field:
-                # TODO ADD LOGGING
+                logger.info("Field %s was not found" % self.request.POST['field'])
                 raise Http404
             qs = field.field.queryset
 
@@ -682,7 +868,8 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
             """
             validate one form and compare it to an new form created with the validated instance
             """
-            valid, data = form.get_changes()
+            valid, data = self.get_changes(form)
+
             return self.render_to_json_response(data)
         raise Http404
 
@@ -693,31 +880,6 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, SingleObjectMixin, BaseFor
         })
         return kwargs
 
-    def normalize_query(
-            self, query_string, findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
-            normspace=re.compile(r'\s{2,}').sub):
-        '''
-        Splits the query string in invidual keywords, getting rid of unecessary spaces
-        and grouping quoted words together.
-
-        Example:
-        > self.normalize_query('  some random  words "with   quotes  " and   spaces')
-        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
-
-        '''
-        return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
-
-    # Apply keyword searches.
-    def construct_search(self, field_name):
-        if field_name.startswith('^'):
-            return "%s__istartswith" % field_name[1:]
-        elif field_name.startswith('='):
-            return "%s__iexact" % field_name[1:]
-        elif field_name.startswith('@'):
-            return "%s__search" % field_name[1:]
-        else:
-            return "%s__icontains" % field_name
-
 
 # --- misc --------------------------------------------------------------------
 
@@ -726,40 +888,20 @@ class ModuleOverviewView(ViewMixin, TemplateView):
     template_name = "djangobmf/modules.html"
 
     def get_context_data(self, **kwargs):
-        from .sites import site
 
         modules = []
-        for ct, model in site.models.items():
-            info = model._meta.app_label, model._meta.model_name
-            perm = '%s.view_%s' % info
-            if self.request.user.has_perms([perm, ]):
-                key = force_text(model._bmfmeta.category)
-                modules.append({
-                    'category': key,
-                    'model': model,
-                    'name': model._meta.verbose_name_plural,
-                    'url': model._bmfmeta.url_namespace + ':index',
-                })
+        # for ct, model in get_site().models.items():
+        #     info = model._meta.app_label, model._meta.model_name
+        #     perm = '%s.view_%s' % info
+        #     if self.request.user.has_perms([perm, ]):
+        #         key = force_text(model._bmfmeta.category)
+        #         modules.append({
+        #             'category': key,
+        #             'model': model,
+        #             'url': reverse('%s:list' % model._bmfmeta.namespace_api),
+        #             'name': model._meta.verbose_name_plural,
+        #         })
 
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)
         context['modules'] = modules
         return context
-
-
-# --- old ---------------------------------------------------------------------
-
-
-class ModuleIndexView(ModuleListView):
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "ModuleIndexView is is deprecated - use ModuleListView",
-            RemovedInNextBMFVersionWarning, stacklevel=2)
-        super(ModuleIndexView, self).__init__(*args, **kwargs)
-
-
-class ModuleGenericListView(ModuleListView):
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "ModuleGenericListView is is deprecated - use ModuleListView",
-            RemovedInNextBMFVersionWarning, stacklevel=2)
-        super(ModuleGenericListView, self).__init__(*args, **kwargs)

@@ -1,17 +1,26 @@
 {% extends parent_template %}
 
-{% load i18n %}
+{% load sekizai_tags i18n %}
+
+{% block content_container %} ng-app="bmfApp" ng-controller="bmfListCtrl"{% endblock %}
 
 {% block base_content %}
 {{ block.super }}
+
 <h2>{% trans "Current goals" %}</h2>
 
-<p>all</p>
+{% block angular %}{% addtoblock "js" %}<script type="text/javascript"><!--
+    var bmfApp = angular.module('bmfApp', []);
+    bmfApp.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    }]);
+    bmfApp.controller('bmfListCtrl', function($scope, $http) {
+            $http.get('/api/module/27/get/?relpk={{ object.pk }}&rel=project').then(function(artResponse){
+                $scope.data = artResponse.data;
+            });
+    });
+--></script>{% endaddtoblock %}{% endblock %}
 
-{{ related_objects.all }}
-
-{% if related_objects.all %}<ul>{% for obj in related_objects.all %}
-    <li class="checklist"><span class="glyphicon glyphicon-unchecked"></span><p><a href="{{ obj.bmfmodule_detail }}">{{ obj }}</a></p></li>
-{% endfor %}</ul>{% endif %}
+{% include "djangobmf_task/goal_bmflist.html" %}
 
 {% endblock %}

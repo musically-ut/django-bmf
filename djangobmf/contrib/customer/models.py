@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import SALES
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_ACCOUNT
 
@@ -80,7 +79,6 @@ class BaseCustomer(BMFModel):
         swappable = "BMF_CONTRIB_CUSTOMER"
 
     class BMFMeta:
-        category = SALES
         search_fields = ['name', ]
         has_logging = True
         has_comments = True

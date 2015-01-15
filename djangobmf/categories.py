@@ -5,24 +5,21 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-SETTINGS = _('Settings')  # OLD
-CR = _('Customer Relationship')  # OLD
-HR = _('Human Resources')  # OLD
-SALES = _('Sales')  # OLD
-ACCOUNTING = _('Accounting')  # OLD
-PURCHASES = _('Purchases')  # OLD
-WAREHOUSE = _('Warehouse')  # OLD
-KNOWLEDGE = _('Knowledge')  # OLD AND UNUSED
-DOCUMENT = _('Documents')  # OLD
-PROJECT = _('Projects')  # OLD
+from djangobmf.core.dashboard import Dashboard as BaseDashboard
+from djangobmf.core.category import Category as BaseCategory
 
 
-class BaseDashboard(object):
-    pass
-
-
-class BaseCategory(object):
-    pass
+__all__ = [
+    'BaseDashboard',
+    'BaseCategory',
+    'ProjectManagement',
+    'DocumentManagement',
+    'Sales',
+    'CustomerRelationship',
+    'Accounting',
+    'Warehouse',
+    'TimeAndAttendance',
+]
 
 
 # --- Predefined Dashboards ---------------------------------------------------
@@ -61,3 +58,8 @@ class Accounting(BaseDashboard):
 class Warehouse(BaseDashboard):
     name = _('Warehouse')
     slug = "warehouse"
+
+
+class TimeAndAttendance(BaseDashboard):
+    name = _('Time and attendance')
+    slug = "attendance"

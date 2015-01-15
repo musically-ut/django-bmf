@@ -4,12 +4,12 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+# from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
-from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
-from django.db.models.query import QuerySet
+# from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -21,12 +21,14 @@ from djangobmf import get_version
 from djangobmf.decorators import login_required
 from djangobmf.models import Notification
 from djangobmf.models import Workspace
+from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
 
 from collections import OrderedDict
 
 import json
 import datetime
+import re
 try:
     from urllib import parse
 except ImportError:
@@ -41,12 +43,15 @@ class BaseMixin(object):
     provides functionality used in EVERY view throughout the application.
     this is used so we don't neet to define a middleware
     """
+    permissions = []
 
     def get_permissions(self, permissions=[]):
         """
         returns a list of (django) permissions and use them in dispatch to
         determinate if the user can view the page, he requested
         """
+        for perm in self.permissions:
+            permissions.append(perm)
         return permissions
 
     def check_permissions(self):
@@ -257,7 +262,7 @@ class AjaxMixin(BaseMixin):
         return self.request.is_ajax() and super(AjaxMixin, self).check_permissions()
 
     def render_to_json_response(self, context, **response_kwargs):
-        data = json.dumps(context, cls=DjangoJSONEncoder)
+        data = json.dumps(context, cls=DjangoBMFEncoder)
         response_kwargs['content_type'] = 'application/json'
         return HttpResponse(data, **response_kwargs)
 
@@ -376,26 +381,45 @@ class ModuleDeletePermissionMixin(object):
 class ModuleBaseMixin(object):
     model = None
 
-    def get_queryset(self):
-        if self.queryset is not None:
-            queryset = self.queryset
-            if isinstance(queryset, QuerySet):
-                queryset = queryset.all()
+    def get_queryset(self, manager=None):
+        """
+        Return the list of items for this view.
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.model and manager and hasattr(self.model._default_manager, manager):
+            qs = getattr(self.model._default_manager, manager)(self.request)
         elif self.model is not None:
-            queryset = self.model._default_manager.all()
+            qs = self.model._default_manager.all()
         else:
             raise ImproperlyConfigured(
                 "%(cls)s is missing a QuerySet. Define "
-                "%(cls)s.model, %(cls)s.queryset, or override "
-                "%(cls)s.get_queryset()." % {
+                "%(cls)s.model " % {
                     'cls': self.__class__.__name__
                 }
             )
 
+#       return qs
+
+#   def get_queryset(self):
+#       if self.queryset is not None:
+#           queryset = self.queryset
+#           if isinstance(queryset, QuerySet):
+#               queryset = queryset.all()
+#       elif self.model is not None:
+#           queryset = self.model._default_manager.all()
+#       else:
+#           raise ImproperlyConfigured(
+#               "%(cls)s is missing a QuerySet. Define "
+#               "%(cls)s.model, %(cls)s.queryset, or override "
+#               "%(cls)s.get_queryset()." % {
+#                   'cls': self.__class__.__name__
+#               }
+#           )
+
         # load employee and team data into user
         user_add_bmf(self.request.user)
 
-        return self.model.has_permissions(queryset, self.request.user)
+        return self.model.has_permissions(qs, self.request.user)
 
     def get_object(self):
         if hasattr(self, 'object'):
@@ -406,16 +430,15 @@ class ModuleBaseMixin(object):
         info = self.model._meta.app_label, self.model._meta.model_name
         kwargs.update({
             'bmfmodule': {
-                'namespace_index': self.model._bmfmeta.url_namespace + ':index',
                 'verbose_name_plural': self.model._meta.verbose_name_plural,
                 'create_views': self.model._bmfmeta.create_views,
                 'model': self.model,
+                # 'contenttype': ContentType.objects.get_for_model(self.model).pk,
                 'has_report': self.model._bmfmeta.has_report,
                 'can_clone': self.model._bmfmeta.can_clone and self.request.user.has_perms([
                     '%s.view_%s' % info,
                     '%s.clone_%s' % info,
                 ]),
-                # 'namespace': self.model._bmfmeta.url_namespace,  # unused
                 # 'verbose_name': self.model._meta.verbose_name,  # unused
             },
         })
@@ -460,3 +483,34 @@ class ModuleViewMixin(ModuleBaseMixin, ViewMixin):
     variables for bmf-views
     """
     pass
+
+
+class ModuleSearchMixin(object):
+    """
+    Adds the methods ``normalize_query`` and ``construct_search``
+    """
+
+    def normalize_query(
+            self, query_string, findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+            normspace=re.compile(r'\s{2,}').sub):
+        '''
+        Splits the query string in invidual keywords, getting rid of unecessary spaces
+        and grouping quoted words together.
+
+        Example:
+        > self.normalize_query('  some random  words "with   quotes  " and   spaces')
+        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
+
+        '''
+        return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
+
+    # Apply keyword searches.
+    def construct_search(self, field_name):
+        if field_name.startswith('^'):
+            return "%s__istartswith" % field_name[1:]
+        elif field_name.startswith('='):
+            return "%s__iexact" % field_name[1:]
+        elif field_name.startswith('@'):
+            return "%s__search" % field_name[1:]
+        else:
+            return "%s__icontains" % field_name

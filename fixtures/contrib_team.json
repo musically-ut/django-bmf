@@ -34,8 +34,7 @@
   "name": "All Users",
   "modified_by": 1,
   "created_by": 1,
-  "created": "2014-08-28T08:58:01.720Z",
-  "uuid": null
+  "created": "2014-08-28T08:58:01.720Z"
  }
 },
 {
@@ -46,8 +45,7 @@
   "name": "Not Admin",
   "modified_by": 1,
   "created_by": 1,
-  "created": "2014-08-28T08:58:49.337Z",
-  "uuid": null
+  "created": "2014-08-28T08:58:49.337Z"
  }
 }
 ]

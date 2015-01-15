@@ -45,7 +45,7 @@ class DashboardView(ViewMixin, DetailView):
                     'category': key,
                     'model': model,
                     'name': model._meta.verbose_name_plural,
-                    'url': model._bmfmeta.url_namespace + ':index'
+                    # 'url': model._bmfmeta.url_namespace + ':index'
                 })
 
         context['modules'] = models

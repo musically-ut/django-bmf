@@ -22,6 +22,7 @@ class TestWorkflow(Workflow):
 class TestView(BMFModel):
     state = WorkflowField()
     field = models.CharField(max_length=3)
+    field_b = models.CharField(max_length=4, blank=True, null=True)
 
     class BMFMeta:
         has_files = True

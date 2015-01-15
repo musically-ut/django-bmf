@@ -9,15 +9,14 @@ models doctype
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Sum
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.categories import ACCOUNTING
+from djangobmf.currency import Wallet
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
 from djangobmf.fields import WorkflowField
-from djangobmf.models import BMFMPTTModel
+from djangobmf.models import BMFModelMPTT
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_ACCOUNT
 from djangobmf.settings import CONTRIB_PROJECT
@@ -25,7 +24,6 @@ from djangobmf.settings import CONTRIB_TRANSACTION
 
 from .workflows import TransactionWorkflow
 
-from decimal import Decimal
 from mptt.models import TreeForeignKey
 
 ACCOUNTING_INCOME = 10
@@ -51,7 +49,7 @@ ACCOUNTING_TYPES = (
 
 
 @python_2_unicode_compatible
-class BaseAccount(BMFMPTTModel):
+class BaseAccount(BMFModelMPTT):
     """
     Accounts
 
@@ -78,24 +76,11 @@ class BaseAccount(BMFMPTTModel):
     )
     read_only = models.BooleanField(_('Read-only'), default=False)
 
-    def get_balance(self):
-        items = [self.pk] + list(self.get_descendants().values_list('pk', flat=True))
-        bal_credit = TransactionItem.objects.filter(
-            account__in=items,
-            balanced=True,
-            credit=True,
-        ).aggregate(Sum('amount'))
-        bal_debit = TransactionItem.objects.filter(
-            account__in=items,
-            balanced=True,
-            credit=False,
-        ).aggregate(Sum('amount'))
-        number_credit = bal_credit['amount__sum'] or Decimal(0)
-        number_debit = bal_debit['amount__sum'] or Decimal(0)
+    def credit_increase(self):
         if self.type in [ACCOUNTING_ASSET, ACCOUNTING_EXPENSE]:
-            return (number_debit - number_credit).quantize(Decimal('0.01'))
+            return False
         else:
-            return (number_credit - number_debit).quantize(Decimal('0.01'))
+            return True
 
     class Meta:
         verbose_name = _('Account')
@@ -105,7 +90,6 @@ class BaseAccount(BMFMPTTModel):
         swappable = "BMF_CONTRIB_ACCOUNT"
 
     class BMFMeta:
-        category = ACCOUNTING
         observed_fields = ['name', ]
 
     class MPTTMeta:
@@ -180,7 +164,6 @@ class BaseTransaction(BMFModel):
         swappable = "BMF_CONTRIB_TRANSACTION"
 
     class BMFMeta:
-        category = ACCOUNTING
         observed_fields = ['expensed', 'text']
         has_files = True
         workflow = TransactionWorkflow
@@ -188,6 +171,31 @@ class BaseTransaction(BMFModel):
 
     def __str__(self):
         return '%s' % self.text
+
+    def calc_balance(self):
+        if hasattr(self, '_calc_balance'):
+            return self._calc_balance
+
+        credit = Wallet()
+        debit = Wallet()
+
+        for i in self.items.all():
+            if i.credit:
+                credit += i.amount
+            else:
+                debit += i.amount
+
+        self._calc_balance = (credit == debit, credit, debit)
+        return self._calc_balance
+
+    def is_balanced(self):
+        return self.calc_balance()[0]
+
+    def balance_credit(self):
+        return self.calc_balance()[1]
+
+    def balance_debit(self):
+        return self.calc_balance()[2]
 
 
 class Transaction(BaseTransaction):
@@ -232,7 +240,6 @@ class BaseTransactionItem(BMFModel):
         swappable = "BMF_CONTRIB_TRANSACTIONITEM"
 
     class BMFMeta:
-        category = ACCOUNTING
         has_logging = False
 
 # def set_debit(self, amount):

@@ -15,7 +15,6 @@ from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_TEAM
 from djangobmf.settings import CONTRIB_GOAL
-from djangobmf.categories import PROJECT
 
 from .workflows import GoalWorkflow
 from .workflows import TaskWorkflow
@@ -26,7 +25,20 @@ from math import floor
 class GoalManager(models.Manager):
 
     def get_queryset(self):
-        return super(GoalManager, self).get_queryset().select_related('project')
+        return super(GoalManager, self) \
+            .get_queryset() \
+            .select_related('project')
+
+    def active(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+        )
+
+    def mygoals(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+            referee=getattr(request.user, 'djangobmf_employee', -1),
+        )
 
 
 @python_2_unicode_compatible
@@ -84,7 +96,7 @@ class AbstractGoal(BMFModel):
         return '%s' % (self.summary)
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
             return qs
 
@@ -142,7 +154,6 @@ class AbstractGoal(BMFModel):
 
     class BMFMeta:
         has_logging = False
-        category = PROJECT
         workflow = GoalWorkflow
         workflow_field = 'state'
         can_clone = True
@@ -156,13 +167,36 @@ class TaskManager(models.Manager):
 
     def get_queryset(self):
 
-        related = ['goal']
-        related.append('project')
+        related = ['goal', 'project']
 
         return super(TaskManager, self).get_queryset() \
             .annotate(due_count=models.Count('due_date')) \
             .order_by('-due_count', 'due_date', 'summary') \
             .select_related(*related)
+
+    def active(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+        )
+
+    def availalbe(self, request):
+        return self.get_queryset().filter(
+            employee=None,
+            completed=False,
+        )
+
+    def mytasks(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+            employee=getattr(request.user, 'djangobmf_employee', -1),
+        )
+
+    def todo(self, request):
+        return self.get_queryset().filter(
+            completed=False,
+            state__in=["todo", "started", "review"],
+            employee=getattr(request.user, 'djangobmf_employee', -1),
+        )
 
 
 @python_2_unicode_compatible
@@ -204,7 +238,7 @@ class AbstractTask(BMFModel):
         return '#%s: %s' % (self.pk, self.summary)
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         qs_filter = Q(project__isnull=True, goal__isnull=True)
         qs_filter |= Q(employee=getattr(user, 'djangobmf_employee', -1))
         qs_filter |= Q(in_charge=getattr(user, 'djangobmf_employee', -1))
@@ -257,7 +291,6 @@ class AbstractTask(BMFModel):
         has_comments = True
         workflow = TaskWorkflow
         workflow_field = 'state'
-        category = PROJECT
 
 
 class Task(AbstractTask):

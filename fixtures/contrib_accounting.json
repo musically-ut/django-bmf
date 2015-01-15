@@ -16,7 +16,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 1
  },
  "pk": 1,
@@ -39,7 +38,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 2
  },
  "pk": 2,
@@ -62,7 +60,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 3
  },
  "pk": 3,
@@ -85,7 +82,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 4
  },
  "pk": 4,
@@ -108,7 +104,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": "",
   "tree_id": 5
  },
  "pk": 5,
@@ -131,7 +126,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 2
  },
  "pk": 6,
@@ -154,7 +148,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 2
  },
  "pk": 7,
@@ -177,7 +170,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 3
  },
  "pk": 8,
@@ -200,7 +192,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 3
  },
  "pk": 9,
@@ -223,7 +214,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 3
  },
  "pk": 10,
@@ -246,7 +236,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 4
  },
  "pk": 11,
@@ -269,7 +258,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 4
  },
  "pk": 12,
@@ -292,7 +280,6 @@
   "modified_by": 1,
   "created": null,
   "balance": "0",
-  "uuid": null,
   "tree_id": 2
  },
  "pk": 13,
@@ -315,7 +302,6 @@
   "modified_by": 1,
   "created": "2014-07-25T12:17:32.762Z",
   "balance": "0",
-  "uuid": null,
   "tree_id": 2
  },
  "pk": 14,
@@ -338,7 +324,6 @@
   "modified_by": 1,
   "created": "2014-07-25T12:17:58.154Z",
   "balance": "0",
-  "uuid": null,
   "tree_id": 2
  },
  "pk": 15,
@@ -361,7 +346,6 @@
   "modified_by": 1,
   "created": "2014-07-25T12:19:20.988Z",
   "balance": "0",
-  "uuid": null,
   "tree_id": 3
  },
  "pk": 16,

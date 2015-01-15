@@ -15,7 +15,7 @@ from django.test.utils import get_runner
 from django.utils import six
 
 from djangobmf import contrib as bmfcontrib
-from djangobmf import currencies as bmfcurrencies
+from djangobmf import currency as bmfcurrencies
 from djangobmf import reports as bmfreports
 
 from argparse import ArgumentParser
@@ -42,6 +42,9 @@ def main(modules, verbosity=2, failfast=False, contrib=None, nocontrib=False):
     )
     styleguide.options.report.start()
     styleguide.input_dir("djangobmf")
+    # styleguide.input_dir("sandbox")
+    # styleguide.input_dir("tests")
+    # styleguide.input_dir("docs")
     styleguide.options.report.stop()
     if styleguide.options.report.get_count() > 0:
         sys.exit(True)
@@ -90,7 +93,7 @@ def main(modules, verbosity=2, failfast=False, contrib=None, nocontrib=False):
             if os.path.isdir(os.path.join(path, module)):
                 if module[0] == '_':
                     continue
-                settings.INSTALLED_APPS += ('djangobmf.currencies.%s' % module, )
+                settings.INSTALLED_APPS += ('djangobmf.currency.%s' % module, )
 
         # add reports to INSTALLED_APPS
         if six.PY2:
@@ -161,13 +164,13 @@ if __name__ == '__main__':
     options = parser.parse_args()
 
     if options.contrib:
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings'
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings_venv'
 
     if options.settings:
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings
     else:
         if "DJANGO_SETTINGS_MODULE" not in os.environ:
-            os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.test_sqlite'
+            os.environ['DJANGO_SETTINGS_MODULE'] = 'sandbox.settings_test'
 
     main(
         options.modules,

@@ -10,20 +10,23 @@ from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Quotation
+from .models import QuotationProduct
 from .views import OpenQuotationView
 from .views import AllQuotationView
 from .views import QuotationCreateView
 from .views import QuotationDetailView
 from .views import QuotationUpdateView
-from .views import QuotationTableView
 
 
-site.register(Quotation, **{
-    'index': QuotationTableView,
+site.register_module(Quotation, **{
     'create': QuotationCreateView,
     'detail': QuotationDetailView,
     'update': QuotationUpdateView,
     'report': True,
+})
+
+
+site.register_module(QuotationProduct, **{
 })
 
 

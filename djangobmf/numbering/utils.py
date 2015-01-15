@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 
 import re
 
-from .models import NumberCycle
+from djangobmf.models import NumberCycle
 from .validators import match_y
 
 

@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 
 from .models import Customer
-from ...testcase import BMFModuleTestCase
+from djangobmf.utils.testcases import BaseTestCase
+from djangobmf.utils.testcases import ModuleMixin
 
-class CustomerTests(BMFModuleTestCase):
+class CustomerTests(ModuleMixin, BaseTestCase):
 
     def test_get_urls(self):
         """
@@ -30,11 +31,11 @@ class CustomerTests(BMFModuleTestCase):
         }, kwargs={'key': 'customer'})
         self.assertNotEqual(data["object_pk"], 0)
 
-        self.autotest_get('index', 200)
+#       self.autotest_get('index', 200)
 
         obj = self.get_latest_object()
 
-        self.autotest_get('detail', kwargs={'pk': obj.pk})
+        self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
         data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
         self.autotest_get('delete', kwargs={'pk': obj.pk})
        #obj.project.delete()

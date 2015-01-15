@@ -7,8 +7,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
-from djangobmf.categories import SALES
-from djangobmf.currencies import BaseCurrency
+from djangobmf.currency import BaseCurrency
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_ACCOUNT
 from djangobmf.settings import CONTRIB_TAX
@@ -160,7 +159,6 @@ class AbstractProduct(BMFModel):
         swappable = "BMF_CONTRIB_PRODUCT"
 
     class BMFMeta:
-        category = SALES
         search_fields = ['name', 'code']
 
     def __str__(self):

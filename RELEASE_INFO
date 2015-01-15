@@ -1,0 +1,12 @@
+
+- create a release branch
+- bump version (setup.py and bowser.json)
+- build newest englisch translations (django + djangojs)
+- push translations
+- pull translations
+- compile translations
+
+- pypi:
+  python setup.py register
+  python setup.py bdist_wheel upload
+  python setup.py sdist upload

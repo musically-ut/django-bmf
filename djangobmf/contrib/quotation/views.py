@@ -3,52 +3,45 @@
 
 from __future__ import unicode_literals
 
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-from djangobmf.views import ModuleIndexView
 from djangobmf.views import ModuleDetailView
 
-from .forms import BMFQuotationUpdateForm
-from .forms import BMFQuotationCreateForm
-
-from .filters import QuotationFilter
-
-import datetime
+from .forms import QuotationUpdateForm
+from .forms import QuotationCreateForm
 
 
-class AllQuotationView(ModuleArchiveView):
+class AllQuotationView(ModuleListView):
     name = _("All Quotations")
     slug = "all"
-    filterset_class = QuotationFilter
 
 
 class OpenQuotationView(ModuleListView):
     name = _("Open Quotations")
     slug = "open"
-    filterset_class = QuotationFilter
+
+    def get_queryset(self):
+        return super(OpenQuotationView, self).get_queryset().filter(completed=False)
 
 
 class QuotationCreateView(ModuleCreateView):
-    form_class = BMFQuotationCreateForm
+    form_class = QuotationCreateForm
 
     def get_initial(self):
-        self.initial.update({'date': datetime.datetime.now()})
-        # LOOK ... this does not work in every case ?!?!
-        # self.initial.update({'employee': self.request.djangobmf_employee.pk})
+        self.initial.update({
+            'date': now(),
+            'employee': getattr(self.request, 'djangobmf_employee', None),
+        })
         return super(QuotationCreateView, self).get_initial()
 
 
 class QuotationUpdateView(ModuleUpdateView):
-    form_class = BMFQuotationUpdateForm
+    form_class = QuotationUpdateForm
 
 
 class QuotationDetailView(ModuleDetailView):
-    form_class = BMFQuotationUpdateForm
-
-
-class QuotationTableView(ModuleIndexView):
-    filterset_class = QuotationFilter
+    pass

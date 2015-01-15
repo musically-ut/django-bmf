@@ -13,18 +13,16 @@ from djangobmf.sites import site
 from .models import Position
 from .views import OpenPositionView
 from .views import AllPositionView
-from .views import PositionTableView
 from .views import PositionDetailView
 from .views import PositionUpdateView
 from .views import PositionCreateView
 from .views import PositionAPI
 
-site.register(Position, **{
-    'index': PositionTableView,
+site.register_module(Position, **{
     'create': PositionCreateView,
     'update': PositionUpdateView,
     'detail': PositionDetailView,
-    'urlpatterns': patterns(
+    'api_urlpatterns': patterns(
         '',
         url(r'^api/$', PositionAPI.as_view(), name="api"),
     ),

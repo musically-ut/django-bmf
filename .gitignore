@@ -7,7 +7,10 @@
 /\.coverage*
 /coverage\.xml
 /junit\.xml
+/build
+/dist
 /reports
+/bower_components
 /htmlcov
 /django_bmf\.egg-info
 /virtenv

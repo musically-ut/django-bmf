@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import ACCOUNTING
 from djangobmf.settings import CONTRIB_CUSTOMER
 from djangobmf.settings import CONTRIB_PRODUCT
 from djangobmf.settings import CONTRIB_PROJECT
@@ -59,7 +58,6 @@ class BaseInvoice(BMFModel):
         return '%s' % self.invoice_number
 
     class BMFMeta:
-        category = ACCOUNTING
         number_cycle = "INV{year}/{month}-{counter:04d}"
         workflow = InvoiceWorkflow
         workflow_field = 'state'
@@ -162,7 +160,7 @@ class Invoice(AbstractInvoice):
     pass
 
 
-class InvoiceProduct(models.Model):
+class InvoiceProduct(BMFModel):
     invoice = models.ForeignKey(
         CONTRIB_INVOICE, null=True, blank=True,
         related_name="invoice_products", on_delete=models.CASCADE,
@@ -181,18 +179,8 @@ class InvoiceProduct(models.Model):
     # unit = models.CharField() # TODO add units
     description = models.TextField(_("Description"), null=True, blank=True)
 
-    def __init__(self, *args, **kwargs):
-        super(InvoiceProduct, self).__init__(*args, **kwargs)
-        self._calcs = None
-
-    def clean(self):
-        if self.product and not self.name:
-            self.name = self.product.name
-        if self.product and not self.price:
-            self.price = self.product.price
-
     def calc_all(self):
-        if self._calcs:
+        if hasattr(self, '_calcs'):
             return self._calcs
         self._calcs = self.product.calc_tax(self.amount, self.price)
         return self._calcs
@@ -208,3 +196,9 @@ class InvoiceProduct(models.Model):
 
     def calc_taxes(self):
         return self.calc_all()[3]
+
+    def clean(self):
+        if self.product and not self.name:
+            self.name = self.product.name
+        if self.product and not self.price:
+            self.price = self.product.price

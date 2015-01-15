@@ -18,20 +18,24 @@ from .views import MyTaskView
 from .views import OpenTaskView
 from .views import TodoTaskView
 
+from .views import TaskGetView
+
 from .views import ActiveGoalView
 from .views import ArchiveGoalView
 from .views import MyGoalView
 
 from .views import GoalCloneView
 from .views import GoalDetailView
+from .views import GoalGetView
 
 
-site.register(Task, **{
-    'index': ArchiveTaskView,
+site.register_module(Task, **{
+    'get': TaskGetView,
 })
 
-site.register(Goal, **{
-    'index': ArchiveGoalView,
+
+site.register_module(Goal, **{
+    'get': GoalGetView,
     'clone': GoalCloneView,
     'detail': GoalDetailView,
 })

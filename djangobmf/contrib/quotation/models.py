@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from djangobmf.models import BMFModel
-from djangobmf.categories import SALES
 from djangobmf.settings import CONTRIB_CUSTOMER
 from djangobmf.settings import CONTRIB_QUOTATION
 from djangobmf.settings import CONTRIB_PROJECT
@@ -73,12 +72,18 @@ class AbstractQuotation(BMFModel):
         on_delete=models.PROTECT,
     )
     quotation_number = models.CharField(_('Quotation number'), max_length=255, null=True, blank=False)
-    products = models.ManyToManyField(CONTRIB_PRODUCT, blank=False, through='QuotationProduct')
+    products = models.ManyToManyField(
+        CONTRIB_PRODUCT,
+        through='QuotationProduct',
+        editable=False,
+    )
     net = models.FloatField(editable=False, blank=True, null=True)
     date = models.DateField(_("Date"), null=True, blank=False)
     valid_until = models.DateField(_("Valid until"), null=True, blank=True)
     notes = models.TextField(_("Notes"), null=True, blank=True)
     term_of_payment = models.TextField(_("Term of payment"), blank=True, null=True)
+
+    completed = models.BooleanField(_("Completed"), default=False, editable=False)
 
     def __init__(self, *args, **kwargs):
         super(AbstractQuotation, self).__init__(*args, **kwargs)
@@ -98,12 +103,10 @@ class AbstractQuotation(BMFModel):
         return None
 
     def clean(self):
-        # if self.project and not self.customer_id:
-        #   self.customer = self.project.customer
-        # if self.project and not self.employee_id:
-        #   self.employee_id = self.project.employee_id
-        # if self.customer and not self.project_id:
-        #   self.project = self.customer.project
+        if self.project and not self.customer_id:
+            self.customer = self.project.customer
+        if self.customer and not self.project_id:
+            self.project = self.customer.project
         if self.customer and not self.invoice_address_id:
             self.invoice_address = \
                 self.customer.customer_address.filter(is_billing=True, default_billing=True).first()
@@ -161,7 +164,6 @@ class AbstractQuotation(BMFModel):
         swappable = "BMF_CONTRIB_QUOTATION"
 
     class BMFMeta:
-        category = SALES
         observed_fields = ['quotation_number', 'net', 'state']
         has_files = True
         has_comments = True
@@ -175,7 +177,7 @@ class Quotation(AbstractQuotation):
     pass
 
 
-class QuotationProduct(models.Model):
+class QuotationProduct(BMFModel):
     quotation = models.ForeignKey(
         CONTRIB_QUOTATION, null=True, blank=True,
         related_name="quotation_products", on_delete=models.CASCADE,
@@ -194,12 +196,8 @@ class QuotationProduct(models.Model):
     # unit = models.CharField() # TODO add units
     description = models.TextField(_("Description"), null=True, blank=True)
 
-    def __init__(self, *args, **kwargs):
-        super(QuotationProduct, self).__init__(*args, **kwargs)
-        self._calcs = None
-
     def calc_all(self):
-        if self._calcs:
+        if hasattr(self, '_calcs'):
             return self._calcs
         self._calcs = self.product.calc_tax(self.amount, self.price)
         return self._calcs

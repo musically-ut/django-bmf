@@ -6,9 +6,8 @@ import sys
 
 from setuptools import setup, find_packages, Command
 
-from djangobmf import __author__, __contact__, __homepage__
-
 CLASSIFIERS = [
+    'Development Status :: 3 - Alpha',
     'Environment :: Web Environment',
     'Framework :: Django',
     'Intended Audience :: Developers',
@@ -16,6 +15,8 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     'Topic :: Office/Business :: Groupware',
@@ -30,29 +31,27 @@ version = __import__('djangobmf').get_version()
 setup(
     name='django-bmf',
     version=version,
-    url=__homepage__,
-    license='BSD',
+    url="http://www.django-bmf.org/",
+    bugtrack_url="https://github.com/django-bmf/django-bmf/issues",
+    license='BSD License',
     platforms=['OS Independent'],
     description='Business Management Framework with integrated ERP solution written for django',
     long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
-    author=__author__,
-    author_email=__contact__,
-    packages=find_packages(exclude=['sandbox']),
+    author="Sebastian Braun",
+    author_email="sebastian@elmnt.de",
+    packages=find_packages(exclude=['sandbox', 'tests']),
     classifiers=CLASSIFIERS,
     install_requires=[
         'django',
         'pytz',
-        'Pillow',
         'django-sekizai',
         'django-mptt',
-        'django-filter',
-        'reportlab',
-        'xhtml2pdf',
+        'django-haystack',
         'markdown',
     ],
     include_package_data=True,
     zip_safe=False,
-    test_suite='run_tests.main',
+    test_suite='runtests.main',
     tests_require = [
 #       'coverage',
 #       'pep8',

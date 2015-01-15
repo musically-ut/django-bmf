@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,54 +17,58 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:28
-msgid "Service"
-msgstr ""
-
-#: models.py:36
-msgid "Has batch number"
-msgstr ""
-
-#: models.py:37
-msgid "Has serial number"
-msgstr ""
-
-#: models.py:48
-msgid "Name"
-msgstr ""
-
-#: models.py:54
-msgid "Product Code"
-msgstr ""
-
-#: models.py:61
-msgid "Product type"
-msgstr ""
-
-#: models.py:68
-msgid "Can be sold"
-msgstr ""
-
-#: models.py:71
-msgid "Can be purchased"
-msgstr ""
-
-#: models.py:73
-msgid "Description"
-msgstr ""
-
-#: models.py:78
-msgid "Price"
-msgstr ""
-
-#: models.py:156
-msgid "Product"
-msgstr ""
-
-#: models.py:157
+#: bmf_module.py:36 models.py:156
 msgid "Products"
 msgstr ""
 
-#: models.py:224
+#: models.py:27
+msgid "Service"
+msgstr ""
+
+#: models.py:35
+msgid "Has batch number"
+msgstr ""
+
+#: models.py:36
+msgid "Has serial number"
+msgstr ""
+
+#: models.py:47
+msgid "Name"
+msgstr ""
+
+#: models.py:53
+msgid "Product Code"
+msgstr ""
+
+#: models.py:60
+msgid "Product type"
+msgstr ""
+
+#: models.py:67
+msgid "Can be sold"
+msgstr ""
+
+#: models.py:70
+msgid "Can be purchased"
+msgstr ""
+
+#: models.py:72
+msgid "Description"
+msgstr ""
+
+#: models.py:77
+msgid "Price"
+msgstr ""
+
+#: models.py:155
+msgid "Product"
+msgstr ""
+
+#: models.py:222
 msgid "Is the tax included in the price?"
+msgstr ""
+
+#: views.py:18
+msgid "All Products"
 msgstr ""

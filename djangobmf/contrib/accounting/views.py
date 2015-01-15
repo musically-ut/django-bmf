@@ -5,18 +5,14 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
 from djangobmf.views import ModuleListView
-# from djangobmf.views import ModuleTreeView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-# from djangobmf.views import ModuleDetailView
 
 # from .models import Account
 
 from .forms import TransactionUpdateForm
-from .forms import TransactionCreateSimpleForm
-from .forms import TransactionCreateSplitForm
+from .forms import TransactionCreateForm
 
 
 class AccountIndexView(ModuleListView):
@@ -24,13 +20,13 @@ class AccountIndexView(ModuleListView):
     slug = "accounts"
 
 
-class AllTransactionView(ModuleArchiveView):
+class AllTransactionView(ModuleListView):
     name = _("All Transactions")
     slug = "transactions"
     date_resolution = "month"
 
 
-class ClosedTransactionView(ModuleArchiveView):
+class ClosedTransactionView(ModuleListView):
     name = _("Closed Transactions")
     slug = "closed"
     date_resolution = "week"
@@ -47,11 +43,11 @@ class OpenTransactionView(ModuleListView):
         return super(OpenTransactionView, self).get_queryset().filter(draft=True).order_by('modified')
 
 
-class TransactionCreateSimpleView(ModuleCreateView):
-    form_class = TransactionCreateSimpleForm
+class TransactionCreateView(ModuleCreateView):
+    form_class = TransactionCreateForm
 
     def form_object_save(self, form):
-        super(TransactionCreateSimpleView, self).form_object_save(form)
+        super(TransactionCreateView, self).form_object_save(form)
 
         self.object.items.create(
             account=form.cleaned_data['debit'],
@@ -64,12 +60,8 @@ class TransactionCreateSimpleView(ModuleCreateView):
             amount=form.cleaned_data['amount'],
         )
 
-        if form.cleaned_data['execute'] is True:
+        if form.cleaned_data['draft'] is False:
             self.object.bmfworkflow_transition('balance', self.request.user)
-
-
-class TransactionCreateSplitView(ModuleCreateView):
-    form_class = TransactionCreateSplitForm
 
 
 class TransactionUpdateView(ModuleUpdateView):

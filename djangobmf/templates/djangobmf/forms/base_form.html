@@ -13,8 +13,6 @@
   {% for field in form %}
     {% if field.is_hidden %}
       <div class="hidden">{{ field }}</div>
-    {% elif field.field.inlineformset %}
-      {% bmfformset field %}
     {% else %}
       {% bmflayout field %}
     {% endif %}

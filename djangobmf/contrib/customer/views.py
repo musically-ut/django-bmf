@@ -7,23 +7,23 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-from djangobmf.views import ModuleLetterView
+from djangobmf.views import ModuleListView
 
 from .forms import CompanyForm
 from .forms import CustomerForm
 
 
-class AllCustomerView(ModuleLetterView):
+class AllCustomerView(ModuleListView):
     slug = "all"
     name = _("All")
 
 
-class SupplierCustomerView(ModuleLetterView):
+class SupplierCustomerView(ModuleListView):
     slug = "supplier"
     name = _("Supplier")
 
 
-class CustomerCustomerView(ModuleLetterView):
+class CustomerCustomerView(ModuleListView):
     slug = "customer"
     name = _("Customer")
 

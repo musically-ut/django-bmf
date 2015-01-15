@@ -9,11 +9,7 @@ import os
 BASEDIR = os.path.dirname(env.real_fabfile)
 
 PYTHON = BASEDIR + "/virtenv/bin/python"
-DJANGO = BASEDIR + "/virtenv/bin/django-admin.py"
-MANAGE = BASEDIR + "/sandbox/manage.py"
 DEVELOP = BASEDIR + "/develop.py"
-
-LANGUAGES = ('en', 'de',)
 
 FIXTURES = (
     'fixtures/sites.json',
@@ -53,7 +49,7 @@ def static():
     js()
     css()
     with lcd(BASEDIR):
-        local('cp submodules/bootstrap/fonts/glyphicons* djangobmf/static/djangobmf/fonts/')
+        local('cp bower_components/bootstrap/fonts/glyphicons* djangobmf/static/djangobmf/fonts/')
 
 
 @task
@@ -74,22 +70,25 @@ def js():
     """
     with lcd(BASEDIR):
         js_ext = (
-            'submodules/jquery-cookie/src/jquery.cookie.js',
+            'bower_components/jquery-cookie/jquery.cookie.js',
             'submodules/jquery-treegrid/js/jquery.treegrid.js',
-            'submodules/bootstrap/dist/js/bootstrap.js',
+            'bower_components/bootstrap/dist/js/bootstrap.js',
         )
         js_own = (
             'js/variables.js',
             'js/bmf-autocomplete.js',
             'js/bmf-calendar.js',
             'js/bmf-editform.js',
-            'js/bmf-inlineform.js',
             'js/bmf-buildform.js',
             'js/menu.js',
         )
 
-        local('cp submodules/bootstrap/dist/js/bootstrap.min.js djangobmf/static/djangobmf/js/')
-        local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.cookie.min.js submodules/jquery-cookie/src/jquery.cookie.js')
+        local('cp bower_components/angular/angular.min.js djangobmf/static/djangobmf/js/')
+        local('cp bower_components/angular/angular.min.js.map djangobmf/static/djangobmf/js/')
+
+        local('cp bower_components/bootstrap/dist/js/bootstrap.min.js djangobmf/static/djangobmf/js/')
+
+        local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.cookie.min.js bower_components/jquery-cookie/jquery.cookie.js')
         local('yui-compressor --type js -o djangobmf/static/djangobmf/js/jquery.treegrid.min.js submodules/jquery-treegrid/js/jquery.treegrid.js')
 
         local('cat %s > djangobmf/static/djangobmf/js/djangobmf.js' % ' '.join(js_ext + js_own))
@@ -98,12 +97,15 @@ def js():
 
 
 @task
-def test():
+def test(fast=False):
     """
     Tests code with django unittests
     """
     with lcd(BASEDIR):
-        local('virtenv/bin/coverage run runtests.py -v2')
+        if fast:
+            local('virtenv/bin/coverage run runtests.py -v2 --failfast')
+        else:
+            local('virtenv/bin/coverage run runtests.py -v2')
         local('virtenv/bin/coverage report -m')
 
 
@@ -124,24 +126,24 @@ def test_core(module=""):
 @task
 def locale():
     with lcd(BASEDIR + '/djangobmf'):
-        local('%s makemessages -l %s --domain django' % (DJANGO, 'en'))
-        local('%s makemessages -l %s --domain djangojs' % (DJANGO, 'en'))
+        local('%s %s makemessages -l %s --domain django' % (PYTHON, DEVELOP, 'en'))
+        local('%s %s makemessages -l %s --domain djangojs' % (PYTHON, DEVELOP, 'en'))
         check_locale()
 
     for app in APPS:
         with lcd(BASEDIR + '/djangobmf/contrib/' + app):
-            local('%s makemessages -l %s --domain django' % (DJANGO, 'en'))
+            local('%s %s makemessages -l %s --domain django' % (PYTHON, DEVELOP, 'en'))
             check_locale()
 
     with lcd(BASEDIR):
         local('tx pull')
 
     with lcd(BASEDIR + '/djangobmf'):
-        local('%s compilemessages' % DJANGO)
+        local('%s %s compilemessages' % (PYTHON, DEVELOP))
 
     for app in APPS:
         with lcd(BASEDIR + '/djangobmf/contrib/' + app):
-            local('%s compilemessages' % DJANGO)
+            local('%s %s compilemessages' % (PYTHON, DEVELOP))
 
     puts("Dont forget to run 'tx push -s' to push new source files")
 
@@ -159,11 +161,11 @@ def make(data=''):
   """
   with lcd(BASEDIR):
     local('rm -f sandbox/database.sqlite')
-    local('%s %s migrate --noinput' % (PYTHON, MANAGE))
+    local('%s %s migrate --noinput' % (PYTHON, DEVELOP))
     if not data:
-        local('%s %s loaddata %s' % (PYTHON, MANAGE, ' '.join(FIXTURES)))
+        local('%s %s loaddata %s' % (PYTHON, DEVELOP, ' '.join(FIXTURES)))
     else:
-        local('%s %s loaddata fixtures/users.json' % (PYTHON, MANAGE))
+        local('%s %s loaddata fixtures/users.json' % (PYTHON, DEVELOP))
 
 
 @task
@@ -171,11 +173,11 @@ def start():
   """
   """
   with lcd(BASEDIR):
-    local('%s %s runserver 8000' % (PYTHON, MANAGE))
+    local('%s %s runserver 8000' % (PYTHON, DEVELOP))
 
 
 @task
 def shell():
   """
   """
-  local('%s %s shell' % (PYTHON, MANAGE))
+  local('%s %s shell' % (PYTHON, DEVELOP))

@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
-from .currencies import BaseCurrency
+from .currency import BaseCurrency
 
 
 class OptionalForeignKey(models.ForeignKey):
@@ -47,6 +48,8 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
 
 
 def get_default_currency():
+    # FIXME when settings are properly cached
+    return 'EUR'
     from .sites import site
     return site.get_lazy_setting('djangobmf', 'currency')
 
@@ -120,7 +123,7 @@ class MoneyField(models.DecimalField):
 
     def __init__(self, *args, **kwargs):
         defaults = {
-            'default': '0',
+            'default': None,
             'blank': True,
         }
         defaults.update(kwargs)
@@ -154,6 +157,13 @@ class MoneyField(models.DecimalField):
         if not cls._meta.abstract:
             self.has_precision = hasattr(self, self.get_precision_field_name())
             setattr(cls, self.name, MoneyProxy(self))
+
+    def formfield(self, **kwargs):
+        kwargs.update({
+            'widget': TextInput,
+        })
+        value = super(MoneyField, self).formfield(**kwargs)
+        return value
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)

@@ -11,7 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 from djangobmf.models import BMFModel
 from djangobmf.settings import CONTRIB_CUSTOMER
 from djangobmf.settings import CONTRIB_PRODUCT
-from djangobmf.categories import HR
 
 from djangobmf.contrib.product.models import PRODUCT_SERVICE
 
@@ -31,9 +30,6 @@ class BaseEmployee(BMFModel):
         verbose_name_plural = _('Employees')
         abstract = True
         swappable = "BMF_CONTRIB_EMPLOYEE"
-
-    class BMFMeta:
-        category = HR
 
 
 @python_2_unicode_compatible
@@ -84,7 +80,7 @@ class AbstractEmployee(BaseEmployee):
         ordering = ['name']
         abstract = True
 
-    class BMFMeta(BaseEmployee.BMFMeta):
+    class BMFMeta:
         search_fields = ['name', 'email', 'user__username']
 
     def __str__(self):

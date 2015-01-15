@@ -5,71 +5,102 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.views import ModuleArchiveView
-from djangobmf.views import ModuleListView
-from djangobmf.views import ModuleLetterView
-
-from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleCloneView
+from djangobmf.views import ModuleDetailView
+from djangobmf.views import ModuleGetView
+from djangobmf.views import ModuleListView
 
-from .filters import TaskFilter
-from .filters import GoalFilter
-from .forms import BMFGoalCloneForm
+from .forms import GoalCloneForm
 
 
-class ArchiveGoalView(ModuleArchiveView):
+class GoalGetView(ModuleGetView):
+    def get_item_data(self, data):
+        l = []
+        for d in data:
+            l.append({
+                'name': str(d),
+                'completed': d.completed,
+                'referee': str(d.referee),
+                'project': str(d.project),
+                'url': d.bmfmodule_detail(),
+                'states': d.get_states(),
+            })
+        return l
+
+
+class TaskGetView(ModuleGetView):
+    def get_item_data(self, data):
+        l = []
+        for d in data:
+            l.append({
+                'summary': d.summary,
+                'completed': d.completed,
+                'employee': str(d.employee),
+                'state': str(d.state),
+                'modified': d.modified,
+                'goal': str(d.goal),
+                'project': str(d.project),
+                'url': d.bmfmodule_detail(),
+            })
+        return l
+
+
+class ArchiveGoalView(ModuleListView):
     slug = "archive"
     name = _("Archive")
-    filterset_class = GoalFilter
 
 
 class ActiveGoalView(ModuleListView):
     slug = "active"
     name = _("Active Goals")
-    filterset_class = GoalFilter
+    manager = "active"
 
-    def get_queryset(self):
+    # TODO: REMOVE ME
+    def get_queryset(self):  # noqa
         return super(ActiveGoalView, self).get_queryset().filter(completed=False)
 
 
 class MyGoalView(ModuleListView):
     slug = "my"
     name = _("My Goals")
+    manager = "mygoals"
 
-    def get_queryset(self):
+    # TODO: REMOVE ME
+    def get_queryset(self):  # noqa
         return super(MyGoalView, self).get_queryset() \
             .filter(completed=False, referee=getattr(self.request.user, 'djangobmf_employee', -1))
 
 
-class ArchiveTaskView(ModuleArchiveView):
+class ArchiveTaskView(ModuleListView):
     slug = "archive"
     name = _("Archive")
     date_resolution = "month"
-    filterset_class = TaskFilter
 
 
-class OpenTaskView(ModuleLetterView):
+class OpenTaskView(ModuleListView):
     slug = "open"
     name = _("Open Tasks")
-    filterset_class = TaskFilter
+    manager = "active"
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa
         return super(OpenTaskView, self).get_queryset().filter(completed=False)
 
 
 class AvailableTaskView(ModuleListView):
     slug = "available"
     name = _("Available Tasks")
+    manager = "availalbe"
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa
         return super(AvailableTaskView, self).get_queryset().filter(employee=None, completed=False)
 
 
 class MyTaskView(ModuleListView):
     slug = "my"
     name = _("My Tasks")
+    manager = "mytasks"
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa
         return super(MyTaskView, self).get_queryset() \
             .filter(completed=False, employee=getattr(self.request.user, 'djangobmf_employee', -1))
 
@@ -77,15 +108,16 @@ class MyTaskView(ModuleListView):
 class TodoTaskView(ModuleListView):
     slug = "todo"
     name = _("Todolist")
+    manager = "todo"
 
-    def get_queryset(self):
+    def get_queryset(self):  # noqa
         return super(TodoTaskView, self).get_queryset() \
             .filter(completed=False, state__in=["todo", "started", "review"],
                     employee=getattr(self.request.user, 'djangobmf_employee', -1))
 
 
 class GoalCloneView(ModuleCloneView):
-    form_class = BMFGoalCloneForm
+    form_class = GoalCloneForm
 
     def clone_object(self, formdata, instance):
         instance.completed = False

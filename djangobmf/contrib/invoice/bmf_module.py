@@ -10,6 +10,7 @@ from djangobmf.categories import Accounting
 from djangobmf.sites import site
 
 from .models import Invoice
+from .models import InvoiceProduct
 from .views import OpenInvoiceView
 from .views import AllInvoiceView
 from .views import InvoiceCreateView
@@ -17,11 +18,14 @@ from .views import InvoiceUpdateView
 from .views import InvoiceDetailView
 
 
-site.register(Invoice, **{
+site.register_module(Invoice, **{
     'create': InvoiceCreateView,
     'detail': InvoiceDetailView,
     'update': InvoiceUpdateView,
     'report': True,
+})
+
+site.register_module(InvoiceProduct, **{
 })
 
 

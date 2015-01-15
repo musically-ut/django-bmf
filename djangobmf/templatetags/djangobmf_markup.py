@@ -30,6 +30,7 @@ def markdown_filter(text):
             'smart_strong',
             'sane_lists',
             'smarty',
+            'fenced_code',
         ],
         output_format="html5",
         save_mode='escape',

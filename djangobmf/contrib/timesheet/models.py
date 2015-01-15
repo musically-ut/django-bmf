@@ -13,7 +13,6 @@ from djangobmf.fields import WorkflowField
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_TASK
-from djangobmf.categories import HR
 
 from .workflows import TimesheetWorkflow
 
@@ -95,14 +94,13 @@ class AbstractTimesheet(BMFModel):
         return '%s' % (self.start)
 
     @classmethod
-    def has_permissions(cls, qs, user, obj=None):
+    def has_permissions(cls, qs, user):
         if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
             return qs
         return qs.filter(employee=getattr(user, 'djangobmf_employee', -1))
 
     class BMFMeta:
         has_logging = True
-        category = HR
         workflow = TimesheetWorkflow
         workflow_field = 'state'
 

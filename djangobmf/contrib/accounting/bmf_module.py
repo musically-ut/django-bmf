@@ -10,8 +10,6 @@ from djangobmf.categories import BaseCategory
 from djangobmf.categories import Accounting
 from djangobmf.sites import site
 
-from collections import OrderedDict
-
 from .apps import AccountingConfig
 
 from .models import ACCOUNTING_INCOME
@@ -23,7 +21,7 @@ from .models import Account
 from .views import AccountIndexView
 
 
-site.register(Account, **{
+site.register_module(Account, **{
     'index': AccountIndexView,
 })
 
@@ -31,15 +29,11 @@ site.register(Account, **{
 from .models import Transaction
 from .views import OpenTransactionView
 from .views import ClosedTransactionView
-from .views import TransactionCreateSimpleView
-from .views import TransactionCreateSplitView
+from .views import TransactionCreateView
 from .views import TransactionUpdateView
 
-site.register(Transaction, **{
-    'create': OrderedDict((
-        ('simple', (_('Simple Transaction'), TransactionCreateSimpleView)),
-        ('split', (_('Split Transaction'), TransactionCreateSplitView)),
-    )),
+site.register_module(Transaction, **{
+    'create': TransactionCreateView,
     'update': TransactionUpdateView,
 })
 
@@ -47,7 +41,7 @@ from .models import TransactionItem
 from .views import AllTransactionView
 
 
-site.register(TransactionItem)
+site.register_module(TransactionItem)
 
 
 SETTINGS = {

@@ -6,11 +6,11 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 
-from .configuration.models import Configuration
-from .dashboard.models import Dashboard
-from .numbering.models import NumberCycle
-from .report.models import Report
-from .workspace.models import Workspace
+from .models import Configuration
+from .models import Dashboard
+from .models import NumberCycle
+from .models import Report
+from .models import Workspace
 
 
 admin.site.register(Configuration)
