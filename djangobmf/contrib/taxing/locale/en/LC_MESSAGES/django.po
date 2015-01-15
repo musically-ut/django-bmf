@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,24 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:30
+#: bmf_module.py:20 models.py:39
+msgid "Taxes"
+msgstr ""
+
+#: models.py:29
 msgid ""
 "Tax is allways included in the product price and never visible to the "
 "customer"
 msgstr ""
 
-#: models.py:33
+#: models.py:32
 msgid "Is active"
 msgstr ""
 
-#: models.py:39
+#: models.py:38
 msgid "Tax"
 msgstr ""
 
-#: models.py:40
-msgid "Taxes"
+#: views.py:12
+msgid "All Taxes"
 msgstr ""

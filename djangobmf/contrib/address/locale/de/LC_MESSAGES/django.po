@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-21 04:28+0200\n"
-"PO-Revision-Date: 2014-09-22 12:14+0000\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"PO-Revision-Date: 2015-01-15 05:10+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -18,66 +18,70 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: contrib/address/models.py:21
-msgid "Is active"
-msgstr "Ist aktiv"
-
-#: contrib/address/models.py:22
-msgid "Is billing"
-msgstr ""
-
-#: contrib/address/models.py:23
-msgid "Is shipping"
-msgstr ""
-
-#: contrib/address/models.py:24
-msgid "Default billing"
-msgstr ""
-
-#: contrib/address/models.py:25
-msgid "Default shipping"
-msgstr ""
-
-#: contrib/address/models.py:33
+#: bmf_module.py:21 models.py:32
 msgid "Address"
 msgstr "Adress"
 
-#: contrib/address/models.py:34
+#: models.py:20
+msgid "Is active"
+msgstr "Ist aktiv"
+
+#: models.py:21
+msgid "Is billing"
+msgstr ""
+
+#: models.py:22
+msgid "Is shipping"
+msgstr ""
+
+#: models.py:23
+msgid "Default billing"
+msgstr ""
+
+#: models.py:24
+msgid "Default shipping"
+msgstr ""
+
+#: models.py:33
 msgid "Addresses"
 msgstr "Adressen"
 
-#: contrib/address/models.py:50
+#: models.py:46
 msgid "Name"
 msgstr "Name"
 
-#: contrib/address/models.py:51
+#: models.py:47
 msgid "Name2"
 msgstr "Name2"
 
-#: contrib/address/models.py:52
+#: models.py:48
 msgid "Street"
 msgstr "Straße"
 
-#: contrib/address/models.py:53
+#: models.py:49
 msgid "Zipcode"
 msgstr "Postleitzahl"
 
-#: contrib/address/models.py:54
+#: models.py:50
 msgid "City"
 msgstr "Stadt"
 
-#: contrib/address/models.py:55
+#: models.py:51
 msgid "State"
 msgstr "Bundesland"
 
-#: contrib/address/models.py:56
+#: models.py:52
 msgid "Country"
 msgstr "Land"
 
-#: contrib/address/models.py:63
+#: models.py:59
 #, python-format
 msgid ""
 "%(name)s %(name2)s\n"
 "%(street)s\n"
 "%(city)s, %(state)s, %(zip)s, %(country)s"
+msgstr ""
+
+#: views.py:12
+msgid "All Addresses"
 msgstr ""

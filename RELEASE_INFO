@@ -2,6 +2,7 @@
 - create a release branch
 - bump version (setup.py and bowser.json)
 - build newest englisch translations (django + djangojs)
+- push translations
 - pull translations
 - compile translations
 

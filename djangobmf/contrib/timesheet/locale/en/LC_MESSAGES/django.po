@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-06 23:37+0200\n"
+"POT-Creation-Date: 2015-01-15 06:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,41 +17,44 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:37
-msgid "Title"
-msgstr ""
-
-#: models.py:38
-msgid "Description"
-msgstr ""
-
-#: models.py:77
-msgid "Timesheet"
-msgstr ""
-
-#: models.py:78
+#: bmf_module.py:25 models.py:77
 msgid "Timesheets"
 msgstr ""
 
-#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:9
+#: models.py:36
+msgid "Title"
+msgstr ""
+
+#: models.py:37
+msgid "Description"
+msgstr ""
+
+#: models.py:76
+msgid "Timesheet"
+msgstr ""
+
+#: templates/djangobmf_timesheet/timesheet_bmflist.html:9
 msgid "Date"
 msgstr ""
 
-#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:10
+#: templates/djangobmf_timesheet/timesheet_bmflist.html:10
 msgid "Subject"
 msgstr ""
 
-#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:11
+#: templates/djangobmf_timesheet/timesheet_bmflist.html:11
 msgid "Employee"
 msgstr ""
 
-#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:12
+#: templates/djangobmf_timesheet/timesheet_bmflist.html:12
 msgid "Time"
 msgstr ""
 
-#: templates/djangobmf_timesheet/timesheet_bmfgeneric_archive.html:20
-#: workflows.py:21
+#: templates/djangobmf_timesheet/timesheet_bmflist.html:20 workflows.py:21
 msgid "Active"
+msgstr ""
+
+#: views.py:17
+msgid "Archive"
 msgstr ""
 
 #: workflows.py:22
