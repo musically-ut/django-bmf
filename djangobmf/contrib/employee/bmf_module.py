@@ -5,16 +5,15 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.sites import site
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import HumanResources
+from djangobmf.sites import site
 
 from .models import Employee
-from .views import EmployeeIndexView
-from .views import EmployeeCreateView
+
 
 site.register_module(Employee, **{
-    'create': EmployeeCreateView,
 })
 
 
@@ -23,6 +22,14 @@ class EmployeeCategory(BaseCategory):
     slug = "employees"
 
 
-site.register_dashboard(HumanResources)
-site.register_category(HumanResources, EmployeeCategory)
-site.register_view(Employee, EmployeeCategory, EmployeeIndexView)
+site.register_dashboards(
+    HumanResources(
+        EmployeeCategory(
+            ViewFactory(
+                model=Employee,
+                name=_("All Employees"),
+                slug="all",
+            ),
+        ),
+    ),
+)

@@ -39,6 +39,19 @@ PRODUCT_NO = (
 # =============================================================================
 
 
+class ProductManager(models.Manager):
+
+    def can_sold(self, request):
+        return self.get_queryset().filter(
+            can_sold=True,
+        )
+
+    def can_purchased(self, request):
+        return self.get_queryset().filter(
+            can_purchased=True,
+        )
+
+
 @python_2_unicode_compatible
 class AbstractProduct(BMFModel):
     """
