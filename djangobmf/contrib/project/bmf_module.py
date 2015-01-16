@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.sites import site
 from djangobmf.categories import BaseCategory
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import ProjectManagement
+from djangobmf.sites import site
 
 from .models import Project
 from .views import ProjectGetView

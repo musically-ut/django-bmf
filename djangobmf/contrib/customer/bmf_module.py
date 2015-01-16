@@ -6,14 +6,12 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Customer
 
-from .views import AllCustomerView
-from .views import CustomerCustomerView
-from .views import SupplierCustomerView
 from .views import CustomerCreateView
 from .views import CompanyCreateView
 from .views import UpdateView
@@ -32,8 +30,26 @@ class CustomerCategory(BaseCategory):
     slug = "customer"
 
 
-site.register_dashboard(Sales)
-site.register_category(Sales, CustomerCategory)
-site.register_view(Customer, CustomerCategory, AllCustomerView)
-site.register_view(Customer, CustomerCategory, CustomerCustomerView)
-site.register_view(Customer, CustomerCategory, SupplierCustomerView)
+site.register_dashboards(
+    Sales(
+        CustomerCategory(
+            ViewFactory(
+                model=Customer,
+                name=_("Customer"),
+                slug="customer",
+                manager="customer",
+            ),
+            ViewFactory(
+                model=Customer,
+                name=_("Supplier"),
+                slug="supplier",
+                manager="supplier",
+            ),
+            ViewFactory(
+                model=Customer,
+                name=_("All"),
+                slug="all",
+            ),
+        ),
+    ),
+)
