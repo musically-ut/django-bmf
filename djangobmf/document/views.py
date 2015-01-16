@@ -13,7 +13,7 @@ from django.views.generic import DetailView
 from django.views.static import serve
 
 from djangobmf.signals import activity_addfile
-from djangobmf.viewmixins import BaseMixin
+from djangobmf.views.mixins import BaseMixin
 from djangobmf.models import Document
 
 from .forms import UploadDocument

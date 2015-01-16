@@ -14,7 +14,7 @@ from django.views.generic import DetailView
 # from django.views.generic import TemplateView
 from django.views.generic import RedirectView
 
-from djangobmf.viewmixins import ViewMixin
+from djangobmf.views.mixins import ViewMixin
 from djangobmf.views import ModuleListView
 
 from djangobmf.models import Workspace

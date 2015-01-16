@@ -13,7 +13,7 @@ from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleDetailView
-from djangobmf.viewmixins import ModuleViewMixin
+from djangobmf.views import ModuleViewMixin
 
 import re
 import datetime

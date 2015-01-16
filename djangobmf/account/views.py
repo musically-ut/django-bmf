@@ -11,8 +11,8 @@ from django.views.decorators.cache import never_cache
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
-from ..viewmixins import AjaxMixin
-from ..viewmixins import NextMixin
+from djangobmf.views.mixins import AjaxMixin
+from djangobmf.views.mixins import NextMixin
 
 from .forms import BMFAuthenticationForm
 

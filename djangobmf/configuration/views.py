@@ -11,7 +11,7 @@ from django.db import models
 from django.views.generic import TemplateView
 from django.views.generic import FormView
 
-from djangobmf.viewmixins import ViewMixin
+from djangobmf.views.mixins import ViewMixin
 from djangobmf.models import Configuration
 
 import json

@@ -7,11 +7,11 @@ from __future__ import unicode_literals
 from django.test import TestCase
 
 from djangobmf.views import ModuleListView
-from djangobmf.views import ModuleActivityMixin
-from djangobmf.views import ModuleFilesMixin
-from djangobmf.views import ModuleFormMixin
+# from djangobmf.views import ModuleActivityMixin
+# from djangobmf.views import ModuleFilesMixin
+# from djangobmf.views import ModuleFormMixin
 from djangobmf.views import ModuleDetailView
-from djangobmf.views import ModuleAutoDetailView
+# from djangobmf.views import ModuleAutoDetailView
 from djangobmf.views import ModuleReportView
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleUpdateView

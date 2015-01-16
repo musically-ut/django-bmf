@@ -54,18 +54,19 @@ from djangobmf.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 # from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
-from djangobmf.viewmixins import ModuleClonePermissionMixin
-from djangobmf.viewmixins import ModuleCreatePermissionMixin
-from djangobmf.viewmixins import ModuleDeletePermissionMixin
-from djangobmf.viewmixins import ModuleUpdatePermissionMixin
-from djangobmf.viewmixins import ModuleSearchMixin
-from djangobmf.viewmixins import ModuleViewPermissionMixin
-from djangobmf.viewmixins import ModuleAjaxMixin
-from djangobmf.viewmixins import ModuleBaseMixin
-from djangobmf.viewmixins import ModuleViewMixin
-from djangobmf.viewmixins import NextMixin
-from djangobmf.viewmixins import ViewMixin
 # from djangobmf.sites import get_site
+
+from .mixins import ModuleClonePermissionMixin
+from .mixins import ModuleCreatePermissionMixin
+from .mixins import ModuleDeletePermissionMixin
+from .mixins import ModuleUpdatePermissionMixin
+from .mixins import ModuleSearchMixin
+from .mixins import ModuleViewPermissionMixin
+from .mixins import ModuleAjaxMixin
+from .mixins import ModuleBaseMixin
+from .mixins import ModuleViewMixin
+from .mixins import NextMixin
+from .mixins import ViewMixin
 
 import copy
 # import datetime

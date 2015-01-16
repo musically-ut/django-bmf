@@ -10,7 +10,8 @@ from django.views.generic import DetailView
 
 from djangobmf.sites import site
 from djangobmf.models import Dashboard
-from djangobmf.viewmixins import ViewMixin
+
+from .mixins import ViewMixin
 
 
 class DashboardView(ViewMixin, DetailView):

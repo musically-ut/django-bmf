@@ -6,17 +6,17 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 
-from djangobmf.viewmixins import BaseMixin
-from djangobmf.viewmixins import ViewMixin
-from djangobmf.viewmixins import AjaxMixin
-from djangobmf.viewmixins import ModuleViewPermissionMixin
-from djangobmf.viewmixins import ModuleCreatePermissionMixin
-from djangobmf.viewmixins import ModuleUpdatePermissionMixin
-from djangobmf.viewmixins import ModuleDeletePermissionMixin
-from djangobmf.viewmixins import ModuleClonePermissionMixin
+from djangobmf.views.mixins import BaseMixin
+from djangobmf.views.mixins import ViewMixin
+from djangobmf.views.mixins import AjaxMixin
+from djangobmf.views.mixins import ModuleViewPermissionMixin
+from djangobmf.views.mixins import ModuleCreatePermissionMixin
+from djangobmf.views.mixins import ModuleUpdatePermissionMixin
+from djangobmf.views.mixins import ModuleDeletePermissionMixin
+from djangobmf.views.mixins import ModuleClonePermissionMixin
 
-from djangobmf.viewmixins import ModuleBaseMixin
-from djangobmf.viewmixins import ModuleAjaxMixin
+from djangobmf.views.mixins import ModuleBaseMixin
+from djangobmf.views.mixins import ModuleAjaxMixin
 
 from unittest import expectedFailure
 
