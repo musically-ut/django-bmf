@@ -3,10 +3,12 @@
 
 from __future__ import unicode_literals
 
+from django.http import Http404
 from django.views.generic import DetailView
-from django.utils import six
-from django.utils.encoding import force_text
+# from django.utils import six
+# from django.utils.encoding import force_text
 
+from djangobmf.sites import site
 from djangobmf.models import Dashboard
 from djangobmf.viewmixins import ViewMixin
 
@@ -17,36 +19,28 @@ class DashboardView(ViewMixin, DetailView):
     template_name = "djangobmf/dashboard/detail.html"
 
     def get_object(self):
-        # Call the superclass
-        if "pk" in self.kwargs:
-            self.object = Dashboard.objects.get_or_create(key=self.kwargs['dashboard'])
-        else:
-            self.object = Dashboard.objects.get_or_create(key=None)
+        if "dashboard" in self.kwargs:
+            try:
+                self.dashboard = site.get_dashboard(self.kwargs["dashboard"])
+            except KeyError:
+                raise Http404
+
+        self.object = Dashboard.objects.get_or_create(
+            key=self.kwargs.get('dashboard', None)
+        )
+
         return self.object
 
-    def get_context_data(self, **kwargs):
-        if self.kwargs.get('pk', None):
-            if self.request.session['djangobmf'].get('dashboard_current', None):
-                if self.request.session['djangobmf']['dashboard_current'].get('pk', None) != self.kwargs['pk']:
-                    self.update_dashboard(self.kwargs['pk'])
-            else:
-                self.update_dashboard(self.kwargs['pk'])
-        context = super(DashboardView, self).get_context_data(**kwargs)
 
-        from djangobmf.sites import site
-        models = []
-        for ct, model in six.iteritems(site.models):
-            info = model._meta.app_label, model._meta.model_name
-            perm = '%s.view_%s' % info
-            if self.request.user.has_perms([perm, ]):
-                # key = unicode(model._bmfmeta.category)
-                key = force_text(model._bmfmeta.category)
-                models.append({
-                    'category': key,
-                    'model': model,
-                    'name': model._meta.verbose_name_plural,
-                    # 'url': model._bmfmeta.url_namespace + ':index'
-                })
+def dashboard_view_factory(request, dashboard, category, view, *args, **kwargs):
+    try:
+        dashboard_instance = site.get_dashboard(dashboard)
+        view_instance = dashboard_instance[category][view]
+    except KeyError:
+        raise Http404
 
-        context['modules'] = models
-        return context
+    return view_instance.view.as_view(
+        model=view_instance.model,
+        name=view_instance.name,
+        **view_instance.kwargs
+    )(request, *args, **kwargs)

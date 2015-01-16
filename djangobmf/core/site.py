@@ -225,6 +225,12 @@ class Site(object):
                 # append
                 self.dashboards.append(dashboard)
 
+    def get_dashboard(self, key):
+        data = [i for i in self.dashboards if i.key == key]
+        if len(data) == 1:
+            return data[0]
+        raise KeyError(key)
+
     def register_dashboard(self, dashboard):
 
         if isinstance(dashboard, BaseDashboard):
