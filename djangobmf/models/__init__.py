@@ -18,7 +18,6 @@ __all__ = (
     'Notification',
     'NumberCycle',
     'Report',
-    'Workspace',
 )
 
 from .base import BMFModel
@@ -36,7 +35,6 @@ from .document import Document
 from .notification import Notification
 from .numbering import NumberCycle
 from .report import Report
-from .workspace import Workspace
 
 
 class Dashboard(AbstractDashboard):

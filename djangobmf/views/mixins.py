@@ -4,12 +4,10 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-# from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse_lazy
-# from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -20,11 +18,8 @@ from django.views.defaults import permission_denied
 from djangobmf import get_version
 from djangobmf.decorators import login_required
 from djangobmf.models import Notification
-from djangobmf.models import Workspace
 from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
-
-from collections import OrderedDict
 
 import json
 import datetime
@@ -125,61 +120,7 @@ class BaseMixin(object):
                 "workspace": {},
             }
 
-            # === OLD BELOW THIS LINE =========================================
-
-            cur_dashboard = None
-            cur_category = None
-            new_category = False
-            for ws in Workspace.objects.all():
-                if not ws.module_cls:
-                    # TODO generate warning!
-                    continue
-
-                if ws.level == 1:
-                    cur_category = ws
-                    new_category = True
-                    continue
-                if ws.level == 0:
-                    cur_dashboard = ws
-                    data['relations'][ws.pk] = (cur_dashboard.pk, None)
-                    continue
-
-                model = ws.ct.model_class()
-                permissions = ws.module_cls(model=model, workspace=ws).get_permissions([])
-
-                if self.request.user.has_perms(permissions):
-                    data['relations'][ws.pk] = (cur_dashboard.pk, cur_category.pk)
-
-                    if cur_dashboard.pk not in data['dashboards'].keys():
-
-                        data['dashboards'][cur_dashboard.pk] = {
-                            "url": cur_dashboard.get_absolute_url(),
-                            "name": '%s' % cur_dashboard.module_cls.name,
-                        }
-
-                        data['workspace'][cur_dashboard.pk] = {
-                            "url": cur_dashboard.get_absolute_url(),
-                            "name": '%s' % cur_dashboard.module_cls.name,
-                            "categories": OrderedDict()
-                        }
-                    if new_category:
-                        data['workspace'][cur_dashboard.pk]["categories"][cur_category.pk] = {
-                            "name": '%s' % cur_category.module_cls.name,
-                            "views": OrderedDict()
-                        }
-                        new_category = False
-                    data['workspace'][cur_dashboard.pk]["categories"][cur_category.pk]["views"][ws.pk] = {
-                        "name": '%s' % ws.module_cls.name,
-                        "url": ws.get_absolute_url(),
-                    }
-
-            # === OLD ABOVE THIS LINE =========================================
-
             cache.set(cache_key, data, cache_timeout)
-
-        # build current workspace
-        if isinstance(workspace, Workspace):
-            workspace = workspace.pk
 
         db, cat = data['relations'].get(workspace, (None, None))
         if cat:
