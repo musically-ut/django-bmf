@@ -8,15 +8,28 @@
 <div class="page-header">
 <h1>{% trans "Module overview" %}</h1>
 </div>
-{% regroup modules|dictsort:"category" by category as module_list %}
-{% for module in module_list %}
-<h2>{{ module.grouper }}</h2>
 <ul>
-  {% for item in module.list|dictsort:"name" %}
+  {% for item in modules|dictsort:"name" %}
   <li><a href="{{ item.url }}">{{ item.name }}</a></li>
+  {% empty %}
+  <li><p>{% trans "You don't have access to any modules" %}</p></li>
   {% endfor %}
 </ul>
-{% empty %}
-  <p>{% trans "You don't have access to any modules" %}</p>
+<h1>Workspaces:</h1>
+<ul>
+{% for dashboard in workspaces %}
+    <li><p>{{ dashboard.name }}</p></li>
+    <ul>
+    {% for category in dashboard %}
+        <li><p>{{ category.name }}</p></li>
+        <ul>
+        {% for view in category %}
+        <li><p>{{ view.name }} <a href="{% url "djangobmf:dashboard_view" dashboard=dashboard.key category=category.key view=view.key %}">[url]</a></p></li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+    </ul>
 {% endfor %}
+</ul>
+
 {% endblock %}

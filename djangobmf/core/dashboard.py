@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+# from django.conf.urls import patterns
+
 from .category import Category
 
 
@@ -72,3 +74,8 @@ class Dashboard(object):
         """
         for category in other.data:
             self.add_category(category)
+
+#   @property
+#   def urls(self):
+#       urlpatterns = patterns('')
+#       return urlpatterns

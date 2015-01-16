@@ -88,6 +88,7 @@ class BaseMixin(object):
 
         # === EMPLOYEE AND TEAMS ==========================================
 
+        # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
         user_add_bmf(self.request.user)
 
         if self.request.user.djangobmf_has_employee and not self.request.user.djangobmf_employee:
@@ -101,19 +102,21 @@ class BaseMixin(object):
 
         return super(BaseMixin, self).dispatch(*args, **kwargs)
 
-    def update_workspace(self, workspace=None):
+    def update_workspace(self, dashboard=None):
         """
         This function reads all workspaces for a user instance, builds the
         navigation-tree and updates the active workspace (if neccessary)
 
-        workspace can either be None, the workspaces primary key or None
+        workspace can either be None, the dashboards key or None
         """
+        workspace = dashboard  # TODO: OLD
+
         cache_key = 'bmf_workspace_%s_%s' % (self.request.user.pk, get_language())
         cache_timeout = 600
 
         # get navigation key from cache
         data = cache.get(cache_key)
-        if not data:
+        if not data:  # pragma: no branch
             logger.debug("Reload workspace cache (%s) for user %s" % (cache_key, self.request.user))
 
             data = {
@@ -121,6 +124,8 @@ class BaseMixin(object):
                 "dashboards": {},
                 "workspace": {},
             }
+
+            # === OLD BELOW THIS LINE =========================================
 
             cur_dashboard = None
             cur_category = None
@@ -167,6 +172,9 @@ class BaseMixin(object):
                         "name": '%s' % ws.module_cls.name,
                         "url": ws.get_absolute_url(),
                     }
+
+            # === OLD ABOVE THIS LINE =========================================
+
             cache.set(cache_key, data, cache_timeout)
 
         # build current workspace

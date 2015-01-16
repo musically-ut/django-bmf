@@ -39,7 +39,7 @@ class Site(object):
         self.clear()
 
     # TODO add some generic register function, which functions as a decorator and can be used on different objects
-    def register(self, *args, **kwargs):
+    def register(self, *args, **kwargs):  # pragma: no cover
         pass
 
     def clear(self):
@@ -58,8 +58,8 @@ class Site(object):
         # all reports should be stored here
         self.reports = {}
 
-        # all workspaces are stored here
-        self.workspaces = []
+        # all dashboards are stored here
+        self.dashboards = []
 
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
@@ -85,9 +85,9 @@ class Site(object):
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
 
-        # ~~~~ workspaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~ dashboards ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        for dashboard in self.workspaces:
+        for dashboard in self.dashboards:
 
             workspace = apps.get_model(APP_LABEL, "Workspace")
 
@@ -217,13 +217,19 @@ class Site(object):
 
     def register_dashboards(self, *args):
         for dashboard in args:
-            if dashboard in self.workspaces:
+            if dashboard in self.dashboards:
                 # merge
-                i = self.workspace.index(dashboard)
-                self.workspace[i].merge(dashboard)
+                i = self.dashboards.index(dashboard)
+                self.dashboards[i].merge(dashboard)
             else:
                 # append
-                self.workspaces.append(dashboard)
+                self.dashboards.append(dashboard)
+
+    def get_dashboard(self, key):
+        data = [i for i in self.dashboards if i.key == key]
+        if len(data) == 1:
+            return data[0]
+        raise KeyError(key)
 
     def register_dashboard(self, dashboard):
 
@@ -321,6 +327,8 @@ class Site(object):
 
         return True
 
+    # --- url generation ------------------------------------------------------
+
     # --- misc methods --------------------------------------------------------
 
     @property
@@ -363,7 +371,7 @@ class Site(object):
                     ),
                 )
 
-#       # build workspaces
+#       # build dashboards
 #       urlpatterns += patterns(
 #           '',
 #           url(
