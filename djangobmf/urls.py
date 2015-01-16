@@ -16,6 +16,7 @@ from django.views.decorators.http import last_modified
 
 from djangobmf import get_version
 from djangobmf.dashboard.views import DashboardView
+# from djangobmf.sites import site
 from djangobmf.views import ModuleOverviewView
 
 

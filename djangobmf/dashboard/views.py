@@ -7,8 +7,8 @@ from django.views.generic import DetailView
 from django.utils import six
 from django.utils.encoding import force_text
 
-from ..models import Dashboard
-from ..viewmixins import ViewMixin
+from djangobmf.models import Dashboard
+from djangobmf.viewmixins import ViewMixin
 
 
 class DashboardView(ViewMixin, DetailView):
@@ -19,9 +19,9 @@ class DashboardView(ViewMixin, DetailView):
     def get_object(self):
         # Call the superclass
         if "pk" in self.kwargs:
-            self.object = Dashboard.objects.get(user=self.request.user, pk=self.kwargs['pk'])
+            self.object = Dashboard.objects.get_or_create(key=self.kwargs['dashboard'])
         else:
-            self.object = Dashboard.objects.get_or_create(user=self.request.user, name=None)
+            self.object = Dashboard.objects.get_or_create(key=None)
         return self.object
 
     def get_context_data(self, **kwargs):
@@ -33,7 +33,7 @@ class DashboardView(ViewMixin, DetailView):
                 self.update_dashboard(self.kwargs['pk'])
         context = super(DashboardView, self).get_context_data(**kwargs)
 
-        from ..sites import site
+        from djangobmf.sites import site
         models = []
         for ct, model in six.iteritems(site.models):
             info = model._meta.app_label, model._meta.model_name

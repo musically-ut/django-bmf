@@ -88,6 +88,7 @@ class BaseMixin(object):
 
         # === EMPLOYEE AND TEAMS ==========================================
 
+        # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
         user_add_bmf(self.request.user)
 
         if self.request.user.djangobmf_has_employee and not self.request.user.djangobmf_employee:
@@ -101,13 +102,15 @@ class BaseMixin(object):
 
         return super(BaseMixin, self).dispatch(*args, **kwargs)
 
-    def update_workspace(self, workspace=None):
+    def update_workspace(self, dashboard=None):
         """
         This function reads all workspaces for a user instance, builds the
         navigation-tree and updates the active workspace (if neccessary)
 
         workspace can either be None, the dashboards key or None
         """
+        workspace = dashboard  # TODO: OLD
+
         cache_key = 'bmf_workspace_%s_%s' % (self.request.user.pk, get_language())
         cache_timeout = 600
 

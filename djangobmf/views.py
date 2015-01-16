@@ -903,5 +903,5 @@ class ModuleOverviewView(ViewMixin, TemplateView):
 
         context = super(ModuleOverviewView, self).get_context_data(**kwargs)
         context['modules'] = modules
-        context['workspaces'] = site.workspaces
+        context['workspaces'] = site.dashboards
         return context

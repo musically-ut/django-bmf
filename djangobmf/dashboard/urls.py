@@ -8,7 +8,8 @@ This is a normal urlconf. it is imported from djangobmf.sites.site.get_url, wher
 the module views get appended by an '^module/' expression
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns
+from django.conf.urls import url
 
 from .views import DashboardView
 

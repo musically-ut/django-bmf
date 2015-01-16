@@ -26,6 +26,11 @@ class TimesheetManager(models.Manager):
             .order_by('end_count', '-end', 'summary') \
             .select_related('task', 'project', 'employee')
 
+    def mytimesheets(self, request):
+        return self.get_queryset().filter(
+            employee=getattr(request.user, 'djangobmf_employee', -1),
+        )
+
 
 @python_2_unicode_compatible
 class AbstractTimesheet(BMFModel):
