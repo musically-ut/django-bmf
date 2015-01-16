@@ -7,21 +7,20 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Position
-from .views import OpenPositionView
-from .views import AllPositionView
-from .views import PositionDetailView
+
 from .views import PositionUpdateView
 from .views import PositionCreateView
 from .views import PositionAPI
 
+
 site.register_module(Position, **{
     'create': PositionCreateView,
     'update': PositionUpdateView,
-    'detail': PositionDetailView,
     'api_urlpatterns': patterns(
         '',
         url(r'^api/$', PositionAPI.as_view(), name="api"),
@@ -34,7 +33,21 @@ class PositionCategory(BaseCategory):
     slug = "positions"
 
 
-site.register_dashboard(Sales)
-site.register_category(Sales, PositionCategory)
-site.register_view(Position, PositionCategory, OpenPositionView)
-site.register_view(Position, PositionCategory, AllPositionView)
+site.register_dashboards(
+    Sales(
+        PositionCategory(
+            ViewFactory(
+                model=Position,
+                name=_("Open Positions"),
+                slug="open",
+                manager="open",
+            ),
+            ViewFactory(
+                model=Position,
+                name=_("All positions"),
+                slug="all",
+                date_resolution="month",
+            ),
+        ),
+    ),
+)

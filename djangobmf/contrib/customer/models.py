@@ -86,6 +86,8 @@ class BaseCustomer(BMFModel):
     customer_payment_term = models.PositiveSmallIntegerField(editable=False, default=1)
     supplier_payment_term = models.PositiveSmallIntegerField(editable=False, default=1)
 
+    objects = BaseCustomerManager()
+
     class Meta:
         verbose_name = _('Customer')
         verbose_name_plural = _('Customers')
