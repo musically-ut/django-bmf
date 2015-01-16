@@ -3,11 +3,13 @@
 
 from __future__ import unicode_literals
 
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse_lazy
+from django.forms.models import modelform_factory
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -17,6 +19,10 @@ from django.views.defaults import permission_denied
 
 from djangobmf import get_version
 from djangobmf.decorators import login_required
+from djangobmf.document.forms import UploadDocument
+from djangobmf.notification.forms import HistoryCommentForm
+from djangobmf.models import Activity
+from djangobmf.models import Document
 from djangobmf.models import Notification
 from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
@@ -463,3 +469,98 @@ class ModuleSearchMixin(object):
             return "%s__search" % field_name[1:]
         else:
             return "%s__icontains" % field_name
+
+
+class ModuleActivityMixin(object):
+    """
+    Parse history to view (as a context variable)
+    """
+
+    def get_context_data(self, **kwargs):
+        ct = ContentType.objects.get_for_model(self.object)
+
+        try:
+            watch = Notification.objects.get(
+                user=self.request.user,
+                watch_ct=ct,
+                watch_id=self.object.pk
+            )
+            if watch.unread:
+                watch.unread = False
+                watch.save()
+            notification = watch
+            watching = watch.is_active()
+        except Notification.DoesNotExist:
+            notification = None
+            watching = False
+
+        kwargs.update({
+            'bmfactivity': {
+                'qs': Activity.objects.filter(parent_ct=ct, parent_id=self.object.pk),
+                'enabled': (self.model._bmfmeta.has_comments or self.model._bmfmeta.has_history),
+                'comments': self.model._bmfmeta.has_comments,
+                'log': self.model._bmfmeta.has_history,
+                'pk': self.object.pk,
+                'ct': ct.pk,
+                'notification': notification,
+                'watch': watching,
+                'log_data': None,
+                'comment_form': None,
+                'object_ct': ct,
+                'object_pk': self.object.pk,
+            },
+        })
+        if self.model._bmfmeta.has_history:
+            kwargs['bmfactivity']['log_data'] = Activity.objects.select_related('user') \
+                .filter(parent_ct=ct, parent_id=self.object.pk)
+        if self.model._bmfmeta.has_comments:
+            kwargs['bmfactivity']['comment_form'] = HistoryCommentForm()
+        return super(ModuleActivityMixin, self).get_context_data(**kwargs)
+
+
+class ModuleFilesMixin(object):
+    """
+    Parse files to view (as a context variable)
+    """
+
+    def get_context_data(self, **kwargs):
+        if self.model._bmfmeta.has_files:
+            ct = ContentType.objects.get_for_model(self.object)
+
+            kwargs.update({
+                'has_files': True,
+                'history_file_form': UploadDocument,
+                'files': Document.objects.filter(content_type=ct, content_id=self.object.pk),
+            })
+        return super(ModuleFilesMixin, self).get_context_data(**kwargs)
+
+
+class ModuleFormMixin(object):
+    """
+    make an BMF-Form
+    """
+    fields = None
+    exclude = []
+
+    def get_form_class(self, *args, **kwargs):
+        """
+        Returns the form class to use in this view.
+        """
+        if not self.form_class:
+            if self.model is not None:
+                # If a model has been explicitly provided, use it
+                model = self.model
+            elif hasattr(self, 'object') and self.object is not None:
+                # If this view is operating on a single object, use
+                # the class of that object
+                model = self.object.__class__
+            else:
+                # Try to get a queryset and extract the model class
+                # from that
+                model = self.get_queryset().model
+
+            if isinstance(self.fields, list):
+                self.form_class = modelform_factory(model, fields=self.fields)
+            else:
+                self.form_class = modelform_factory(model, exclude=self.exclude)
+        return self.form_class

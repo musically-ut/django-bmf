@@ -26,7 +26,6 @@ class TimesheetCategory(BaseCategory):
     slug = "timesheets"
 
 
-# NEW
 site.register_dashboards(
     TimeAndAttendance(
         TimesheetCategory(
@@ -46,9 +45,3 @@ site.register_dashboards(
         ),
     ),
 )
-
-# OLD
-from .views import ArchiveView
-site.register_dashboard(TimeAndAttendance)
-site.register_category(TimeAndAttendance, TimesheetCategory)
-site.register_view(Timesheet, TimesheetCategory, ArchiveView)

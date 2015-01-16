@@ -1,7 +1,7 @@
 [run]
 source=djangobmf
 branch=True
-omit=djangobmf/contrib/*/test*py
+omit=djangobmf/contrib/*/test*py,djangobmf/contrib/*/search_indexes.py,djangobmf/search_indexes.py
 
 [report]
 precision = 2

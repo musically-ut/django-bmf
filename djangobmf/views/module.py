@@ -17,14 +17,12 @@ from django.forms.fields import CharField
 from django.forms.fields import FloatField
 from django.forms.fields import DecimalField
 from django.forms.models import ModelChoiceField
-from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect, Http404, QueryDict
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic import View
-from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
 # from django.views.generic.dates import BaseDateListView
 # from django.views.generic.dates import YearMixin
@@ -45,12 +43,7 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
-from djangobmf.document.forms import UploadDocument
-from djangobmf.models import Document
 from djangobmf.models import Report
-from djangobmf.notification.forms import HistoryCommentForm
-from djangobmf.models import Activity
-from djangobmf.models import Notification
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 # from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
@@ -66,7 +59,9 @@ from .mixins import ModuleAjaxMixin
 from .mixins import ModuleBaseMixin
 from .mixins import ModuleViewMixin
 from .mixins import NextMixin
-from .mixins import ViewMixin
+from .mixins import ModuleActivityMixin
+from .mixins import ModuleFilesMixin
+from .mixins import ModuleFormMixin
 
 import copy
 # import datetime
@@ -297,101 +292,6 @@ class ModuleLetterView(ModuleGenericBaseView, FilterView):
 # --- detail, forms and api ---------------------------------------------------
 
 
-class ModuleActivityMixin(object):
-    """
-    Parse history to view (as a context variable)
-    """
-
-    def get_context_data(self, **kwargs):
-        ct = ContentType.objects.get_for_model(self.object)
-
-        try:
-            watch = Notification.objects.get(
-                user=self.request.user,
-                watch_ct=ct,
-                watch_id=self.object.pk
-            )
-            if watch.unread:
-                watch.unread = False
-                watch.save()
-            notification = watch
-            watching = watch.is_active()
-        except Notification.DoesNotExist:
-            notification = None
-            watching = False
-
-        kwargs.update({
-            'bmfactivity': {
-                'qs': Activity.objects.filter(parent_ct=ct, parent_id=self.object.pk),
-                'enabled': (self.model._bmfmeta.has_comments or self.model._bmfmeta.has_history),
-                'comments': self.model._bmfmeta.has_comments,
-                'log': self.model._bmfmeta.has_history,
-                'pk': self.object.pk,
-                'ct': ct.pk,
-                'notification': notification,
-                'watch': watching,
-                'log_data': None,
-                'comment_form': None,
-                'object_ct': ct,
-                'object_pk': self.object.pk,
-            },
-        })
-        if self.model._bmfmeta.has_history:
-            kwargs['bmfactivity']['log_data'] = Activity.objects.select_related('user') \
-                .filter(parent_ct=ct, parent_id=self.object.pk)
-        if self.model._bmfmeta.has_comments:
-            kwargs['bmfactivity']['comment_form'] = HistoryCommentForm()
-        return super(ModuleActivityMixin, self).get_context_data(**kwargs)
-
-
-class ModuleFilesMixin(object):
-    """
-    Parse files to view (as a context variable)
-    """
-
-    def get_context_data(self, **kwargs):
-        if self.model._bmfmeta.has_files:
-            ct = ContentType.objects.get_for_model(self.object)
-
-            kwargs.update({
-                'has_files': True,
-                'history_file_form': UploadDocument,
-                'files': Document.objects.filter(content_type=ct, content_id=self.object.pk),
-            })
-        return super(ModuleFilesMixin, self).get_context_data(**kwargs)
-
-
-class ModuleFormMixin(object):
-    """
-    make an BMF-Form
-    """
-    fields = None
-    exclude = []
-
-    def get_form_class(self, *args, **kwargs):
-        """
-        Returns the form class to use in this view.
-        """
-        if not self.form_class:
-            if self.model is not None:
-                # If a model has been explicitly provided, use it
-                model = self.model
-            elif hasattr(self, 'object') and self.object is not None:
-                # If this view is operating on a single object, use
-                # the class of that object
-                model = self.object.__class__
-            else:
-                # Try to get a queryset and extract the model class
-                # from that
-                model = self.get_queryset().model
-
-            if isinstance(self.fields, list):
-                self.form_class = modelform_factory(model, fields=self.fields)
-            else:
-                self.form_class = modelform_factory(model, exclude=self.exclude)
-        return self.form_class
-
-
 class ModuleDetailView(
         ModuleViewPermissionMixin, ModuleFilesMixin, ModuleActivityMixin, ModuleViewMixin, DetailView):
     """
@@ -450,6 +350,7 @@ class ModuleDetailView(
             + ["djangobmf/module_detail_default.html"]
 
 
+'''
 class ModuleAutoDetailView(ModuleFormMixin, ModuleDetailView):
     """
     show the details of an entry
@@ -467,6 +368,7 @@ class ModuleAutoDetailView(ModuleFormMixin, ModuleDetailView):
             'form': self.get_form()
         })
         return super(ModuleAutoDetailView, self).get_context_data(**kwargs)
+'''
 
 
 class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
@@ -880,29 +782,3 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
             'instance': self.get_object(),
         })
         return kwargs
-
-
-# --- misc --------------------------------------------------------------------
-
-
-class ModuleOverviewView(ViewMixin, TemplateView):
-    template_name = "djangobmf/modules.html"
-
-    def get_context_data(self, **kwargs):
-        from djangobmf.sites import site
-
-        modules = []
-        for ct, model in site.models.items():
-            info = model._meta.app_label, model._meta.model_name
-            perm = '%s.view_%s' % info
-            if self.request.user.has_perms([perm]):
-                modules.append({
-                    'model': model,
-                    'url': reverse('%s:list' % model._bmfmeta.namespace_api),
-                    'name': model._meta.verbose_name_plural,
-                })
-
-        context = super(ModuleOverviewView, self).get_context_data(**kwargs)
-        context['modules'] = modules
-        context['workspaces'] = site.dashboards
-        return context
