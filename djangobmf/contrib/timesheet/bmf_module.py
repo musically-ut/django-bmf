@@ -12,7 +12,6 @@ from djangobmf.categories import TimeAndAttendance
 
 from .models import Timesheet
 
-from .views import ArchiveView
 from .views import CreateView
 from .views import UpdateView
 
@@ -49,6 +48,7 @@ site.register_dashboards(
 )
 
 # OLD
+from .views import ArchiveView
 site.register_dashboard(TimeAndAttendance)
 site.register_category(TimeAndAttendance, TimesheetCategory)
 site.register_view(Timesheet, TimesheetCategory, ArchiveView)
