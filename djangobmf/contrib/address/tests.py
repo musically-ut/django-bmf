@@ -4,11 +4,19 @@
 
 from __future__ import unicode_literals
 
+from .apps import AddressConfig
 from .models import Address
-from djangobmf.utils.testcases import BaseTestCase
-from djangobmf.utils.testcases import ModuleMixin
 
-class AddressModuleTests(ModuleMixin, BaseTestCase):
+from djangobmf.utils.testcases import TestCase
+from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
+
+
+class AddressFactory(ModuleTestFactory, TestCase):
+    app = AddressConfig
+
+
+class AddressModuleTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """

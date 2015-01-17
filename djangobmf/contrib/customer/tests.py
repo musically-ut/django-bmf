@@ -4,11 +4,20 @@
 
 from __future__ import unicode_literals
 
+from .apps import CustomerConfig
 from .models import Customer
-from djangobmf.utils.testcases import BaseTestCase
-from djangobmf.utils.testcases import ModuleMixin
 
-class CustomerTests(ModuleMixin, BaseTestCase):
+from djangobmf.utils.testcases import TestCase
+from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
+
+
+class CustomerFactory(ModuleTestFactory, TestCase):
+    app = CustomerConfig
+
+
+
+class CustomerTests(ModuleMixin, TestCase):
 
     def test_get_urls(self):
         """

@@ -10,7 +10,7 @@ from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
 warnings.warn(
     "This feature is deprecated.",
     RemovedInNextBMFVersionWarning, stacklevel=2)
-"""
+"""  # pragma: no cover
 
 
 class RemovedInBMF10Warning(PendingDeprecationWarning):  # pragma: no cover

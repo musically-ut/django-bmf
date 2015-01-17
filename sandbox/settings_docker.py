@@ -1,7 +1,5 @@
 from sandbox.settings_common import *
 
-# OLD BELOW THIS LINE -----------------------------------------------------------------------------
-
 # Django settings
 
 import os
@@ -47,7 +45,6 @@ HAYSTACK_CONNECTIONS = {
 }
 
 INSTALLED_APPS += (
-#   'django_extensions',
     'debug_toolbar',
 )
 MIDDLEWARE_CLASSES += (
@@ -56,8 +53,6 @@ MIDDLEWARE_CLASSES += (
 DEBUG_TOOLBAR_CONFIG = {
     'JQUERY_URL': None,
 }
-
-# OLD OVER THIS LINE ------------------------------------------------------------------------------
 
 try:
     from sandbox.settings_local import *

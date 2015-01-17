@@ -7,12 +7,19 @@ from __future__ import unicode_literals
 from django.test import LiveServerTestCase
 from django.core.urlresolvers import reverse
 
+from .apps import ProductConfig
 from .models import Product
-from djangobmf.utils.testcases import BaseTestCase
+
+from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class ProductTests(ModuleMixin, BaseTestCase):
+class ProductFactory(ModuleTestFactory, TestCase):
+    app = ProductConfig
+
+
+class ProductTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """

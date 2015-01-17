@@ -17,12 +17,14 @@ from djangobmf.sites import site
 
 import json
 
+from unittest import expectedFailure
+
 
 class BaseTestCase(object):
+
     def setUp(self):  # noqa
         site.activate(test=True)
         activate('en')
-
         super(BaseTestCase, self).setUp()
 
     def create_user(self, username, is_staff=False, is_superuser=False,
@@ -69,7 +71,55 @@ class BaseTestCase(object):
         self.client.login(username=username, password=username)
 
 
-class ModuleMixin(object):
+class SuperuserMixin(object):
+    """
+    Adds a superuser to the clients and authenticates itself with this user
+    """
+
+    def setUp(self):  # noqa
+        super(SuperuserMixin, self).setUp()
+        self.user = self.create_user("superuser", is_superuser=True)
+        self.client_login("superuser")
+
+
+class ModuleTestFactory(SuperuserMixin, BaseTestCase):
+    """
+    Test generic module views within app-config ``app``
+
+    Currently detail, get and list views are tested. The detail-views
+    are selected via the installed (and registered) models of the app.
+    The get and list views are registered via the apps registered
+    dashboards.
+
+    The test includes only the template rendering of those classes. No
+    data is accessed or changed.
+    """
+
+    # the modules app config
+    app = None
+
+    def setUp(self):  # noqa
+        super(BaseTestCase, self).setUp()
+        self.user = self.create_user("superuser", is_superuser=True)
+        self.client_login("superuser")
+
+    @expectedFailure
+    def test_module_detail(self):
+        # TODO
+        self.assertTrue(False)
+
+    @expectedFailure
+    def test_module_create(self):
+        # TODO
+        self.assertTrue(False)
+
+    @expectedFailure
+    def test_module_list(self):
+        # TODO
+        self.assertTrue(False)
+
+
+class ModuleMixin(SuperuserMixin):
     model = None
 
     def get_latest_object(self):
