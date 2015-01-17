@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.core.cache import cache
@@ -26,6 +27,7 @@ from djangobmf.models import Document
 from djangobmf.models import Notification
 from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
+from djangobmf.settings import APP_LABEL
 
 import json
 import datetime
@@ -87,6 +89,10 @@ class BaseMixin(object):
         if not self.check_permissions() or not self.request.user.has_perms(self.get_permissions([])):
             return permission_denied(self.request)
 
+        # === DJANGO BMF SITE OBJECT ======================================
+
+        self.request.djangobmf_site = apps.get_app_config(APP_LABEL).site
+
         # === EMPLOYEE AND TEAMS ==========================================
 
         # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
@@ -101,7 +107,12 @@ class BaseMixin(object):
 
         # =================================================================
 
-        return super(BaseMixin, self).dispatch(*args, **kwargs)
+        response = super(BaseMixin, self).dispatch(*args, **kwargs)
+
+        # TODO catch 400 (Bad), 404 (Not Found), 403 (Forbidden) and 405 (Not allowed) errors
+        logger.debug("TESTING RESPONSE %s" % response.status_code)
+
+        return response
 
     def update_workspace(self, dashboard=None):
         """
