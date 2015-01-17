@@ -21,7 +21,7 @@ FIXTURES = (
     'fixtures/contrib_quotation.json',
     'fixtures/contrib_task.json',
     'fixtures/contrib_team.json',
-    'fixtures/admin_dashboard.json',
+#   'fixtures/admin_dashboard.json',
 )
 
 APPS = [

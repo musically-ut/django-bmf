@@ -12,6 +12,7 @@ from django.test import TransactionTestCase as DjangoTransactionTestCase
 from django.test import TestCase as DjangoTestCase
 from django.utils.translation import activate
 
+from djangobmf.settings import APP_LABEL
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.sites import site
 
@@ -86,10 +87,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
     """
     Test generic module views within app-config ``app``
 
-    Currently detail, get and list views are tested. The detail-views
-    are selected via the installed (and registered) models of the app.
-    The get and list views are registered via the apps registered
-    dashboards.
+    Currently detail, get and list views are tested.
 
     The test includes only the template rendering of those classes. No
     data is accessed or changed.
@@ -102,21 +100,39 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
         super(BaseTestCase, self).setUp()
         self.user = self.create_user("superuser", is_superuser=True)
         self.client_login("superuser")
+        self.appconf = [app for app in apps.get_app_configs() if isinstance(app, self.app)][0]
+        self.models = [m for m in self.appconf.get_models() if m in site.models.values()]
+        self.views = self.get_views()
 
-    @expectedFailure
-    def test_module_detail(self):
-        # TODO
-        self.assertTrue(False)
+    def get_views(self):
+        views = []
+        for model in self.models:
+            for dashboard in site.dashboards:
+                for category in dashboard:
+                    for view in category:
+                        if view.model == model:
+                            views.append((model, view, dashboard.key, category.key, view.key))
+        return views
 
     @expectedFailure
     def test_module_create(self):
         # TODO
         self.assertTrue(False)
 
-    @expectedFailure
-    def test_module_list(self):
-        # TODO
-        self.assertTrue(False)
+    def test_module_lists_and_gets(self):
+        for v in self.views:
+            url = reverse('%s:dashboard_view' % APP_LABEL, kwargs={
+                'dashboard': v[2],
+                'category': v[3],
+                'view': v[4],
+            })
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+
+            url = response.context['get_data_url']
+
+            response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            self.assertEqual(response.status_code, 200)
 
 
 class ModuleMixin(SuperuserMixin):

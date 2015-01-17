@@ -109,8 +109,15 @@ class BaseMixin(object):
 
         response = super(BaseMixin, self).dispatch(*args, **kwargs)
 
-        # TODO catch 400 (Bad), 404 (Not Found), 403 (Forbidden) and 405 (Not allowed) errors
-        logger.debug("TESTING RESPONSE %s" % response.status_code)
+        if response.status_code in [400, 404, 403, 405, 500] and not settings.DEBUG:
+            # Catch HTTP error codes and redirect to a bmf-specific template
+            # * 400 Bad Request
+            # * 404 Not Found
+            # * 403 Forbidden
+            # * 405 Not allowed
+            # * 500 Server Error
+            # TODO
+            logger.debug("TESTING RESPONSE %s" % response.status_code)
 
         return response
 

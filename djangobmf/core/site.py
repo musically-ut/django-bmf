@@ -224,13 +224,21 @@ class Site(object):
         return models
 
     def get_urls(self):
+
         from djangobmf.urls import urlpatterns
 
         self.activate()
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
-            ct = ContentType.objects.get_for_model(module)
+
+            try:
+                ct = ContentType.objects.get_for_model(module)
+            except RuntimeError:
+                # During the first migrate command, contenttypes are not ready
+                # and raise a Runtime error. We ignore that error and return
+                # an empty pattern - the urls are not needed during migrations.
+                return patterns('')
 
             # set the apis
             urlpatterns += patterns(
