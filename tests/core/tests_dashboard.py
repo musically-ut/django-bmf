@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # ex:set fileencoding=utf-8:
-# flake8: noqa
 
 from __future__ import unicode_literals
 
@@ -9,6 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.core.dashboard import Dashboard
 from djangobmf.core.category import Category
+
+from collections import OrderedDict
 
 
 class ClassTests(TestCase):
@@ -34,7 +35,7 @@ class ClassTests(TestCase):
             slug = "test"
         td = TestDashboard()
 
-        self.assertEqual(td.data, [])
+        self.assertEqual(td.data, OrderedDict([]))
 
     def test_init_data1(self):
         class TestDashboard(Dashboard):
@@ -42,7 +43,9 @@ class ClassTests(TestCase):
             slug = "test"
         td = TestDashboard(self.cat1)
 
-        self.assertEqual(td.data, [self.cat1])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+        ]))
 
     def test_init_data2(self):
         class TestDashboard(Dashboard):
@@ -50,7 +53,21 @@ class ClassTests(TestCase):
             slug = "test"
         td = TestDashboard(self.cat1, self.cat2)
 
-        self.assertEqual(td.data, [self.cat1, self.cat2])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+            (self.cat2.key, self.cat2),
+        ]))
+
+    def test_init_data3(self):
+        class TestDashboard(Dashboard):
+            name = "test"
+            slug = "test"
+        td = TestDashboard(self.cat2, self.cat1)
+
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat2.key, self.cat2),
+            (self.cat1.key, self.cat1),
+        ]))
 
     def test_add_category(self):
         class TestDashboard(Dashboard):
@@ -59,19 +76,32 @@ class ClassTests(TestCase):
         td = TestDashboard()
 
         td.add_category(self.cat1)
-        self.assertEqual(td.data, [self.cat1])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+        ]))
 
         td.add_category(self.cat1)
-        self.assertEqual(td.data, [self.cat1])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+        ]))
 
         td.add_category(self.cat2)
-        self.assertEqual(td.data, [self.cat1, self.cat2])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+            (self.cat2.key, self.cat2),
+        ]))
 
         td.add_category(self.cat1)
-        self.assertEqual(td.data, [self.cat1, self.cat2])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+            (self.cat2.key, self.cat2),
+        ]))
 
         td.add_category(self.cat2)
-        self.assertEqual(td.data, [self.cat1, self.cat2])
+        self.assertEqual(td.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+            (self.cat2.key, self.cat2),
+        ]))
 
     def test_key(self):
         class TestDashboard(Dashboard):
@@ -91,27 +121,37 @@ class ClassTests(TestCase):
         td1 = TestDashboard1()
         td2 = TestDashboard2()
         td1.merge(td2)
-        self.assertEqual(td1.data, [])
+        self.assertEqual(td1.data, OrderedDict())
 
         td1 = TestDashboard1()
         td2 = TestDashboard2(self.cat1)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.cat1])
+        self.assertEqual(td1.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+        ]))
 
         td1 = TestDashboard1(self.cat1)
         td2 = TestDashboard2(self.cat2)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.cat1, self.cat2])
+        self.assertEqual(td1.data, OrderedDict([
+            (self.cat1.key, self.cat1),
+            (self.cat2.key, self.cat2),
+        ]))
 
         td1 = TestDashboard1(self.cat2)
         td2 = TestDashboard2(self.cat2)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.cat2])
+        self.assertEqual(td1.data, OrderedDict([
+            (self.cat2.key, self.cat2),
+        ]))
 
         td1 = TestDashboard1(self.cat2, self.cat1)
         td2 = TestDashboard2(self.cat2)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.cat2, self.cat1])
+        self.assertEqual(td1.data, OrderedDict([
+            (self.cat2.key, self.cat2),
+            (self.cat1.key, self.cat1),
+        ]))
 
     def test_bool(self):
         class TestDashboard(Dashboard):
@@ -178,10 +218,9 @@ class ClassTests(TestCase):
         class TestDashboard(Dashboard):
             name = "test"
             slug = "test"
-        td = TestDashboard(self.cat1)
-
-        for i in td:
-            self.assertEqual(i, self.cat1)
 
         td = TestDashboard(self.cat1, self.cat2)
         self.assertEqual([i for i in td], [self.cat1, self.cat2])
+
+        td = TestDashboard(self.cat2, self.cat1)
+        self.assertEqual([i for i in td], [self.cat2, self.cat1])
