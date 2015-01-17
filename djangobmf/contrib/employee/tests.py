@@ -4,11 +4,19 @@
 
 from __future__ import unicode_literals
 
+from .apps import EmployeeConfig
 from .models import Employee
-from djangobmf.utils.testcases import BaseTestCase
-from djangobmf.utils.testcases import ModuleMixin
 
-class TaxTests(ModuleMixin, BaseTestCase):
+from djangobmf.utils.testcases import TestCase
+from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
+
+
+class EmployeeFactory(ModuleTestFactory, TestCase):
+    app = EmployeeConfig
+
+
+class TaxTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """

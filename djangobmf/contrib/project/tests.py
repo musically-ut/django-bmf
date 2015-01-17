@@ -4,11 +4,19 @@
 
 from __future__ import unicode_literals
 
+from .apps import ProjectConfig
 from .models import Project
-from djangobmf.utils.testcases import BaseTestCase
-from djangobmf.utils.testcases import ModuleMixin
 
-class ProjectTests(ModuleMixin, BaseTestCase):
+from djangobmf.utils.testcases import TestCase
+from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
+
+
+class ProjectFactory(ModuleTestFactory, TestCase):
+    app = ProjectConfig
+
+
+class ProjectTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """

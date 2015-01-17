@@ -7,12 +7,20 @@ from __future__ import unicode_literals
 from django.test import LiveServerTestCase
 from django.core.urlresolvers import reverse
 
-from .models import Quotation, QuotationProduct
-from djangobmf.utils.testcases import BaseTestCase
+from .apps import QuotationConfig
+from .models import Quotation
+from .models import QuotationProduct
+
+from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class QuotationModuleTests(ModuleMixin, BaseTestCase):
+class QuotationFactory(ModuleTestFactory, TestCase):
+    app = QuotationConfig
+
+
+class QuotationModuleTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """

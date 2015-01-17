@@ -9,11 +9,17 @@ from django.contrib.contenttypes.models import ContentType
 
 from factory.django import DjangoModelFactory
 
+from .apps import TaskConfig
 from .models import Goal
 from .models import Task
 
-from djangobmf.utils.testcases import BaseTestCase
+from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
+
+
+class TaskFactory(ModuleTestFactory, TestCase):
+    app = TaskConfig
 
 
 # class GoalFactory(DjangoModelFactory):
@@ -28,7 +34,7 @@ from djangobmf.utils.testcases import ModuleMixin
 #     summary = 'Test summary'
 
 
-class TaskModuleTests(ModuleMixin, BaseTestCase):
+class TaskModuleTests(ModuleMixin, TestCase):
 
     def test_goal_views(self):
         self.model = Goal

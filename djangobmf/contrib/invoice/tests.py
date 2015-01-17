@@ -10,13 +10,20 @@ from django.core.urlresolvers import reverse
 from factory.django import DjangoModelFactory
 from unittest import expectedFailure
 
+from .apps import InvoiceConfig
 from .models import Invoice
-from djangobmf.utils.testcases import BaseTestCase
+
+from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 # from djangobmf.utils.testcases import WorkflowTestCase
+from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class InvoiceFactory(DjangoModelFactory):
+class InvoiceFactory(ModuleTestFactory, TestCase):
+    app = InvoiceConfig
+
+
+class InvoiceFactory(DjangoModelFactory, TestCase):
     class Meta:
         model = Invoice
    #customer = 1
@@ -28,7 +35,7 @@ class InvoiceFactory(DjangoModelFactory):
    #invoice_number = "TEST INVOICE"
 
 
-class InvoiceModuleTests(ModuleMixin, BaseTestCase):
+class InvoiceModuleTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """

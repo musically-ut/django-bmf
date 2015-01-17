@@ -4,12 +4,19 @@
 
 from __future__ import unicode_literals
 
+from .apps import TimesheetConfig
 from .models import Timesheet
-from djangobmf.utils.testcases import BaseTestCase
+
+from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class TimesheetModuleTests(ModuleMixin, BaseTestCase):
+class TimesheetFactory(ModuleTestFactory, TestCase):
+    app = TimesheetConfig
+
+
+class TimesheetModuleTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """
@@ -22,7 +29,6 @@ class TimesheetModuleTests(ModuleMixin, BaseTestCase):
             'description': 'test',
         })
         self.assertNotEqual(data["object_pk"], 0)
-#       self.autotest_get('index', 200)
 
         obj = self.get_latest_object()
         a = '%s' % obj  # check if object name has any errors

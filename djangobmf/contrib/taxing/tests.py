@@ -4,12 +4,19 @@
 
 from __future__ import unicode_literals
 
+from .apps import TaxingConfig
 from .models import Tax
-from djangobmf.utils.testcases import BaseTestCase
+
+from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class TaxModuleTests(ModuleMixin, BaseTestCase):
+class TaxingFactory(ModuleTestFactory, TestCase):
+    app = TaxingConfig
+
+
+class TaxModuleTests(ModuleMixin, TestCase):
 
     def test_urls_user(self):
         """
@@ -24,7 +31,6 @@ class TaxModuleTests(ModuleMixin, BaseTestCase):
             'is_active': '1',
         })
         self.assertNotEqual(data["object_pk"], 0)
-#       self.autotest_get('index', 200)
 
         obj = self.get_latest_object()
         a = '%s'%obj # check if object name has any errors
