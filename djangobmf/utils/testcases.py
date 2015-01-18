@@ -12,6 +12,7 @@ from django.test import TransactionTestCase as DjangoTransactionTestCase
 from django.test import TestCase as DjangoTestCase
 from django.utils.translation import activate
 
+from djangobmf.demo import FIXTURES
 from djangobmf.settings import APP_LABEL
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.sites import site
@@ -70,6 +71,13 @@ class BaseTestCase(object):
 
         # update client
         self.client.login(username=username, password=username)
+
+
+class DemoDataMixin(object):
+    """
+    Adds the demo data from the fixtures to the testcase
+    """
+    fixtures = FIXTURES
 
 
 class SuperuserMixin(object):
@@ -139,7 +147,6 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
 
     def test_module_detail(self):
         for model in self.models:
-
             for object in model.objects.all():
                 response = self.client.get(object.bmfmodule_detail())
                 self.assertEqual(response.status_code, 200)

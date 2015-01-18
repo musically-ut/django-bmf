@@ -7,12 +7,13 @@ from __future__ import unicode_literals
 from .apps import TaxingConfig
 from .models import Tax
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class TaxingFactory(ModuleTestFactory, TestCase):
+class TaxingFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = TaxingConfig
 
 

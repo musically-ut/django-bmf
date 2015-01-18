@@ -9,10 +9,11 @@ from .models import Project
 
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class ProjectFactory(ModuleTestFactory, TestCase):
+class ProjectFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = ProjectConfig
 
 

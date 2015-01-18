@@ -108,3 +108,15 @@ DOCUMENT_URL = CFG_STORAGE['OPTIONS']['base_url']
 STORAGE = get_storage_class(CFG_STORAGE['ENGINE'])
 STORAGE_OPTIONS = CFG_STORAGE['OPTIONS']
 STORAGE_STATIC_PREFIX = CFG_STORAGE['STATIC_PREFIX']
+
+DEMO_FIXTURES = [
+    'fixtures/sites.json',
+    'fixtures/users.json',
+    'fixtures/demodata.json',
+    'fixtures/contrib_accounting.json',
+    'fixtures/contrib_invoice.json',
+    'fixtures/contrib_project.json',
+    'fixtures/contrib_quotation.json',
+    'fixtures/contrib_task.json',
+    'fixtures/contrib_team.json',
+]

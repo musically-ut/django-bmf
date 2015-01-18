@@ -9,10 +9,11 @@ from .models import Account
 
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class AccountingFactory(ModuleTestFactory, TestCase):
+class AccountingFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = AccountingConfig
 
 

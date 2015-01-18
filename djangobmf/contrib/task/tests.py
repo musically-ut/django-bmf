@@ -13,12 +13,13 @@ from .apps import TaskConfig
 from .models import Goal
 from .models import Task
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class TaskFactory(ModuleTestFactory, TestCase):
+class TaskFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = TaskConfig
 
 

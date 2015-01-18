@@ -7,12 +7,13 @@ from __future__ import unicode_literals
 from .apps import CustomerConfig
 from .models import Customer
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class CustomerFactory(ModuleTestFactory, TestCase):
+class CustomerFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = CustomerConfig
 
 

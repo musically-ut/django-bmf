@@ -7,12 +7,13 @@ from __future__ import unicode_literals
 from .apps import PositionConfig
 from .models import Position
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class PositionFactory(ModuleTestFactory, TestCase):
+class PositionFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = PositionConfig
 
 

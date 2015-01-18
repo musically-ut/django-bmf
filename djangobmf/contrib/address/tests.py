@@ -7,12 +7,13 @@ from __future__ import unicode_literals
 from .apps import AddressConfig
 from .models import Address
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class AddressFactory(ModuleTestFactory, TestCase):
+class AddressFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = AddressConfig
 
 

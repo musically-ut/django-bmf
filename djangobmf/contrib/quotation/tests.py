@@ -11,12 +11,13 @@ from .apps import QuotationConfig
 from .models import Quotation
 from .models import QuotationProduct
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class QuotationFactory(ModuleTestFactory, TestCase):
+class QuotationFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = QuotationConfig
 
 

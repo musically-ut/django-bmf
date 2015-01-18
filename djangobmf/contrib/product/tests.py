@@ -10,12 +10,13 @@ from django.core.urlresolvers import reverse
 from .apps import ProductConfig
 from .models import Product
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class ProductFactory(ModuleTestFactory, TestCase):
+class ProductFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = ProductConfig
 
 
