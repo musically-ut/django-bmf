@@ -18,7 +18,7 @@ from djangobmf.sites import site
 
 import json
 
-from unittest import expectedFailure
+# from unittest import expectedFailure
 
 
 class BaseTestCase(object):
@@ -102,9 +102,49 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
         self.client_login("superuser")
         self.appconf = [app for app in apps.get_app_configs() if isinstance(app, self.app)][0]
         self.models = [m for m in self.appconf.get_models() if m in site.models.values()]
-        self.views = self.get_views()
 
-    def get_views(self):
+    def test_module_create(self):
+        for model in self.models:
+
+            ns = model._bmfmeta.namespace_api
+
+            for key, slug, view in site.modules[model].list_creates():
+                url = reverse('%s:create' % ns, kwargs={
+                    'key': key,
+                })
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                self.assertEqual(response.status_code, 200)
+
+    def test_module_update(self):
+        for model in self.models:
+            ns = model._bmfmeta.namespace_api
+
+            for object in model.objects.all():
+                url = reverse('%s:update' % ns, kwargs={
+                    'pk': object.pk,
+                })
+                response = self.client.get(url)
+                self.assertTrue(response.status_code in [200, 403])
+
+    def test_module_delete(self):
+        for model in self.models:
+            ns = model._bmfmeta.namespace_api
+
+            for object in model.objects.all():
+                url = reverse('%s:delete' % ns, kwargs={
+                    'pk': object.pk,
+                })
+                response = self.client.get(url)
+                self.assertTrue(response.status_code in [200, 403])
+
+    def test_module_detail(self):
+        for model in self.models:
+
+            for object in model.objects.all():
+                response = self.client.get(object.bmfmodule_detail())
+                self.assertEqual(response.status_code, 200)
+
+    def test_module_lists_and_gets(self):
         views = []
         for model in self.models:
             for dashboard in site.dashboards:
@@ -112,15 +152,8 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
                     for view in category:
                         if view.model == model:
                             views.append((model, view, dashboard.key, category.key, view.key))
-        return views
 
-    @expectedFailure
-    def test_module_create(self):
-        # TODO
-        self.assertTrue(False)
-
-    def test_module_lists_and_gets(self):
-        for v in self.views:
+        for v in views:
             url = reverse('%s:dashboard_view' % APP_LABEL, kwargs={
                 'dashboard': v[2],
                 'category': v[3],
