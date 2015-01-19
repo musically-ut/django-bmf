@@ -34,7 +34,12 @@
                 alert( gettext("Error 405\n Method not allowed") );
             },
             500: function(jqXHRm, textStatus, errorThrown) {
-                alert( gettext("Error 500\n An Error occured while rendering the page") );
+                if (jqXHRm.responseText == undefined) {
+                    alert( gettext("Error 500\n An Error occured while rendering the page") );
+                }
+                else {
+                    alert( jqXHRm.responseText );
+                }
             }
         }
     };
