@@ -3,29 +3,11 @@
 
 from __future__ import unicode_literals
 
-from django.utils.translation import ugettext_lazy as _
-
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-from djangobmf.views import ModuleListView
 
 from .forms import CompanyForm
 from .forms import CustomerForm
-
-
-class AllCustomerView(ModuleListView):
-    slug = "all"
-    name = _("All")
-
-
-class SupplierCustomerView(ModuleListView):
-    slug = "supplier"
-    name = _("Supplier")
-
-
-class CustomerCustomerView(ModuleListView):
-    slug = "customer"
-    name = _("Customer")
 
 
 class BaseCreateView(ModuleCreateView):

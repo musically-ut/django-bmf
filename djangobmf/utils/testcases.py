@@ -12,12 +12,14 @@ from django.test import TransactionTestCase as DjangoTransactionTestCase
 from django.test import TestCase as DjangoTestCase
 from django.utils.translation import activate
 
+from djangobmf.demo import FIXTURES
+from djangobmf.settings import APP_LABEL
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.sites import site
 
 import json
 
-from unittest import expectedFailure
+# from unittest import expectedFailure
 
 
 class BaseTestCase(object):
@@ -71,6 +73,13 @@ class BaseTestCase(object):
         self.client.login(username=username, password=username)
 
 
+class DemoDataMixin(object):
+    """
+    Adds the demo data from the fixtures to the testcase
+    """
+    fixtures = FIXTURES
+
+
 class SuperuserMixin(object):
     """
     Adds a superuser to the clients and authenticates itself with this user
@@ -86,10 +95,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
     """
     Test generic module views within app-config ``app``
 
-    Currently detail, get and list views are tested. The detail-views
-    are selected via the installed (and registered) models of the app.
-    The get and list views are registered via the apps registered
-    dashboards.
+    Currently detail, get and list views are tested.
 
     The test includes only the template rendering of those classes. No
     data is accessed or changed.
@@ -102,21 +108,71 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
         super(BaseTestCase, self).setUp()
         self.user = self.create_user("superuser", is_superuser=True)
         self.client_login("superuser")
+        self.appconf = [app for app in apps.get_app_configs() if isinstance(app, self.app)][0]
+        self.models = [m for m in self.appconf.get_models() if m in site.models.values()]
 
-    @expectedFailure
-    def test_module_detail(self):
-        # TODO
-        self.assertTrue(False)
-
-    @expectedFailure
     def test_module_create(self):
-        # TODO
-        self.assertTrue(False)
+        for model in self.models:
 
-    @expectedFailure
-    def test_module_list(self):
-        # TODO
-        self.assertTrue(False)
+            ns = model._bmfmeta.namespace_api
+
+            for key, slug, view in site.modules[model].list_creates():
+                url = reverse('%s:create' % ns, kwargs={
+                    'key': key,
+                })
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                self.assertEqual(response.status_code, 200)
+
+    def test_module_update(self):
+        for model in self.models:
+            ns = model._bmfmeta.namespace_api
+
+            for object in model.objects.all():
+                url = reverse('%s:update' % ns, kwargs={
+                    'pk': object.pk,
+                })
+                response = self.client.get(url)
+                self.assertTrue(response.status_code in [200, 403])
+
+    def test_module_delete(self):
+        for model in self.models:
+            ns = model._bmfmeta.namespace_api
+
+            for object in model.objects.all():
+                url = reverse('%s:delete' % ns, kwargs={
+                    'pk': object.pk,
+                })
+                response = self.client.get(url)
+                self.assertTrue(response.status_code in [200, 403])
+
+    def test_module_detail(self):
+        for model in self.models:
+            for object in model.objects.all():
+                response = self.client.get(object.bmfmodule_detail())
+                self.assertEqual(response.status_code, 200)
+
+    def test_module_lists_and_gets(self):
+        views = []
+        for model in self.models:
+            for dashboard in site.dashboards:
+                for category in dashboard:
+                    for view in category:
+                        if view.model == model:
+                            views.append((model, view, dashboard.key, category.key, view.key))
+
+        for v in views:
+            url = reverse('%s:dashboard_view' % APP_LABEL, kwargs={
+                'dashboard': v[2],
+                'category': v[3],
+                'view': v[4],
+            })
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+
+            url = response.context['get_data_url']
+
+            response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            self.assertEqual(response.status_code, 200)
 
 
 class ModuleMixin(SuperuserMixin):

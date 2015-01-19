@@ -31,6 +31,6 @@ from .module import ModuleReportView
 from .module import ModuleUpdateView
 from .module import ModuleWorkflowView
 
-from .module import ModuleOverviewView
+from .interface import ModuleOverviewView
 
 from .mixins import ModuleViewMixin

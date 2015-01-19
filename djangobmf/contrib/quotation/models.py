@@ -26,6 +26,15 @@ from decimal import Decimal
 from .workflows import QuotationWorkflow
 
 
+class QuotationManager(models.Manager):
+
+    def open(self, request):
+        return self.get_queryset().filter(
+            # completed=False,
+            state__in=['draft', 'send', 'accepted'],
+        )
+
+
 @python_2_unicode_compatible
 class AbstractQuotation(BMFModel):
     """
@@ -84,6 +93,8 @@ class AbstractQuotation(BMFModel):
     term_of_payment = models.TextField(_("Term of payment"), blank=True, null=True)
 
     completed = models.BooleanField(_("Completed"), default=False, editable=False)
+
+    objects = QuotationManager()
 
     def __init__(self, *args, **kwargs):
         super(AbstractQuotation, self).__init__(*args, **kwargs)

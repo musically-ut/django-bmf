@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+from collections import OrderedDict
+
 from .view import View
 
 
@@ -16,7 +18,11 @@ class Category(object):
     slug = None
 
     def __init__(self, *args):
-        self.data = []
+        self.data = OrderedDict()
+
+        # the dashboards gets set during the registation
+        self.dashboard = None  # auto
+
         for view in args:
             self.add_view(view)
 
@@ -41,31 +47,31 @@ class Category(object):
             return False
 
     def __iter__(self):
-        return self.data.__iter__()
+        return self.data.values().__iter__()
 
     def __getitem__(self, key):
-        data = [i for i in self.data if i.key == key]
-        if len(data) == 1:
-            return data[0]
-        raise KeyError(key)
+        return self.data[key]
 
     def __contains__(self, item):
         if isinstance(item, View):
             key = item.key
         else:
             key = item
-        return key in [i.key for i in self.data]
+        return key in self.data
 
     def add_view(self, view):
         """
         Adds a view to the category
         """
-        if view not in self.data:
-            self.data.append(view)
+
+        if view not in self.data.values():
+            self.data[view.key] = view
+            self.data[view.key].dashboard = self.dashboard
+            self.data[view.key].category = self
 
     def merge(self, other):
         """
         merges two categories
         """
-        for view in other.data:
+        for view in other.data.values():
             self.add_view(view)

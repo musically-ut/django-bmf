@@ -26,6 +26,14 @@ from decimal import Decimal
 from .workflows import InvoiceWorkflow
 
 
+class InvoiceManager(models.Manager):
+
+    def open(self, request):
+        return self.get_queryset().filter(
+            state__in=['draft', 'open'],
+        )
+
+
 @python_2_unicode_compatible
 class BaseInvoice(BMFModel):
 
@@ -47,6 +55,8 @@ class BaseInvoice(BMFModel):
         CONTRIB_TRANSACTION, null=True, blank=True, related_name="transation_invoice",
         editable=False, on_delete=models.PROTECT,
     )
+
+    objects = InvoiceManager()
 
     @staticmethod
     def post_save(sender, instance, created, raw, *args, **kwargs):

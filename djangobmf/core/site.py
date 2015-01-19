@@ -12,11 +12,7 @@ from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.admin.sites import NotRegistered
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-from django.db.utils import OperationalError
-from django.db.utils import ProgrammingError
 
-from djangobmf.categories import BaseDashboard
-from djangobmf.categories import BaseCategory
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
 from djangobmf.models import NumberCycle
@@ -85,36 +81,7 @@ class Site(object):
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
 
-        # ~~~~ dashboards ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        for dashboard in self.dashboards:
-
-            workspace = apps.get_model(APP_LABEL, "Workspace")
-
-            label = '%s.%s' % (dashboard.__module__, dashboard.__class__.__name__)
-
-            d_obj, created = workspace.objects.get_or_create(module=label, level=0)
-
-            if created or d_obj.slug != obj.slug or d_obj.url != dashboard.slug:
-                d_obj.slug = dashboard.slug
-                d_obj.url = dashboard.slug
-                d_obj.editable = False
-                d_obj.save()
-                logger.debug('Dashboard %s registered or updated' % label)
-
-            for category in dashboard:
-                c_obj, created = workspace.objects \
-                    .select_related('parent') \
-                    .get_or_create(module=label, parent=d_obj)
-
-                if created or c_obj.slug != category.slug or c_obj.url != c_obj.get_url():
-                    c_obj.slug = category.slug
-                    c_obj.editable = False
-                    c_obj.update_url()
-                    c_obj.save()
-                    logger.debug('Category %s registered or updated' % label)
-
-        # ~~~~ END ~ acticate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~ END ~ activate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.is_active = True
         return True
@@ -213,7 +180,7 @@ class Site(object):
     def register_numbercycle(self, model):
         self.numbercycles.append(model)
 
-    # --- workspace -----------------------------------------------------------
+    # --- dashboards ----------------------------------------------------------
 
     def register_dashboards(self, *args):
         for dashboard in args:
@@ -231,101 +198,14 @@ class Site(object):
             return data[0]
         raise KeyError(key)
 
-    def register_dashboard(self, dashboard):
+    def register_dashboard(self, dashboard):  # pragma: no cover
+        pass
 
-        if isinstance(dashboard, BaseDashboard):
-            obj = dashboard
-        else:
-            obj = dashboard()
+    def register_category(self, dashboard, category):  # pragma: no cover
+        pass
 
-        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-        workspace = apps.get_model(APP_LABEL, "Workspace")
-
-        try:
-            ws, created = workspace.objects.get_or_create(module=label, level=0)
-        except (OperationalError, ProgrammingError, ImproperlyConfigured):
-            logger.debug('Database not ready, skipping registration of Dashboard %s' % label)
-            return False
-
-        if created or ws.slug != obj.slug or ws.url != obj.slug:
-            ws.slug = obj.slug
-            ws.url = obj.slug
-            ws.editable = False
-            ws.save()
-            logger.debug('Dashboard %s registered' % label)
-
-        return True
-
-    def register_category(self, dashboard, category):
-
-        if isinstance(dashboard, BaseDashboard):
-            parent = dashboard
-        else:
-            parent = dashboard()
-
-        if isinstance(category, BaseCategory):
-            obj = category
-        else:
-            obj = category()
-
-        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-        parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
-        workspace = apps.get_model(APP_LABEL, "Workspace")
-
-        try:
-            parent_workspace = workspace.objects.get(module=parent_label)
-        except (OperationalError, ProgrammingError, ImproperlyConfigured):
-            logger.debug('Database not ready, skipping registration of Category %s' % label)
-            return False
-        except workspace.DoesNotExist:
-            logger.error('%s does not exist - skipping registration of Category %s' % (parent_label, label))
-            return False
-
-        ws, created = workspace.objects \
-            .select_related('parent') \
-            .get_or_create(module=label, parent=parent_workspace)
-
-        if created or ws.slug != obj.slug or ws.url != ws.get_url():
-            ws.slug = obj.slug
-            ws.editable = False
-            ws.update_url()
-            ws.save()
-            logger.debug('Category %s registered' % label)
-
-        return True
-
-    def register_view(self, model, category, view, **kwargs):
-
-        parent = category()
-        obj = view()
-        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-        parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
-        workspace = apps.get_model(APP_LABEL, "Workspace")
-
-        try:
-            parent_workspace = workspace.objects.get(module=parent_label)
-        except (OperationalError, ProgrammingError, ImproperlyConfigured):
-            logger.debug('Database not ready, skipping registration of View %s' % label)
-            return False
-        except workspace.DoesNotExist:
-            logger.error('%s does not exist - skipping registration of View %s' % (parent_label, label))
-            return False
-
-        ct = ContentType.objects.get_for_model(model)
-
-        ws, created = workspace.objects \
-            .select_related('parent') \
-            .get_or_create(module=label, parent=parent_workspace)
-
-        if created or ws.slug != obj.slug or ws.url != ws.get_url() or ws.ct != ct:
-            ws.ct = ct
-            ws.slug = obj.slug
-            ws.editable = False
-            ws.update_url()
-            ws.save()
-            logger.debug('View %s registered' % label)
-
-        return True
+    def register_view(self, model, category, view, **kwargs):  # pragma: no cover
+        pass
 
     # --- url generation ------------------------------------------------------
 
@@ -344,13 +224,21 @@ class Site(object):
         return models
 
     def get_urls(self):
+
         from djangobmf.urls import urlpatterns
 
         self.activate()
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
-            ct = ContentType.objects.get_for_model(module)
+
+            try:
+                ct = ContentType.objects.get_for_model(module)
+            except RuntimeError:
+                # During the first migrate command, contenttypes are not ready
+                # and raise a Runtime error. We ignore that error and return
+                # an empty pattern - the urls are not needed during migrations.
+                return patterns('')
 
             # set the apis
             urlpatterns += patterns(
@@ -370,14 +258,5 @@ class Site(object):
                         include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
                     ),
                 )
-
-#       # build dashboards
-#       urlpatterns += patterns(
-#           '',
-#           url(
-#               r'^workspace',
-#               include((self.get_workspace_urls(), self.app_name, "workspace"))
-#           ),
-#       )
 
         return urlpatterns

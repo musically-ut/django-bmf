@@ -13,13 +13,14 @@ from unittest import expectedFailure
 from .apps import InvoiceConfig
 from .models import Invoice
 
+from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 # from djangobmf.utils.testcases import WorkflowTestCase
 from djangobmf.utils.testcases import ModuleTestFactory
 
 
-class InvoiceFactory(ModuleTestFactory, TestCase):
+class InvoiceFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = InvoiceConfig
 
 

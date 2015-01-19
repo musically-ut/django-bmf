@@ -7,20 +7,18 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.sites import site
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import HumanResources
 
 from .models import Team
 from .models import TeamMember
 
-from .views import TeamIndexView
 from .views import TeamCreateView
-from .views import TeamDetailView
 from .views import TeamUpdateView
 
 
 site.register_module(Team, **{
     'create': TeamCreateView,
-    'detail': TeamDetailView,
     'update': TeamUpdateView,
 })
 
@@ -33,6 +31,14 @@ class TeamCategory(BaseCategory):
     slug = "teams"
 
 
-site.register_dashboard(HumanResources)
-site.register_category(HumanResources, TeamCategory)
-site.register_view(Team, TeamCategory, TeamIndexView)
+site.register_dashboards(
+    HumanResources(
+        TeamCategory(
+            ViewFactory(
+                model=Team,
+                name=_("All Teams"),
+                slug="all",
+            ),
+        ),
+    ),
+)

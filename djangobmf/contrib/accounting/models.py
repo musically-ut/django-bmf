@@ -141,6 +141,19 @@ class Account(AbstractAccount):
 # =============================================================================
 
 
+class BaseTransactionManager(models.Manager):
+
+    def open(self, request):
+        return self.get_queryset().filter(
+            draft=False,
+        ).order_by('-modified')
+
+    def closed(self, request):
+        return self.get_queryset().filter(
+            draft=True,
+        ).order_by('modified')
+
+
 @python_2_unicode_compatible
 class BaseTransaction(BMFModel):
     """
@@ -156,6 +169,8 @@ class BaseTransaction(BMFModel):
     draft = models.BooleanField(_('Draft'), default=True, editable=False)
 
 #   expensed = models.BooleanField(_('Expensed'), blank=True, null=False, default=False, )
+
+    objects = BaseTransactionManager()
 
     class Meta:
         verbose_name = _('Transaction')

@@ -5,15 +5,13 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.sites import site
 from djangobmf.categories import BaseCategory
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import ProjectManagement
+from djangobmf.sites import site
 
 from .models import Project
 from .views import ProjectGetView
-from .views import ActiveProjectView
-from .views import AllProjectView
 from .views import ProjectUpdateView
 
 
@@ -28,7 +26,6 @@ class ProjectCategory(BaseCategory):
     slug = "projects"
 
 
-# NEW
 site.register_dashboards(
     ProjectManagement(
         ProjectCategory(
@@ -46,9 +43,3 @@ site.register_dashboards(
         ),
     ),
 )
-
-# OLD
-site.register_dashboard(ProjectManagement)
-site.register_category(ProjectManagement, ProjectCategory)
-site.register_view(Project, ProjectCategory, ActiveProjectView)
-site.register_view(Project, ProjectCategory, AllProjectView)

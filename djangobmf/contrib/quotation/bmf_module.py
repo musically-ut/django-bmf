@@ -6,21 +6,18 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Quotation
 from .models import QuotationProduct
-from .views import OpenQuotationView
-from .views import AllQuotationView
 from .views import QuotationCreateView
-from .views import QuotationDetailView
 from .views import QuotationUpdateView
 
 
 site.register_module(Quotation, **{
     'create': QuotationCreateView,
-    'detail': QuotationDetailView,
     'update': QuotationUpdateView,
     'report': True,
 })
@@ -35,7 +32,20 @@ class QuotationCategory(BaseCategory):
     slug = "quotations"
 
 
-site.register_dashboard(Sales)
-site.register_category(Sales, QuotationCategory)
-site.register_view(Quotation, QuotationCategory, OpenQuotationView)
-site.register_view(Quotation, QuotationCategory, AllQuotationView)
+site.register_dashboards(
+    Sales(
+        QuotationCategory(
+            ViewFactory(
+                model=Quotation,
+                name=_("Open quotations"),
+                slug="open",
+                manager="open",
+            ),
+            ViewFactory(
+                model=Quotation,
+                name=_("All quotations"),
+                slug="all",
+            ),
+        ),
+    ),
+)
