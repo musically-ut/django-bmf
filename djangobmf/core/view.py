@@ -20,6 +20,8 @@ class View(object):
         self.model = model
         self.name = name
         self.slug = slug
+        self.dashboard = None  # auto
+        self.category = None  # auto
         self.key = slug
         self.view = view or ModuleListView
         self.kwargs = kwargs

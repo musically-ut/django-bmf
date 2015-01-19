@@ -350,27 +350,6 @@ class ModuleDetailView(
             + ["djangobmf/module_detail_default.html"]
 
 
-'''
-class ModuleAutoDetailView(ModuleFormMixin, ModuleDetailView):
-    """
-    show the details of an entry
-    """
-    form_class = None
-
-    def get_form(self, **kwargs):
-        if self.form_class is None:
-            self.get_form_class()
-        form = self.form_class(instance=self.object)
-        return form
-
-    def get_context_data(self, **kwargs):
-        kwargs.update({
-            'form': self.get_form()
-        })
-        return super(ModuleAutoDetailView, self).get_context_data(**kwargs)
-'''
-
-
 class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
     """
     render a report

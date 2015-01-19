@@ -65,7 +65,14 @@ class BaseMixin(object):
         return True
 
     def read_session_data(self):
-        return self.request.session.get("djangobmf", {'version': get_version()})
+        """
+        returns the data saved in the session or an
+        default dictionary containing the version of
+        the bmf
+        """
+        return self.request.session.get("djangobmf", {
+            'version': get_version(),
+        })
 
     def write_session_data(self, data):
         # reload sessiondata, because we can not be sure, that the

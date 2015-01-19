@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from djangobmf.core.category import Category
 from djangobmf.core.view import View
 
+from collections import OrderedDict
+
 
 class ClassTests(TestCase):
 
@@ -26,7 +28,8 @@ class ClassTests(TestCase):
             slug = "test"
         td = TestCategory()
 
-        self.assertEqual(td.data, [])
+        self.assertEqual(td.data, OrderedDict([
+        ]))
 
     def test_init_data1(self):
         class TestCategory(Category):
@@ -34,7 +37,9 @@ class ClassTests(TestCase):
             slug = "test"
         td = TestCategory(self.view1)
 
-        self.assertEqual(td.data, [self.view1])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+        ]))
 
     def test_init_data2(self):
         class TestCategory(Category):
@@ -42,7 +47,10 @@ class ClassTests(TestCase):
             slug = "test"
         td = TestCategory(self.view1, self.view2)
 
-        self.assertEqual(td.data, [self.view1, self.view2])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+            ('test2', self.view2),
+        ]))
 
     def test_add_view(self):
         class TestCategory(Category):
@@ -51,19 +59,32 @@ class ClassTests(TestCase):
         td = TestCategory()
 
         td.add_view(self.view1)
-        self.assertEqual(td.data, [self.view1])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+        ]))
 
         td.add_view(self.view1)
-        self.assertEqual(td.data, [self.view1])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+        ]))
 
         td.add_view(self.view2)
-        self.assertEqual(td.data, [self.view1, self.view2])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+            ('test2', self.view2),
+        ]))
 
         td.add_view(self.view1)
-        self.assertEqual(td.data, [self.view1, self.view2])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+            ('test2', self.view2),
+        ]))
 
         td.add_view(self.view2)
-        self.assertEqual(td.data, [self.view1, self.view2])
+        self.assertEqual(td.data, OrderedDict([
+            ('test1', self.view1),
+            ('test2', self.view2),
+        ]))
 
     def test_key(self):
         class TestCategory(Category):
@@ -83,27 +104,38 @@ class ClassTests(TestCase):
         td1 = TestCategory1()
         td2 = TestCategory2()
         td1.merge(td2)
-        self.assertEqual(td1.data, [])
+        self.assertEqual(td1.data, OrderedDict([
+        ]))
 
         td1 = TestCategory1()
         td2 = TestCategory2(self.view1)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.view1])
+        self.assertEqual(td1.data, OrderedDict([
+            ('test1', self.view1),
+        ]))
 
         td1 = TestCategory1(self.view1)
         td2 = TestCategory2(self.view2)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.view1, self.view2])
+        self.assertEqual(td1.data, OrderedDict([
+            ('test1', self.view1),
+            ('test2', self.view2),
+        ]))
 
         td1 = TestCategory1(self.view2)
         td2 = TestCategory2(self.view2)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.view2])
+        self.assertEqual(td1.data, OrderedDict([
+            ('test2', self.view2),
+        ]))
 
         td1 = TestCategory1(self.view2, self.view1)
         td2 = TestCategory2(self.view2)
         td1.merge(td2)
-        self.assertEqual(td1.data, [self.view2, self.view1])
+        self.assertEqual(td1.data, OrderedDict([
+            ('test2', self.view2),
+            ('test1', self.view1),
+        ]))
 
     def test_bool(self):
         class TestCategory(Category):

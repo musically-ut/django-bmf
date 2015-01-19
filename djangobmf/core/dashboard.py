@@ -65,6 +65,7 @@ class Dashboard(object):
             self.data[category.key].merge(category)
         else:
             self.data[category.key] = category
+            self.data[category.key].dashboard = self
 
     def merge(self, other):
         """
