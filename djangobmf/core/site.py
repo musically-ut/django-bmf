@@ -198,15 +198,6 @@ class Site(object):
             return data[0]
         raise KeyError(key)
 
-    def register_dashboard(self, dashboard):  # pragma: no cover
-        pass
-
-    def register_category(self, dashboard, category):  # pragma: no cover
-        pass
-
-    def register_view(self, model, category, view, **kwargs):  # pragma: no cover
-        pass
-
     # --- url generation ------------------------------------------------------
 
     # --- misc methods --------------------------------------------------------

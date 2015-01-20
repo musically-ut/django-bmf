@@ -19,6 +19,11 @@ class DashboardView(ViewMixin, DetailView):
     model = Dashboard
     template_name = "djangobmf/dashboard/detail.html"
 
+    def get_dashboard(self):
+        if "dashboard" in self.kwargs:
+            return site.get_dashboard(self.kwargs["dashboard"])
+        return None
+
     def get_object(self):
         if "dashboard" in self.kwargs:
             try:
@@ -42,6 +47,7 @@ def dashboard_view_factory(request, dashboard, category, view, *args, **kwargs):
 
     return view_instance.view.as_view(
         model=view_instance.model,
-        name=view_instance.name,
+        dashboard=dashboard_instance,
+        dashboard_view=view_instance,
         **view_instance.kwargs
     )(request, *args, **kwargs)

@@ -77,7 +77,7 @@ class BaseMixin(object):
         return self.request.session.get("djangobmf", {
             'version': get_version(),
             'active_dashboard': None,
-            'active_view': None,
+            # 'active_view': None,
         })
 
     def write_session_data(self, data):
@@ -187,41 +187,7 @@ class BaseMixin(object):
                     del dashboards[dashboard.key]
 
             cache.set(cache_key, dashboards, self.bmf_cache_timeout)
-
-    def update_workspace(self, dashboard=None):
-        """
-        This function reads all workspaces for a user instance, builds the
-        navigation-tree and updates the active workspace (if neccessary)
-
-        workspace can either be None, the dashboards key or None
-        """
-        workspace = dashboard  # TODO: OLD
-
-        cache_key = 'bmf_workspace_%s_%s' % (self.request.user.pk, get_language())
-        cache_timeout = 600
-
-        # get navigation key from cache
-        data = cache.get(cache_key)
-        if not data:  # pragma: no branch
-            logger.debug("Reload workspace cache (%s) for user %s" % (cache_key, self.request.user))
-
-            data = {
-                "relations": {},
-                "dashboards": {},
-                "workspace": {},
-            }
-
-            cache.set(cache_key, data, cache_timeout)
-
-        db, cat = data['relations'].get(workspace, (None, None))
-        if cat:
-            view = data['workspace'][db]["categories"][cat]["views"][workspace]
-        else:
-            view = None
-
-        if not db:
-            return data["dashboards"], None, None, None, None
-        return data["dashboards"], data["workspace"][db], db, workspace, view
+        return dashboards
 
     def update_notification(self, count=None):
         """
@@ -253,36 +219,70 @@ class ViewMixin(BaseMixin):
 
         session_data = self.read_session_data()
 
-        self.update_dashboards()
-
-        # load the current workspace
-        dashboards, workspace, db_active, ws_active, ws_view = self.update_workspace(
-            getattr(self, 'workspace', session_data.get('workspace', None))
-        )
+        # load dashboard
+        if hasattr(self, 'get_dashboard_view'):
+            current_dashboard = self.get_dashboard()
+            current_view = self.get_dashboard_view()
+        elif hasattr(self, 'get_dashboard'):
+            current_dashboard = self.get_dashboard()
+            current_view = None
+        else:
+            try:
+                current_dashboard = self.request.djangobmf_site.get_dashboard(session_data['active_dashboard'])
+            except KeyError:
+                current_dashboard = None
+            current_view = None
 
         # update session
-        if db_active and ws_active and session_data.get('dashboard') != db_active \
-                or db_active != ws_active and session_data.get('workspace') != ws_active:
-            logger.debug("Update session for %s: (dashboard %s->%s) (workspace %s->%s)" % (
-                self.request.user,
-                session_data.get('dashboard', None),
-                db_active,
-                session_data.get('workspace', None),
-                ws_active,
-            ))
-            session_data['dashboard'] = db_active
-            session_data['workspace'] = ws_active
+        if current_dashboard and current_dashboard.key != session_data['active_dashboard']:
+            session_data['active_dashboard'] = current_dashboard.key
             self.write_session_data(session_data)
+
+        dashboards = self.update_dashboards()
+
+        # collect data
+        sidebar = []
+        if current_dashboard:
+            for category in current_dashboard:
+                for view in category:
+                    try:
+                        url = dashboards[current_dashboard.key][category.key][view.key]
+                    except KeyError:
+                        continue
+                    sidebar.append({
+                        'category': category.name,
+                        'view': view,
+                        'url': url,
+                        'active': current_view == view,
+                    })
+
+        navigation_dashboard = []
+        for key in dashboards.keys():
+            obj = self.request.djangobmf_site.get_dashboard(key)
+            url = reverse(
+                'djangobmf:dashboard',
+                kwargs={
+                    'dashboard': key,
+                },
+            )
+            navigation_dashboard.append({
+                'name': obj.name,
+                'url': url,
+                'active': current_dashboard == obj,
+            })
 
         # update context with session data
         kwargs.update({
             'djangobmf': self.read_session_data(),
-            'bmfworkspace': {
-                'dashboards': dashboards,
-                'workspace': workspace,
-                'workspace_active': session_data.get('dashboard', None),
-                'dashboard_active': session_data.get('workspace', None),
-            },
+            'sidebar': sidebar,
+            'navigation_dashboard': navigation_dashboard,
+            'active_dashboard': current_dashboard,
+            'active_dashboard_view': current_view,
+            #   'bmfworkspace': {
+            #       'dashboards': dashboards,
+            #       'workspace': workspace,
+            #       'workspace_active': session_data.get('dashboard', None),
+            #   },
         })
 
         # always read current version, if in development mode

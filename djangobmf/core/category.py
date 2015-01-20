@@ -63,11 +63,8 @@ class Category(object):
         """
         Adds a view to the category
         """
-
         if view not in self.data.values():
             self.data[view.key] = view
-            self.data[view.key].dashboard = self.dashboard
-            self.data[view.key].category = self
 
     def merge(self, other):
         """

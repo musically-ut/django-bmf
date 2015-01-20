@@ -86,12 +86,10 @@ class ModuleListView(
         MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
     """
     """
-    model = None  # set by workspace.views # TODO remove me
-    workspace = None  # set by workspace.views # TODO remove me
-    slug = None  # TODO: remove me
-
-    model = None  # set by sites
-    name = None
+    # set by views.dashboard
+    model = None
+    dashboard = None
+    dashboard_view = None
 
     allow_empty = True
     paginate_by = None
@@ -113,6 +111,12 @@ class ModuleListView(
 
     template_name = None
 
+    def get_dashboard_view(self):
+        return self.dashboard_view
+
+    def get_dashboard(self):
+        return self.dashboard
+
     def get_template_names(self):
         """
         Return a list of template names to be used for the request. Must return
@@ -131,8 +135,8 @@ class ModuleListView(
         return names
 
     def get_view_name(self):
-        if self.name:
-            return self.name
+        if self.dashboard:
+            return self.dashboard_view.name
         else:
             return self.model._meta.verbose_name_plural
 
