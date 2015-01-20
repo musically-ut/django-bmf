@@ -96,6 +96,7 @@ class Activity(models.Model):
         verbose_name = _('Activity')
         verbose_name_plural = _('Activity')
         get_latest_by = "modified"
+        abstract=True
 
     def __str__(self):
         if self.topic:

@@ -28,14 +28,39 @@ from .activity import ACTION_CREATED
 from .activity import ACTION_UPDATED
 from .activity import ACTION_WORKFLOW
 from .activity import ACTION_FILE
-from .activity import Activity
-from .configuration import Configuration
+
+from .activity import Activity as AbstractActivity
+from .configuration import Configuration as AbstractConfiguration
 from .dashboard import Dashboard as AbstractDashboard
-from .document import Document
-from .notification import Notification
-from .numbering import NumberCycle
-from .report import Report
+from .document import Document as AbstractDocument
+from .notification import Notification as AbstractNotification
+from .numbering import NumberCycle as AbstractNumberCycle
+from .report import Report as AbstractReport
+
+
+class Activity(AbstractActivity):
+    pass
+
+
+class Configuration(AbstractConfiguration):
+    pass
 
 
 class Dashboard(AbstractDashboard):
+    pass
+
+
+class Document(AbstractDocument):
+    pass
+
+
+class Notification(AbstractNotification):
+    pass
+
+
+class NumberCycle(AbstractNumberCycle):
+    pass
+
+
+class Report(AbstractReport):
     pass

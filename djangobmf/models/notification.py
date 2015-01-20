@@ -46,6 +46,7 @@ class Notification(models.Model):
         verbose_name_plural = _('Watched activities')
         get_latest_by = "modified"
         default_permissions = ()
+        abstract = True
 
     def is_active(self):
         return self.comment or self.file or self.changed or self.workflow
