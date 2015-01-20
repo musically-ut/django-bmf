@@ -18,7 +18,7 @@ class QuotationCreateView(ModuleCreateView):
     def get_initial(self):
         self.initial.update({
             'date': now(),
-            'employee': getattr(self.request, 'djangobmf_employee', None),
+            'employee': getattr(self.request.user, 'djangobmf_employee', None),
         })
         return super(QuotationCreateView, self).get_initial()
 

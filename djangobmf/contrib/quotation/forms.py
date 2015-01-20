@@ -13,10 +13,10 @@ from .models import Quotation
 class QuotationUpdateForm(ModelForm):
     class Meta:
         model = Quotation
-        exclude = ['quotation_number', ]
+        exclude = ['quotation_number', 'products']
 
 
 class QuotationCreateForm(ModelForm):
     class Meta:
         model = Quotation
-        exclude = ['quotation_number', 'state', 'shipping_address', 'invoice_address', 'valid_until']
+        exclude = ['quotation_number', 'state', 'shipping_address', 'invoice_address', 'valid_until', 'products']

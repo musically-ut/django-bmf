@@ -47,7 +47,7 @@ class BaseInvoice(BMFModel):
         null=True, on_delete=models.SET_NULL,
     )
     invoice_number = models.CharField(_('Invoice number'), max_length=255, null=True, blank=False)
-    products = models.ManyToManyField(CONTRIB_PRODUCT, through='InvoiceProduct')
+    products = models.ManyToManyField(CONTRIB_PRODUCT, through='InvoiceProduct', editable=False)
     net = models.FloatField(editable=False, blank=True, null=True)
     date = models.DateField(_("Date"), null=True, blank=False)
 

@@ -11,10 +11,10 @@ from .models import Invoice
 class InvoiceUpdateForm(ModelForm):
     class Meta:
         model = Invoice
-        exclude = ['invoice_number', ]
+        exclude = ['invoice_number', 'products']
 
 
 class InvoiceCreateForm(ModelForm):
     class Meta:
         model = Invoice
-        exclude = ['invoice_number', 'state', 'shipping_address', 'invoice_address', 'valid_until']
+        exclude = ['invoice_number', 'state', 'shipping_address', 'invoice_address', 'valid_until', 'products']

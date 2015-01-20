@@ -13,6 +13,12 @@ from .forms import TimesheetUpdateForm
 class CreateView(ModuleCreateView):
     form_class = TimesheetCreateForm
 
+    def get_initial(self):
+        self.initial.update({
+            'employee': getattr(self.request.user, 'djangobmf_employee', None),
+        })
+        return super(CreateView, self).get_initial()
+
 
 class UpdateView(ModuleUpdateView):
     form_class = TimesheetUpdateForm
