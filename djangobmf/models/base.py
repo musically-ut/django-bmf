@@ -15,8 +15,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
 from djangobmf.fields import WorkflowField
-from djangobmf.models.activity import Activity
-from djangobmf.models.notification import Notification
 from djangobmf.signals import activity_workflow
 from djangobmf.workflow import DefaultWorkflow
 
@@ -30,6 +28,12 @@ APP_LABEL = "djangobmf"
 
 
 def add_signals(cls):
+    # TODO add model from app config
+    from djangobmf.models import Activity
+
+    # TODO add model from app config
+    from djangobmf.models import Notification
+
     # cleanup history and follows
     def post_delete(sender, instance, *args, **kwargs):
         Activity.objects.filter(
@@ -246,8 +250,18 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
         getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
         null=True, blank=True, editable=False,
         related_name="+", on_delete=models.SET_NULL)
-    djangobmf_activity = GenericRelation(Activity, content_type_field='parent_ct', object_id_field='parent_id')
-    djangobmf_notification = GenericRelation(Notification, content_type_field='watch_ct', object_id_field='watch_id')
+    # TODO add model from app config
+    djangobmf_activity = GenericRelation(
+        "djangobmf.Activity",
+        content_type_field='parent_ct',
+        object_id_field='parent_id',
+    )
+    # TODO add model from app config
+    djangobmf_notification = GenericRelation(
+        "djangobmf.Notification",
+        content_type_field='watch_ct',
+        object_id_field='watch_id',
+    )
 
     class Meta:
         abstract = True
