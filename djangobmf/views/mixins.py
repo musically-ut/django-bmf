@@ -7,7 +7,6 @@ from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
@@ -17,7 +16,6 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
-from django.views.defaults import permission_denied
 
 from djangobmf import get_version
 from djangobmf.decorators import login_required
@@ -26,9 +24,13 @@ from djangobmf.notification.forms import HistoryCommentForm
 from djangobmf.models import Activity
 from djangobmf.models import Document
 from djangobmf.models import Notification
+from djangobmf.settings import APP_LABEL
 from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
-from djangobmf.settings import APP_LABEL
+from djangobmf.views.defaults import bad_request
+from djangobmf.views.defaults import permission_denied
+from djangobmf.views.defaults import page_not_found
+from djangobmf.views.defaults import server_error
 
 import json
 import datetime
@@ -109,26 +111,33 @@ class BaseMixin(object):
         # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
         user_add_bmf(self.request.user)
 
+        # check if bmf has a employee model and if so do a validation of the
+        # employee instance (users, who are not employees are not allowed to access)
         if self.request.user.djangobmf_has_employee and not self.request.user.djangobmf_employee:
             logger.debug("User %s does not have permission to access djangobmf" % self.request.user)
             if self.request.user.is_superuser:
                 return redirect('djangobmf:wizard', permanent=False)
             else:
-                raise PermissionDenied
+                return permission_denied(self.request)
 
         # =================================================================
 
         response = super(BaseMixin, self).dispatch(*args, **kwargs)
 
-        if response.status_code in [400, 404, 403, 405, 500] and not settings.DEBUG:
-            # Catch HTTP error codes and redirect to a bmf-specific template
-            # * 400 Bad Request
-            # * 404 Not Found
-            # * 403 Forbidden
-            # * 405 Not allowed
-            # * 500 Server Error
-            # TODO
-            logger.debug("TESTING RESPONSE %s" % response.status_code)
+        # Catch HTTP error codes and redirect to a bmf-specific template
+        if response.status_code in [400, 403, 404, 500] and not settings.DEBUG:
+
+            if response.status_code == 400:
+                return bad_request(self.request)
+
+            if response.status_code == 403:
+                return permission_denied(self.request)
+
+            if response.status_code == 404:
+                return page_not_found(self.request)
+
+            if response.status_code == 500:
+                return server_error(self.request)
 
         return response
 
