@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
@@ -29,6 +30,8 @@ from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
 from djangobmf.settings import APP_LABEL
 
+from collections import OrderedDict
+
 import json
 import datetime
 import re
@@ -47,6 +50,7 @@ class BaseMixin(object):
     this is used so we don't neet to define a middleware
     """
     permissions = []
+    bmf_cache_timeout = 600
 
     def get_permissions(self, permissions=[]):
         """
@@ -72,6 +76,8 @@ class BaseMixin(object):
         """
         return self.request.session.get("djangobmf", {
             'version': get_version(),
+            'active_dashboard': None,
+            'active_view': None,
         })
 
     def write_session_data(self, data):
@@ -127,6 +133,53 @@ class BaseMixin(object):
             logger.debug("TESTING RESPONSE %s" % response.status_code)
 
         return response
+
+    def get_dashboards_cache_key(self):
+        return 'bmf_dashboards_%s_%s' % (self.request.user.pk, get_language())
+
+    def update_dashboards(self):
+        """
+        This functions loads all dashboards for one user instance
+        """
+
+        # store information about all user dashboards
+        cache_key = self.get_dashboards_cache_key()
+
+        # get navigation key from cache
+        dashboards = cache.get(cache_key)
+
+        if not dashboards:  # pragma: no branch
+            logger.debug("Reload cache: %s" % cache_key)
+
+            dashboards = {}
+
+            # update all dashboards
+            for dashboard in self.request.djangobmf_site.dashboards:
+                dashboards[dashboard.key] = {}
+                for category in dashboard:
+                    dashboards[dashboard.key][category.key] = {}
+                    for view in category:
+                        model = view.model
+                        permissions = view.view(model=model).get_permissions([])
+                        if self.request.user.has_perms(permissions):
+                            dashboards[dashboard.key][category.key][view.key] = reverse(
+                                'djangobmf:dashboard_view',
+                                kwargs={
+                                    'dashboard': dashboard.key,
+                                    'category': category.key,
+                                    'view': view.key,
+                                },
+                            )
+
+                    # test if category has no views and delete empty categories
+                    if not dashboards[dashboard.key][category.key]:
+                        del dashboards[dashboard.key][category.key]
+
+                # test if dashboard has no categories and delete empty dashboards
+                if not dashboards[dashboard.key]:
+                    del dashboards[dashboard.key]
+
+            cache.set(cache_key, dashboards, self.bmf_cache_timeout)
 
     def update_workspace(self, dashboard=None):
         """
@@ -192,6 +245,8 @@ class ViewMixin(BaseMixin):
     def get_context_data(self, **kwargs):
 
         session_data = self.read_session_data()
+
+        self.update_dashboards()
 
         # load the current workspace
         dashboards, workspace, db_active, ws_active, ws_view = self.update_workspace(
