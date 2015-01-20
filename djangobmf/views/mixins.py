@@ -30,8 +30,6 @@ from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
 from djangobmf.settings import APP_LABEL
 
-from collections import OrderedDict
-
 import json
 import datetime
 import re
