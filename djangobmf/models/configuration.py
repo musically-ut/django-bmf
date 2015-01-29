@@ -33,38 +33,35 @@ class Configuration(models.Model):
         default_permissions = ('change',)
         abstract = True
 
-    def get_key(self, app, name):
-        return 'bmfconfig.%s.%s' % (app, name)
+    def get_key(self):
+        return 'bmfconfig.%s.%s' % (self.app_label, self.field_name)
 
     def get_cache(self):
         return caches[CACHE_DEFAULT_CONNECTION]
 
-    def get_value(self, app, name):
+    def get_value(self):
         """
         Returns the current ``Configuration`` based on the app-label and
         the name of the setting. The ``Configuration`` object is cached in the
         bmf default cache connection (which should be shared throughout all instances)
         """
         cache = self.get_cache()
-        key = self.get_key(app, name)
+        key = self.get_key()
 
         value = cache.get(key)
 
         if not value:
-            value = json.loads(self.get(app_label=app, field_name=name).value)
+            value = json.loads(self.value)
             cache.set(key, value)
 
         return value
 
-    def field(self):
-        return 'bmfconfig.%s.%s' % (app, name)
-
-    def remove_value(self, app, name):
+    def remove_value(self):
         """
         removes the cache key to ensure it is reloaded if needed
         """
         cache = self.get_cache()
-        key = self.get_key(app, name)
+        key = self.get_key()
         cache.delete(key)
 
     def clear_cache(self):
@@ -75,16 +72,19 @@ class Configuration(models.Model):
     def save(self, *args, **kwargs):
         super(Configuration, self).save(*args, **kwargs)
         # Cached information will likely be incorrect now.
-        self.remove_value(self.app_label, self.field_name)
+        self.remove_value()
 
     def delete(self):
         super(Configuration, self).delete()
         # Cached information will likely be incorrect now.
-        self.remove_value(self.app_label, self.field_name)
+        self.remove_value()
 
     def __str__(self):
         return '%s.%s' % (self.app_label, self.field_name)
 
     @models.permalink
     def get_absolute_url(self):
-        return ('djangobmf:configuration', (), {"app_label": self.app_label, "name": self.field_name})
+        return ('djangobmf:configuration', (), {
+            "app_label": self.app_label,
+            "name": self.field_name,
+        })

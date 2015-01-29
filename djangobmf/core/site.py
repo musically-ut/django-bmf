@@ -16,7 +16,6 @@ from django.core.exceptions import ImproperlyConfigured
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
 from djangobmf.models import NumberCycle
-from djangobmf.settings import APP_LABEL
 
 import logging
 logger = logging.getLogger(__name__)
@@ -60,10 +59,11 @@ class Site(object):
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
         self.settings_valid = False
-        self.register_settings(APP_LABEL, {
+        self.register_settings(self.app_name, {
             'company_name': forms.CharField(max_length=100, required=True,),
             'company_email': forms.EmailField(required=True,),
-            'currency': forms.CharField(max_length=10, required=True,),  # TODO add validation / use dropdown
+            # TODO add validation / use dropdown
+            'currency': forms.CharField(max_length=10, required=True,),
         })
 
     def activate(self, test=False):
