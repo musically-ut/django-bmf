@@ -1,6 +1,8 @@
 Version 0.2.3 (currently in development)
 ========================================
 
+* Added Configuration Cache
+
 Version 0.2.2 (2015-02-08)
 ========================================
 
@@ -19,7 +21,6 @@ Version 0.2.1 (2015-01-15)
 * Changed Admin-API urls
 * Added AngularJS and redesigned List-Views
 * Added Celery
-* Added Configuration Cache
 * Added the function to test a single module or only the core
 * Updates in ``contrib.accounting``
 * Updates in ``contrib.quotation``

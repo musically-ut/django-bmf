@@ -13,10 +13,25 @@ from djangobmf.settings import CACHE_DEFAULT_CONNECTION
 import json
 
 
-CONFIGURATION_CACHE = {}
+@python_2_unicode_compatible
+class Configuration(models.Model):
+    """
+    Model to store informations about settings
+    """
 
+    app_label = models.CharField(
+        _("Application"), max_length=100, editable=False, null=True, blank=False,
+    )
+    field_name = models.CharField(
+        _("Fieldname"), max_length=100, editable=False, null=True, blank=False,
+    )
+    value = models.TextField(_("Value"), null=True, blank=False)
 
-class ConfigurationManager(models.Manager):
+    class Meta:
+        verbose_name = _('Configuration')
+        verbose_name_plural = _('Configurations')
+        default_permissions = ('change',)
+        abstract = True
 
     def get_key(self, app, name):
         return 'bmfconfig.%s.%s' % (app, name)
@@ -41,6 +56,9 @@ class ConfigurationManager(models.Manager):
 
         return value
 
+    def field(self):
+        return 'bmfconfig.%s.%s' % (app, name)
+
     def remove_value(self, app, name):
         """
         removes the cache key to ensure it is reloaded if needed
@@ -54,38 +72,19 @@ class ConfigurationManager(models.Manager):
         cache = caches[CACHE_DEFAULT_CONNECTION]
         cache.clear()
 
-
-@python_2_unicode_compatible
-class Configuration(models.Model):
-    """
-    Model to store informations about settings
-    """
-
-    app_label = models.CharField(
-        _("Application"), max_length=100, editable=False, null=True, blank=False,
-    )
-    field_name = models.CharField(
-        _("Fieldname"), max_length=100, editable=False, null=True, blank=False,
-    )
-    value = models.TextField(_("Value"), null=True, blank=False)
-
-    class Meta:
-        verbose_name = _('Configuration')
-        verbose_name_plural = _('Configurations')
-        default_permissions = ('change',)
-        abstract = True
-
-    objects = ConfigurationManager()
-
     def save(self, *args, **kwargs):
         super(Configuration, self).save(*args, **kwargs)
         # Cached information will likely be incorrect now.
-        self.objects.remove_value(self.app_label, self.field_name)
+        self.remove_value(self.app_label, self.field_name)
 
     def delete(self):
         super(Configuration, self).delete()
         # Cached information will likely be incorrect now.
-        self.objects.remove_value(self.app_label, self.field_name)
+        self.remove_value(self.app_label, self.field_name)
 
     def __str__(self):
         return '%s.%s' % (self.app_label, self.field_name)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('djangobmf:configuration', (), {"app_label": self.app_label, "name": self.field_name})

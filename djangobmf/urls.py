@@ -16,6 +16,8 @@ from django.views.decorators.http import last_modified
 
 from djangobmf import get_version
 from djangobmf.views import ModuleOverviewView
+from djangobmf.views.configuration import ConfigurationView
+from djangobmf.views.configuration import ConfigurationEdit
 from djangobmf.views.dashboard import DashboardView
 from djangobmf.views.dashboard import dashboard_view_factory
 
@@ -37,9 +39,21 @@ urlpatterns = patterns(
     '',
     url(r'^$', DashboardView.as_view(), name="dashboard"),
     url(r'^accounts/', include('djangobmf.account.urls')),
+
     #   r'^api/module/' via sites
-    url(r'^config/', include('djangobmf.configuration.urls')),
+
+    # --- Configuration
+    url(
+        r'^config/$', ConfigurationView.as_view(), name="configuration",
+    ),
+    url(
+        r'^config/(?P<app_label>[\w_]+)/(?P<name>[\w_]+)/$',
+        ConfigurationEdit.as_view(), name="configuration",
+    ),
+
     #   r'^detail/' via sites
+
+    # --- Dashboard
     url(
         r'^dashboard/(?P<dashboard>[\w-]+)/$',
         DashboardView.as_view(),
@@ -50,6 +64,7 @@ urlpatterns = patterns(
         dashboard_view_factory,
         name="dashboard_view",
     ),
+
     url(r'^document/', include('djangobmf.document.urls')),
     url(r'^i18n/', i18n_javascript, name="jsi18n"),
     #  url(r'^messages/', include('djangobmf.message.urls')),
