@@ -384,21 +384,20 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
     """
     Provides an API to get object data
     """
-    model = None  # set by workspace.views
+    model = None  # set by views
+    serializer = None  # set by views
 
     # Limit Queryset length and activate pagination
     limit = 100
 
     def get_item_data(self, data):
-        # TODO write a more generic function, which provides basic data
-        l = []
-        for d in data:
-            l.append({
-                'pk': d.pk,
-                'name': str(d),
-                'url': d.bmfmodule_detail()
-            })
-        return l
+        """
+        this method calls the serializer, you can overwrite if, if you like
+        but it's recommended to create a serializer for your object
+
+        it returns a (serialized) list with all objects in the queryset
+        """
+        return self.serializer(self.model, data).serialize()
 
     def get(self, request):
         pk = int(self.request.GET.get('pk', 0))

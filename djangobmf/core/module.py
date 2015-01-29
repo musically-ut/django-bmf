@@ -9,6 +9,7 @@ from django.conf.urls import url
 from django.utils import six
 from django.utils.text import slugify
 
+from djangobmf.core.serializer import Serializer
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDeleteView
@@ -38,6 +39,7 @@ class Module(object):
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
         self.get = options.get('get', ModuleGetView)
+        self.serializer = options.get('serializer', Serializer)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
@@ -117,7 +119,7 @@ class Module(object):
             ),
             url(
                 r'^get/$',
-                self.get.as_view(model=self.model),
+                self.get.as_view(model=self.model, serializer=Serializer),
                 name='get',
             ),
             url(
