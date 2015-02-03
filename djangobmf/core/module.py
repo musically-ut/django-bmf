@@ -119,7 +119,7 @@ class Module(object):
             ),
             url(
                 r'^get/$',
-                self.get.as_view(model=self.model, serializer=Serializer),
+                self.get.as_view(model=self.model, serializer=self.serializer),
                 name='get',
             ),
             url(

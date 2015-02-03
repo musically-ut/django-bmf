@@ -18,6 +18,7 @@ __all__ = (
     'Notification',
     'NumberCycle',
     'Report',
+    'Serializer',
 )
 
 from django.contrib.contenttypes.models import ContentType
@@ -25,6 +26,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import signals
 from django.dispatch import receiver
 
+from djangobmf.core.serializer import Serializer
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 from djangobmf.signals import activity_addfile
