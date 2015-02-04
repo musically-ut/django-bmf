@@ -26,20 +26,7 @@ class GoalGetView(ModuleGetView):
 
 
 class TaskGetView(ModuleGetView):
-    def get_item_data(self, data):
-        l = []
-        for d in data:
-            l.append({
-                'summary': d.summary,
-                'completed': d.completed,
-                'employee': str(d.employee),
-                'state': str(d.state),
-                'modified': d.modified,
-                'goal': str(d.goal),
-                'project': str(d.project),
-                'url': d.bmfmodule_detail(),
-            })
-        return l
+    pass
 
 
 class GoalCloneView(ModuleCloneView):

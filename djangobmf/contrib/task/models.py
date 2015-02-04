@@ -179,7 +179,7 @@ class TaskManager(models.Manager):
             completed=False,
         )
 
-    def availalbe(self, request):
+    def available(self, request):
         return self.get_queryset().filter(
             employee=None,
             completed=False,
