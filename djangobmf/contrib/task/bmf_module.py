@@ -21,6 +21,7 @@ from .views import GoalCloneView
 from .views import GoalDetailView
 from .views import GoalGetView
 
+
 class TaskSerializer(Serializer):
     def serialize(self):
         l = []
