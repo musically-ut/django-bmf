@@ -617,7 +617,8 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
             if not registered:
                 return None
 
-            return format_html('{0}: <a href="{1}">{2}</a>',
+            return format_html(
+                '{0}: <a href="{1}">{2}</a>',
                 obj._meta.verbose_name,
                 obj.bmfmodule_detail(),
                 obj
@@ -626,13 +627,15 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         def format_protected_callback(obj):
 
             if obj.__class__ in site.modules:
-                return format_html('{0}: <a href="{1}">{2}</a>',
+                return format_html(
+                    '{0}: <a href="{1}">{2}</a>',
                     obj._meta.verbose_name,
                     obj.bmfmodule_detail(),
                     obj
                 )
             else:
-                return format_html('{0}: {1}',
+                return format_html(
+                    '{0}: {1}',
                     obj._meta.verbose_name,
                     obj
                 )
