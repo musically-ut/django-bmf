@@ -590,9 +590,9 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         return super(ModuleDeleteView, self).get_template_names() \
             + ["djangobmf/module_delete.html"]
 
+    # TODO
     def get_success_url(self):
-        messages.info(self.request, 'Object deleted')
-        return self.redirect_next()
+        return '/'
 
     def get_deleted_objects(self):
         from djangobmf.sites import site
@@ -644,6 +644,12 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         ]
 
         return to_delete, perms_needed, protected
+
+    def form_valid(self, form):
+        return self.render_valid_form({
+            'object_pk': self.object.pk,
+            'message': ugettext('Object deleted'),
+        })
 
     def clean_list(self, lst):
         if not isinstance(lst, (list, tuple)):
