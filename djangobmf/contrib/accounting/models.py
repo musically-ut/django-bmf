@@ -9,6 +9,7 @@ models doctype
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -16,15 +17,17 @@ from djangobmf.currency import Wallet
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
 from djangobmf.fields import WorkflowField
-from djangobmf.models import BMFModelMPTT
 from djangobmf.models import BMFModel
+from djangobmf.models import BMFModelBase
 from djangobmf.settings import CONTRIB_ACCOUNT
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_TRANSACTION
 
 from .workflows import TransactionWorkflow
 
+from mptt.managers import TreeManager
 from mptt.models import TreeForeignKey
+from mptt.models import MPTTModelBase, MPTTModel
 
 ACCOUNTING_INCOME = 10
 ACCOUNTING_EXPENSE = 20
@@ -39,6 +42,17 @@ ACCOUNTING_TYPES = (
     (ACCOUNTING_LIABILITY, _('Liability')),
     (ACCOUNTING_EQUITY, _('Equity')),
 )
+
+
+class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
+    pass
+
+
+class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
+    objects = TreeManager()
+
+    class Meta:
+        abstract = True
 
 # =============================================================================
 

@@ -1,6 +1,7 @@
 Version 0.2.2 (currently in development)
 ========================================
 
+* Removed core dependency of django-mptt (but it's still used in the contrib applications)
 
 
 Version 0.2.1 (2015-01-15)

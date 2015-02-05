@@ -22,9 +22,6 @@ from djangobmf.workflow import DefaultWorkflow
 import types
 import inspect
 
-from mptt.managers import TreeManager
-from mptt.models import MPTTModelBase, MPTTModel
-
 
 def add_signals(cls):
     # TODO add model from app config
@@ -408,14 +405,3 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
         Returns the current state of the workflow attached to this model
         """
         return self._bmfworkflow._current_state
-
-
-class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
-    pass
-
-
-class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
-    objects = TreeManager()
-
-    class Meta:
-        abstract = True
