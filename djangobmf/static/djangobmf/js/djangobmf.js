@@ -614,8 +614,11 @@ $.extend($.fn.treegrid.defaults, {
     };
 })(jQuery);
 $(document).ready(function() {
-    $('.bmf-edit').bmf_editform(); // TODO: remove me
-    $('.bmfedit').bmf_editform();
+    $('.bmf-edit').bmf_editform();
+    $('.btn-bmfdelete').bmf_editform();
+    $('.btn-bmfupdate').bmf_editform();
+    $('.btn-bmfclone').bmf_editform();
+    $('.btn-bmfworkflow').bmf_editform();
 });
 /* buildform */
 (function($){

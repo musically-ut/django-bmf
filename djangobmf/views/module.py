@@ -590,13 +590,10 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         return super(ModuleDeleteView, self).get_template_names() \
             + ["djangobmf/module_delete.html"]
 
-    # TODO
     def get_success_url(self):
-        return '/'
+        return '/de/'
 
     def get_deleted_objects(self):
-        from djangobmf.sites import site
-
         collector = NestedObjects(using=router.db_for_write(self.model))
         collector.collect([self.object])
         perms_needed = set()
@@ -611,7 +608,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
             if not self.request.user.has_perm(p):
                 perms_needed.add(obj._meta.verbose_name)
 
-            registered = obj.__class__ in site.modules
+            registered = obj.__class__ in self.request.djangobmf_site.modules
 
             # only show bmf modules
             if not registered:
@@ -650,7 +647,6 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
 
     def form_valid(self, form):
         return self.render_valid_form({
-            'object_pk': self.object.pk,
             'message': ugettext('Object deleted'),
         })
 

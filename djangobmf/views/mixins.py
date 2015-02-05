@@ -308,7 +308,7 @@ class AjaxMixin(BaseMixin):
         response_kwargs['content_type'] = 'application/json'
         return HttpResponse(data, **response_kwargs)
 
-    def get_ajax_context(self, context):
+    def get_ajax_context(self, context={}):
         return context
 
     def render_to_response(self, context, **response_kwargs):
@@ -497,8 +497,7 @@ class ModuleBaseMixin(object):
 
 class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
     """
-    base mixin for update, clone and create views (ajax-forms)
-    and form-api
+    base mixin for update, clone, delete and create views (ajax-forms)
     """
 
     def get_ajax_context(self, context):
