@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
-from djangobmf.fields import WorkflowField
+from djangobmf.fields import WorkflowFieldV2 as WorkflowField
 from djangobmf.settings import APP_LABEL
 from djangobmf.signals import activity_workflow
 from djangobmf.workflow import Workflow
@@ -220,7 +220,7 @@ class BMFModelBase(ModelBase):
                     )
 
             except models.FieldDoesNotExist:
-                field = WorkflowField()
+                field = WorkflowField(workflow=cls._bmfmeta.workflow_cls)
                 field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
 
         # add field: modified
@@ -399,17 +399,17 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
 
     def __init__(self, *args, **kwargs):
         super(BMFModel, self).__init__(*args, **kwargs)
-        # update the state of the workflow with object data
-        if self._bmfmeta.workflow_field:
-            if hasattr(self, self._bmfmeta.workflow_field):
-                self._bmfworkflow = self._bmfmeta.workflow(getattr(self, self._bmfmeta.workflow_field))
-                if getattr(self, self._bmfmeta.workflow_field) is None:
-                    # set default value in new objects
-                    setattr(
-                        self,
-                        self._bmfmeta.workflow_field,
-                        self._bmfworkflow._current_state_key
-                    )
+#       # update the state of the workflow with object data
+#       if self._bmfmeta.workflow_field:
+#           if hasattr(self, self._bmfmeta.workflow_field):
+#               self._bmfworkflow = self._bmfmeta.workflow(getattr(self, self._bmfmeta.workflow_field))
+#               if getattr(self, self._bmfmeta.workflow_field) is None:
+#                   # set default value in new objects
+#                   setattr(
+#                       self,
+#                       self._bmfmeta.workflow_field,
+#                       self._bmfworkflow._current_state_key
+#                   )
         if self.pk and len(self._bmfmeta.observed_fields) > 0:
             self._bmfmeta.changelog = self._get_observed_values()
 

@@ -8,7 +8,8 @@ from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
-from .currency import BaseCurrency
+from djangobmf.currency import BaseCurrency
+from djangobmf.workflow import WorkflowContainer
 
 
 class OptionalForeignKey(models.ForeignKey):
@@ -29,6 +30,7 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
     description = _("Workflow object")
 
     def __init__(self, **kwargs):
+        # TODO ADD REMOVAL WARNING
         defaults = {
             'max_length': 32,  # max length
             'db_index': True,
@@ -40,6 +42,55 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
             'editable': False,
         })
         super(WorkflowField, self).__init__(**defaults)
+
+
+class WorkflowFieldV2(models.CharField):
+    """
+    Holds the current state of an Workflow object
+    can not be edited
+    """
+    description = _("Workflow Field")
+
+    def __init__(self, workflow, *args, **kwargs):
+        self.workflow = workflow
+        defaults = {
+            'max_length': 32,  # max length
+            'db_index': True,
+        }
+        defaults.update(kwargs)
+        defaults.update({
+            'null': True,
+            'blank': True,
+            'editable': False,
+        })
+        super(WorkflowFieldV2, self).__init__(**defaults)
+
+    def to_python(self, value):
+        if isinstance(value, WorkflowContainer):
+            return value
+        return WorkflowContainer(self.workflow, value)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(WorkflowFieldV2, self).deconstruct()
+        del kwargs["null"]
+        del kwargs["blank"]
+        del kwargs["editable"]
+        kwargs["workflow"] = self.workflow
+        return name, path, args, kwargs
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self.get_prep_value(value)
+
+    def get_prep_value(self, value):
+        if isinstance(value, WorkflowContainer):
+            value = value.state_key
+        super(WorkflowFieldV2, self).get_prep_value(value)
+
+    def get_db_prep_save(self, value, *args, **kwargs):
+        if isinstance(value, WorkflowContainer):
+            value = value.state_key
+        return super(WorkflowFieldV2, self).get_db_prep_save(value, *args, **kwargs)
 
 
 # Currency and Money

@@ -240,6 +240,20 @@ class Workflow(six.with_metaclass(WorkflowMetaclass, object)):
         return url
 
 
+class WorkflowContainer(object):
+
+    def __init__(self, workspace, state=None):
+        self.obj = workspace(state)
+
+    @property
+    def state(self):
+        return self.obj._current_state
+
+    @property
+    def state_key(self):
+        return self.obj._current_state_key
+
+
 class DefaultWorkflow(Workflow):
     class States:
         default = State('default', default=True, update=True, delete=True)
