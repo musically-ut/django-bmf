@@ -15,6 +15,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
 from djangobmf.fields import WorkflowField
+from djangobmf.settings import APP_LABEL
 from djangobmf.signals import activity_workflow
 from djangobmf.workflow import DefaultWorkflow
 
@@ -23,8 +24,6 @@ import inspect
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModelBase, MPTTModel
-
-APP_LABEL = "djangobmf"
 
 
 def add_signals(cls):
@@ -360,7 +359,7 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
         return self._bmfworkflow._current_state
 
     @classmethod
-    def has_permissions(cls, qs, user):  # DRAFT!!
+    def has_permissions(cls, qs, user):
         """
         Overwrite this function to enable object bases permissions. It must return
         a queryset.
