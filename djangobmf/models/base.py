@@ -182,6 +182,75 @@ class BMFModelBase(ModelBase):
                 ('addfile_' + cls._meta.model_name, u'Can add files to %s' % cls.__name__),
             )
 
+        # add fields
+        try:
+            cls._meta.get_field('modified')
+        except models.FieldDoesNotExist:
+            field = models.DateTimeField(
+                _("Modified"),
+                auto_now=True,
+                editable=False,
+                null=True,
+                blank=False,
+            )
+            field.contribute_to_class(cls, 'modified')
+
+        try:
+            cls._meta.get_field('created')
+        except models.FieldDoesNotExist:
+            field = models.DateTimeField(
+                _("Created"),
+                auto_now_add=True,
+                editable=False,
+                null=True,
+                blank=False,
+            )
+            field.contribute_to_class(cls, 'created')
+
+        try:
+            cls._meta.get_field('modified_by')
+        except models.FieldDoesNotExist:
+            field = models.ForeignKey(
+                getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+                verbose_name=_("Modified by"),
+                null=True, blank=True, editable=False,
+                related_name="+", on_delete=models.SET_NULL
+            )
+            field.contribute_to_class(cls, 'modified_by')
+
+        try:
+            cls._meta.get_field('created_by')
+        except models.FieldDoesNotExist:
+            field = models.ForeignKey(
+                getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+                verbose_name=_("Created by"),
+                null=True, blank=True, editable=False,
+                related_name="+", on_delete=models.SET_NULL
+            )
+            field.contribute_to_class(cls, 'created_by')
+
+        # TODO add model from app config
+        try:
+            cls._meta.get_field('djangobmf_activity')
+        except models.FieldDoesNotExist:
+            field = GenericRelation(
+                "djangobmf.Activity",
+                content_type_field='parent_ct',
+                object_id_field='parent_id',
+            )
+            field.contribute_to_class(cls, 'djangobmf_activity')
+
+        # TODO add model from app config
+        try:
+            cls._meta.get_field('djangobmf_notification')
+        except models.FieldDoesNotExist:
+            field = GenericRelation(
+                "djangobmf.Notification",
+                content_type_field='watch_ct',
+                object_id_field='watch_id',
+            )
+            field.contribute_to_class(cls, 'djangobmf_notification')
+
         # make workflow
         cls._bmfworkflow = cls._bmfmeta.workflow()
         if cls._bmfmeta.has_workflow:
@@ -240,28 +309,6 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
     """
     Base class for BMF models.
     """
-    modified = models.DateTimeField(_("Modified"), auto_now=True, editable=False, null=True, blank=False)
-    created = models.DateTimeField(_("Created"), auto_now_add=True, editable=False, null=True, blank=False)
-    modified_by = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
-        null=True, blank=True, editable=False,
-        related_name="+", on_delete=models.SET_NULL)
-    created_by = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
-        null=True, blank=True, editable=False,
-        related_name="+", on_delete=models.SET_NULL)
-    # TODO add model from app config
-    djangobmf_activity = GenericRelation(
-        "djangobmf.Activity",
-        content_type_field='parent_ct',
-        object_id_field='parent_id',
-    )
-    # TODO add model from app config
-    djangobmf_notification = GenericRelation(
-        "djangobmf.Notification",
-        content_type_field='watch_ct',
-        object_id_field='watch_id',
-    )
 
     class Meta:
         abstract = True
