@@ -27,6 +27,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 
 from djangobmf.core.serializer import Serializer
+from djangobmf.settings import APP_LABEL
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 from djangobmf.signals import activity_addfile
@@ -54,31 +55,45 @@ from .report import Report as AbstractReport
 
 
 class Activity(AbstractActivity):
-    pass
+    class Meta(AbstractActivity.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 class Configuration(AbstractConfiguration):
-    pass
+    class Meta(AbstractConfiguration.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 class Dashboard(AbstractDashboard):
-    pass
+    class Meta(AbstractDashboard.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 class Document(AbstractDocument):
-    pass
+    class Meta(AbstractDocument.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 class Notification(AbstractNotification):
-    pass
+    class Meta(AbstractNotification.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 class NumberCycle(AbstractNumberCycle):
-    pass
+    class Meta(AbstractNumberCycle.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 class Report(AbstractReport):
-    pass
+    class Meta(AbstractReport.Meta):
+        abstract = False
+        app_label = APP_LABEL
 
 
 @receiver(activity_create)
