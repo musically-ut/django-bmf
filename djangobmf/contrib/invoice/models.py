@@ -15,7 +15,6 @@ from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_INVOICE
 from djangobmf.settings import CONTRIB_ADDRESS
 from djangobmf.settings import CONTRIB_TRANSACTION
-from djangobmf.fields import WorkflowField
 from djangobmf.numbering.utils import numbercycle_get_name, numbercycle_delete_object
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
@@ -37,7 +36,6 @@ class InvoiceManager(models.Manager):
 @python_2_unicode_compatible
 class BaseInvoice(BMFModel):
 
-    state = WorkflowField()
     shipping_address = models.ForeignKey(
         CONTRIB_ADDRESS, related_name="shipping_invoice",
         blank=False, null=True, on_delete=models.SET_NULL,
@@ -70,7 +68,6 @@ class BaseInvoice(BMFModel):
     class BMFMeta:
         number_cycle = "INV{year}/{month}-{counter:04d}"
         workflow = InvoiceWorkflow
-        workflow_field = 'state'
 
     class Meta:
         verbose_name = _('Invoice')

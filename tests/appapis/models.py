@@ -22,7 +22,6 @@ class TestWorkflow(Workflow):
 
 
 class TestView(BMFModel):
-    state = WorkflowField()
     field = models.CharField(max_length=3)
     field_b = models.CharField(max_length=4, blank=True, null=True)
 
@@ -31,4 +30,3 @@ class TestView(BMFModel):
         has_comments = True
         observed_fields = ['field', ]
         workflow = TestWorkflow
-        workflow_field = 'state'

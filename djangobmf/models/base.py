@@ -17,10 +17,13 @@ from django.contrib.contenttypes.fields import GenericRelation
 from djangobmf.fields import WorkflowField
 from djangobmf.settings import APP_LABEL
 from djangobmf.signals import activity_workflow
+from djangobmf.workflow import Workflow
 from djangobmf.workflow import DefaultWorkflow
 
 import types
 import inspect
+# import logging
+# logger = logging.getLogger(__name__)
 
 
 def add_signals(cls):
@@ -58,13 +61,12 @@ class BMFOptions(object):
 
       class MyModel(BMFModel):
         class BMFMeta:
-          category = 'mycategory'
+          workflow = MyWorkflow
     """
 
     def __init__(self, cls, meta, options=None):
 
         # overwriteable =========================================================
-        self.category = _("No category")
         self.has_logging = True
         self.has_comments = False
         self.has_files = False
@@ -74,15 +76,39 @@ class BMFOptions(object):
         self.observed_fields = []
         self.search_fields = []
         self.number_cycle = None
+
         self.workflow = DefaultWorkflow
         self.workflow_field = None
 
+        # workflow_cls
+
+        self.workflow_cls = getattr(
+            options, 'workflow', None
+        )
+
+        if self.workflow_cls and not issubclass(self.workflow_cls, Workflow):
+            raise ImproperlyConfigured(
+                "%s is not a Workflow in %s" % (
+                    self.workflow_cls.__name__,
+                    cls.__name__
+                )
+            )
+
+        # workflow_field_name
+
+        self.workflow_field_name = getattr(
+            options, 'workflow_field_name', 'state'
+        )
+
         # protected =============================================================
+
         # used to detect changes
         self.changelog = {}
+
         # set namespace of urls
         self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
         self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
         # is filles with keys if multiple create views are definied for this model (see sites.py)
@@ -97,7 +123,6 @@ class BMFOptions(object):
         for key, value in options:
             # auto-set known options (no validation!)
             if key in [
-                'category',
                 'has_logging',
                 'has_comments',
                 'has_files',
@@ -123,7 +148,11 @@ class BMFOptions(object):
             self.can_clone = False
 
         # determin if the model has an workflow
-        self.has_workflow = bool(self.workflow_field) and self.has_logging
+        self.has_workflow = bool(self.workflow_cls)
+
+        # TODO: remove me - BUGFIX (transition)
+        if self.has_workflow and not self.workflow_field:
+            self.workflow_field = self.workflow_field_name
 
         # determin if the model detects changes
         self.has_detectchanges = bool(self.observed_fields) and self.has_logging
@@ -178,7 +207,23 @@ class BMFModelBase(ModelBase):
                 ('addfile_' + cls._meta.model_name, u'Can add files to %s' % cls.__name__),
             )
 
-        # add fields
+        # add field: workflow field
+        if cls._bmfmeta.has_workflow:
+            try:
+                field = cls._meta.get_field(cls._bmfmeta.workflow_field_name)
+                if not isinstance(field, WorkflowField):
+                    raise ImproperlyConfigured(
+                        '%s is not a WorkflowField in %s' % (
+                            cls._bmfmeta.workflow_field_name,
+                            cls.__name__
+                        )
+                    )
+
+            except models.FieldDoesNotExist:
+                field = WorkflowField()
+                field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
+
+        # add field: modified
         try:
             cls._meta.get_field('modified')
         except models.FieldDoesNotExist:
@@ -191,6 +236,7 @@ class BMFModelBase(ModelBase):
             )
             field.contribute_to_class(cls, 'modified')
 
+        # add field: created
         try:
             cls._meta.get_field('created')
         except models.FieldDoesNotExist:
@@ -203,6 +249,7 @@ class BMFModelBase(ModelBase):
             )
             field.contribute_to_class(cls, 'created')
 
+        # add field: modified by
         try:
             cls._meta.get_field('modified_by')
         except models.FieldDoesNotExist:
@@ -214,6 +261,7 @@ class BMFModelBase(ModelBase):
             )
             field.contribute_to_class(cls, 'modified_by')
 
+        # add field: created by
         try:
             cls._meta.get_field('created_by')
         except models.FieldDoesNotExist:
@@ -299,21 +347,10 @@ class BMFModelBase(ModelBase):
         setattr(cls, 'get_absolute_url', get_absolute_url)
 
         # make workflow
-        cls._bmfworkflow = cls._bmfmeta.workflow()
-        if cls._bmfmeta.has_workflow:
-            try:
-                if not isinstance(cls.__dict__[cls._bmfmeta.workflow_field].field, WorkflowField):
-                    raise ImproperlyConfigured(
-                        '%s is not a WorkflowField in %s' % (
-                            cls._bmfmeta.workflow_field, cls._meta.model.__class__.__name__
-                        )
-                    )
-            except KeyError:
-                raise ImproperlyConfigured(
-                    '%s is not a WorkflowField in %s' % (
-                        cls._bmfmeta.workflow_field, cls._meta.model.__class__.__name__
-                    )
-                )
+        if cls._bmfmeta.workflow:
+            cls._bmfworkflow = cls._bmfmeta.workflow()
+        else:
+            cls._bmfworkflow = DefaultWorkflow()
 
         if cls._bmfmeta.clean:
             if not hasattr(cls, 'bmf_clean') and not cls._meta.abstract:

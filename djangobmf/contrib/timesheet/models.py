@@ -9,7 +9,6 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.models import BMFModel
-from djangobmf.fields import WorkflowField
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_TASK
@@ -36,8 +35,6 @@ class TimesheetManager(models.Manager):
 class AbstractTimesheet(BMFModel):
     """
     """
-    state = WorkflowField()
-
     summary = models.CharField(_("Title"), max_length=255, null=True, blank=False, )
     description = models.TextField(_("Description"), null=True, blank=True, )
     start = models.DateTimeField(null=True, blank=False, default=now)
@@ -107,7 +104,6 @@ class AbstractTimesheet(BMFModel):
     class BMFMeta:
         has_logging = True
         workflow = TimesheetWorkflow
-        workflow_field = 'state'
 
 
 class Timesheet(AbstractTimesheet):

@@ -16,7 +16,6 @@ from django.utils.translation import ugettext_lazy as _
 from djangobmf.currency import Wallet
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
-from djangobmf.fields import WorkflowField
 from djangobmf.models import BMFModel
 from djangobmf.models import BMFModelBase
 from djangobmf.settings import CONTRIB_ACCOUNT
@@ -173,7 +172,6 @@ class BaseTransaction(BMFModel):
     """
     Transaction
     """
-    state = WorkflowField()
     project = models.ForeignKey(  # TODO optional
         CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
     )
@@ -196,7 +194,6 @@ class BaseTransaction(BMFModel):
         observed_fields = ['expensed', 'text']
         has_files = True
         workflow = TransactionWorkflow
-        workflow_field = 'state'
 
     def __str__(self):
         return '%s' % self.text
