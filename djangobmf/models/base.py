@@ -250,6 +250,57 @@ class BMFModelBase(ModelBase):
             )
             field.contribute_to_class(cls, 'djangobmf_notification')
 
+        # classmethod: has_permissions
+        def has_permissions(cls, qs, user):
+            """
+            Overwrite this function to enable object bases permissions. It must return
+            a queryset.
+
+            Default: queryset
+            """
+            return qs
+
+        setattr(cls, 'has_permissions', classmethod(has_permissions))
+
+        # instancemethod: bmfget_project
+        def bmfget_project(self):
+            """
+            The result of this value is currently used by the document-management system
+            to connect the file uploaded to this model with a project instance
+
+            Default: None
+            """
+            return None
+
+        setattr(cls, 'bmfget_project', bmfget_project)
+
+        # instancemethod: bmfget_customer
+        def bmfget_customer(self):
+            """
+            The result of this value is currently used by the document-management system
+            to connect the file uploaded to this model with a customer instance
+
+            Default: None
+            """
+            return None
+
+        setattr(cls, 'bmfget_customer', bmfget_customer)
+
+        # instancemethod: bmfmodule_detail
+        def bmfmodule_detail(self):
+            """
+            A permalink to the default view of this model in the BMF-System
+            """
+            return ('%s:detail' % self._bmfmeta.namespace_detail, (), {"pk": self.pk})
+
+        setattr(cls, 'bmfmodule_detail', models.permalink(bmfmodule_detail))
+
+        # instancemethod: get_absolute_url
+        def get_absolute_url(self):
+            return self.bmfmodule_detail()
+
+        setattr(cls, 'get_absolute_url', get_absolute_url)
+
         # make workflow
         cls._bmfworkflow = cls._bmfmeta.workflow()
         if cls._bmfmeta.has_workflow:
@@ -357,44 +408,6 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
         Returns the current state of the workflow attached to this model
         """
         return self._bmfworkflow._current_state
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        """
-        Overwrite this function to enable object bases permissions. It must return
-        a queryset.
-
-        Default: queryset
-        """
-        return qs
-
-    def bmfget_project(self):
-        """
-        The result of this value is currently used by the document-management system
-        to connect the file uploaded to this model with a project instance
-
-        Default: None
-        """
-        return None
-
-    def bmfget_customer(self):
-        """
-        The result of this value is currently used by the document-management system
-        to connect the file uploaded to this model with a customer instance
-
-        Default: None
-        """
-        return None
-
-    @models.permalink
-    def bmfmodule_detail(self):
-        """
-        A permalink to the default view of this model in the BMF-System
-        """
-        return ('%s:detail' % self._bmfmeta.namespace_detail, (), {"pk": self.pk})
-
-    def get_absolute_url(self):
-        return self.bmfmodule_detail()
 
 
 class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
