@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 __all__ = (
     'BMFModel',
+    'BMFModelBase',
     'BMFModelMPTT',
     'ACTION_COMMENT',
     'ACTION_CREATED',
@@ -37,6 +38,7 @@ from djangobmf.tasks import djangobmf_user_watch
 import json
 
 from .base import BMFModel
+from .base import BMFModelBase
 from .base import BMFModelMPTT
 
 from .activity import ACTION_COMMENT
