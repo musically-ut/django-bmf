@@ -4,6 +4,8 @@
 from __future__ import unicode_literals
 
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
+from django.contrib.auth import get_permission_codename
 from django.contrib.contenttypes.models import ContentType
 # from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,6 +14,7 @@ from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
+from django.db import router
 from django.db.models import Q
 from django.forms.fields import CharField
 from django.forms.fields import FloatField
@@ -40,6 +43,8 @@ from django.template import TemplateDoesNotExist
 from django.utils import six
 # from django.utils.formats import get_format
 # from django.utils.timezone import now
+from django.utils.encoding import force_text
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -47,7 +52,6 @@ from djangobmf.models import Report
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 # from djangobmf.utils.deprecation import RemovedInNextBMFVersionWarning
-# from djangobmf.sites import get_site
 
 from .mixins import ModuleClonePermissionMixin
 from .mixins import ModuleCreatePermissionMixin
@@ -575,7 +579,7 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
         })
 
 
-class ModuleDeleteView(ModuleDeletePermissionMixin, NextMixin, ModuleViewMixin, DeleteView):
+class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView):
     """
     delete an instance
     """
@@ -584,11 +588,88 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, NextMixin, ModuleViewMixin, 
 
     def get_template_names(self):
         return super(ModuleDeleteView, self).get_template_names() \
-            + ["djangobmf/module_delete_default.html"]
+            + ["djangobmf/module_delete.html"]
 
     def get_success_url(self):
         messages.info(self.request, 'Object deleted')
         return self.redirect_next()
+
+    def get_deleted_objects(self):
+        from djangobmf.sites import site
+
+        collector = NestedObjects(using=router.db_for_write(self.model))
+        collector.collect([self.object])
+        perms_needed = set()
+
+        def format_callback(obj):
+
+            p = '%s.%s' % (
+                obj._meta.app_label,
+                get_permission_codename('delete', obj._meta)
+            )
+
+            if not self.request.user.has_perm(p):
+                perms_needed.add(obj._meta.verbose_name)
+
+            registered = obj.__class__ in site.modules
+
+            # only show bmf modules
+            if not registered:
+                return None
+
+            return format_html('{0}: <a href="{1}">{2}</a>',
+                obj._meta.verbose_name,
+                obj.bmfmodule_detail(),
+                obj
+            )
+
+        def format_protected_callback(obj):
+
+            if obj.__class__ in site.modules:
+                return format_html('{0}: <a href="{1}">{2}</a>',
+                    obj._meta.verbose_name,
+                    obj.bmfmodule_detail(),
+                    obj
+                )
+            else:
+                return format_html('{0}: {1}',
+                    obj._meta.verbose_name,
+                    obj
+                )
+
+        to_delete = collector.nested(format_callback)
+
+        protected = [
+            format_protected_callback(obj) for obj in collector.protected
+        ]
+
+        return to_delete, perms_needed, protected
+
+    def clean_list(self, lst):
+        if not isinstance(lst, (list, tuple)):
+            return lst
+        else:
+            return [x for x in map(self.clean_list, lst) if x]
+
+    def get_context_data(self, **kwargs):
+        context = super(ModuleDeleteView, self).get_context_data(**kwargs)
+
+        to_delete, perms_needed, protected = self.get_deleted_objects()
+
+        if perms_needed or protected:
+            title = _("Cannot delete %(name)s") % {
+                "name": force_text(self.model._meta.verbose_name)
+            }
+        else:
+            title = _("Are you sure?")
+
+        context['deleted_objects'] = self.clean_list(to_delete)
+        context['object_name'] = self.model._meta.verbose_name
+        context['perms_lacking'] = perms_needed
+        context['protected'] = protected
+        context['title'] = title
+
+        return context
 
 
 class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):

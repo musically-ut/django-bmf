@@ -1,15 +1,33 @@
-{% extends "djangobmf/module_base.html" %}
+{% extends "djangobmf/module_modal_base.html" %}
 
-{% load djangobmf_core %}
 {% load i18n %}
 
+{% block title %}{{ title }}{% endblock %}
+
+{% block base_content %}
+{% if perms_lacking %}
+    <p>{% blocktrans with escaped_object=object %}Deleting the {{ object_name }} '{{ escaped_object }}' would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktrans %}</p>
+    <ul>
+    {% for obj in perms_lacking %}
+        <li>{{ obj }}</li>
+    {% endfor %}
+    </ul>
+{% elif protected %}
+    <p>{% blocktrans with escaped_object=object %}Deleting the {{ object_name }} '{{ escaped_object }}' would require deleting the following protected related objects:{% endblocktrans %}</p>
+    <ul>
+    {% for obj in protected %}
+        <li>{{ obj }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>{% blocktrans with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktrans %}</p>
+    <ul>{{ deleted_objects|unordered_list }}</ul>
+{% endif %}
+{% endblock %}
+
 {% block base_buttons %}
-<div class="btn-toolbar pull-right" role="toolbar">
-  <div class="btn-group">
-  <a class="btn btn-default btn-sm btn-warning" href="{% get_bmf_url object "detail" %}">
-    <span class="glyphicon glyphicon-hand-left"></span> {% trans "Back" %}
-  </a>
-  </div>
-</div>
-<div class="clearfix"></div>
+<button type="button" class="btn bmfedit-cancel btn-primary">{% trans "Cancel" %}</button>
+{% if not perms_lacking and not protected %}
+<button type="button" class="btn bmfedit-submit btn-danger">{% trans "Delete Object" %}</button>
+{% endif %}
 {% endblock %}
