@@ -131,7 +131,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
                 url = reverse('%s:update' % ns, kwargs={
                     'pk': object.pk,
                 })
-                response = self.client.get(url)
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
                 self.assertTrue(response.status_code in [200, 403])
 
     def test_module_delete(self):
@@ -142,7 +142,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
                 url = reverse('%s:delete' % ns, kwargs={
                     'pk': object.pk,
                 })
-                response = self.client.get(url)
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
                 self.assertTrue(response.status_code in [200, 403])
 
     def test_module_detail(self):
