@@ -503,10 +503,18 @@ class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
     def get_ajax_context(self, context):
         ctx = {
             'object_pk': 0,
-            'status': 'ok',  # "ok" for normal html, "valid" for valid forms, "error" if an error occured
+
+            # "ok" for normal html, "valid" for valid forms, "error" if an error occured
+            'status': 'ok',
+
             'html': '',
+
             'message': '',
+
             'redirect': '',
+
+            # use the history.back method
+            'back': False,
         }
         ctx.update(context)
         return ctx

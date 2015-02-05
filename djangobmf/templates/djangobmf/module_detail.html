@@ -91,7 +91,7 @@
         {% endif %}
 
         {% if bmfworkflow.state.delete %}
-            <a class="btn btn-bmfdelete" href="{% get_bmf_url object "delete" %}">
+            <a class="btn btn-bmfdelete" href="{% get_bmf_url object "delete" %}?back=1">
                 <span class="glyphicon glyphicon-trash"></span>
             </a>
         {% else %}

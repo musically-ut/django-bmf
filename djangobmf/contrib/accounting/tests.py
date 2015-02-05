@@ -34,4 +34,4 @@ class AccountModuleTests(ModuleMixin, TestCase):
         a = '%s'%obj # check if object name has any errors
 
         data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
-        self.autotest_post('delete', status_code=302, kwargs={'pk': obj.pk})
+        self.autotest_ajax_post('delete', kwargs={'pk': obj.pk})

@@ -39,4 +39,4 @@ class AddressModuleTests(ModuleMixin, DemoDataMixin, TestCase):
         obj = self.get_latest_object()
         a = '%s'%obj # check if object name has any errors
 
-        self.autotest_post('delete', status_code=302, kwargs={'pk': obj.pk})
+        self.autotest_ajax_post('delete', kwargs={'pk': obj.pk})

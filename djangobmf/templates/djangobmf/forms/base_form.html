@@ -1,6 +1,6 @@
 {% load djangobmf_forms %}
 {% load i18n %}
-<form class="form-horizontal" role="form" method="post"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} action="">
+<form class="form-horizontal" role="form" method="post"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} action="{{ request.path }}?{{ request.GET.urlencode }}">
   {% if form.non_field_errors %}
   <div class="alert alert-danger">
     <a class="close" data-dismiss="alert">&times;</a>

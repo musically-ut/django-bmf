@@ -66,7 +66,8 @@
             // cause the template-tag which generates the form is not aware of the url
             var parent_object = $('#bmfmodal_edit div.modal-dialog div:first-child');
             var form_object = parent_object.find('form');
-            form_object.attr('action', base.options.href.split("?",1)[0]);
+            // form_object.attr('action', base.options.href.split("?",1)[0]);
+            form_object.attr('action', base.options.href);
             // apply bmf-form functions
             form_object.bmf_buildform();
 
@@ -75,11 +76,18 @@
                 $('#bmfmodal_edit').modal('hide');
             });
             parent_object.find('button.bmfedit-submit').click(function (event) {
-            dict = $.bmf.AJAX;
-            dict.type = "POST";
-            dict.data = form_object.serialize();
-            dict.url = form_object.attr('action');
-            $.ajax(dict).done(function( data, textStatus, jqXHR ) {
+                dict = $.bmf.AJAX;
+                dict.type = "POST";
+                dict.data = form_object.serialize();
+                dict.url = form_object.attr('action');
+                $.ajax(dict).done(function( data, textStatus, jqXHR ) {
+
+                    console.log(data);
+                    // alert(data);
+
+                    //if (data.back) {
+                    //    window.history.back();
+                    //}
                     if (data.status == "valid") {
                         // TODO check if there are multile forms and close modal or show next form
                         if ($('#bmfmodal_edit > div.page-reload').length == 0) {

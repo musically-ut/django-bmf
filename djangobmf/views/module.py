@@ -590,9 +590,6 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         return super(ModuleDeleteView, self).get_template_names() \
             + ["djangobmf/module_delete.html"]
 
-    def get_success_url(self):
-        return '/de/'
-
     def get_deleted_objects(self):
         collector = NestedObjects(using=router.db_for_write(self.model))
         collector.collect([self.object])
@@ -623,7 +620,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
 
         def format_protected_callback(obj):
 
-            if obj.__class__ in site.modules:
+            if obj.__class__ in self.request.djangobmf_site.modules:
                 return format_html(
                     '{0}: <a href="{1}">{2}</a>',
                     obj._meta.verbose_name,
@@ -645,9 +642,20 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
 
         return to_delete, perms_needed, protected
 
-    def form_valid(self, form):
+    def get_success_url(self):
+        # TODO redirect to active dashboard
+        return reverse('djangobmf:dashboard', kwargs={
+            'dashboard': None,
+        })
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
         return self.render_valid_form({
             'message': ugettext('Object deleted'),
+            'back': bool(self.request.GET.get('back', False)),
+            'redirect': success_url,
         })
 
     def clean_list(self, lst):
