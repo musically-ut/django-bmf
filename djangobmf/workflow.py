@@ -186,15 +186,17 @@ class Workflow(six.with_metaclass(WorkflowMetaclass, object)):
     """
     Example:
 
-        >>> class ExampleWorkflow(Workflow):
-        >>>     class States:
-        >>>         start = State(_('Start'), default=True, delete=False)
-        >>>         deleted = State(_('Deleted'), update=False, delete=True)
-        >>>         accepted = State(_('Accepted'), update=False, delete=True)
-        >>> 
-        >>>     class Transitions:
-        >>>         accept = State(_('Accept'), 'start', 'accepted')
-        >>>         delete = State(_('Delete'), ['start', 'accepted'], 'deleted', validate=False)
+    .. code-block:: python
+
+        class ExampleWorkflow(Workflow):
+            class States:
+                start = State(_('Start'), default=True, delete=False)
+                deleted = State(_('Deleted'), update=False, delete=True)
+                accepted = State(_('Accepted'), update=False, delete=True)
+        
+            class Transitions:
+                accept = State(_('Accept'), 'start', 'accepted')
+                delete = State(_('Delete'), ['start', 'accepted'], 'deleted', validate=False)
     """
 
     def __init__(self, state=None):
