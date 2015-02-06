@@ -9,19 +9,6 @@ BMFMeta-options that you can give your model in its internal
 Available ``BMFMeta`` options
 =============================
 
-.. currentmodule:: djangobmf.basemodels
-
-``category``
----------------
-
-Default: ``None``
-
-.. attribute:: Options.category
-
-    Set the name of the Category visible in the Module-overview and within
-    the breadcrumb navigation. Django BMF ships with some predefined categories
-    in `~djangobmf.categories`
-
 ``has_logging``
 ---------------
 
@@ -106,7 +93,7 @@ Default: ``[]`` (Empty list)
 
 
 ``workflow``
--------------------
+------------
 
 Default: ``DefaultWorkflow``
 
@@ -117,18 +104,16 @@ Default: ``DefaultWorkflow``
     Defines the workflow-object connected to you model
 
 
-``workflow_field``
--------------------
+``workflow_field_name``
+-----------------------
 
-Default: ``None``
+Default: ``state``
 
-.. attribute:: Options.workflow_field
+.. attribute:: Options.workflow_field_name
 
-    If you'd like to store the different workflow-states inside your
-    database, you need to tell the model which field is used to store
-    the value
+    If the model has a workflow (and the workflow has valid transitions)
+    a field is added to you model. The field has the name of this attribute.
 
-        workflow_field = "state"
 
 
 
