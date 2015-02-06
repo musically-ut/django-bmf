@@ -536,7 +536,11 @@ class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxM
     def form_valid(self, form):
         # messages.success(self.request, 'Object updated')
         form.instance.modified_by = self.request.user
+        # TODO: get the values of all observed fields
         self.object = form.save()
+        # TODO: compare the lists of observed fields
+        # TODO: generate change signal
+        # return dict([(field, getattr(self, field)) for field in self._bmfmeta.observed_fields])
         activity_update.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
             'object_pk': self.object.pk,

@@ -52,7 +52,7 @@
           </small>
           {% endif %}{% endif %}
       </td>
-      <td>{{ obj.get_workflow_state }}<br /><small>{{ obj.modified|date:"SHORT_DATE_FORMAT" }}</small></td>
+      <td>{{ obj.state }}<br /><small>{{ obj.modified|date:"SHORT_DATE_FORMAT" }}</small></td>
       <td class="text-right">
           <a class="btn btn-xs btn-primary" href="{{ obj.bmfmodule_detail }}">
           <span class="glyphicon glyphicon-list"></span>

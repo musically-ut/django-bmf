@@ -147,21 +147,21 @@ class BMFOptions(object):
             self.has_logging = False
             self.can_clone = False
 
-        # determin if the model has an workflow
+        # determines if the model has an workflow
         self.has_workflow = bool(self.workflow_cls)
 
         # TODO: remove me - BUGFIX (transition)
         if self.has_workflow and not self.workflow_field:
             self.workflow_field = self.workflow_field_name
 
-        # determin if the model detects changes
+        # determines if the model detects changes
         self.has_detectchanges = bool(self.observed_fields) and self.has_logging
 
-        # determin if the model can be watched by a user
+        # determines if the model can be watched by a user
         self.has_watchfunction = self.has_workflow or self.has_detectchanges \
             or self.has_comments or self.has_files
 
-        # determin if the model has an activity
+        # determines if the model has an activity
         self.has_activity = self.has_logging or self.has_comments or self.has_files
 
         self.has_history = self.has_logging  # TODO OLD REMOVE ME
@@ -222,6 +222,26 @@ class BMFModelBase(ModelBase):
             except models.FieldDoesNotExist:
                 field = WorkflowField(workflow=cls._bmfmeta.workflow_cls)
                 field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
+
+            def bmfworkflow_transition(self, via, user):
+                """
+                executes the ``via`` transition of the workflow state.
+                """
+
+                transitions = dict(self._bmfworkflow._from_here())
+                if via not in transitions:
+                    raise ValidationError(_("This transition is not valid"))
+
+                success_url = self._bmfworkflow._call(via, self, user)  # TODO remove me, if workflows use ajax
+                self.modified_by = user
+                self.save()
+
+                # generate a history object and signal
+                activity_workflow.send(sender=self.__class__, instance=self)
+
+                return success_url  # TODO remove me, if workflows use ajax
+
+            setattr(cls, 'bmfworkflow_transition', classmethod(bmfworkflow_transition))
 
         # add field: modified
         try:
@@ -393,52 +413,5 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
     """
     Base class for BMF models.
     """
-
     class Meta:
         abstract = True
-
-    def __init__(self, *args, **kwargs):
-        super(BMFModel, self).__init__(*args, **kwargs)
-#       # update the state of the workflow with object data
-#       if self._bmfmeta.workflow_field:
-#           if hasattr(self, self._bmfmeta.workflow_field):
-#               self._bmfworkflow = self._bmfmeta.workflow(getattr(self, self._bmfmeta.workflow_field))
-#               if getattr(self, self._bmfmeta.workflow_field) is None:
-#                   # set default value in new objects
-#                   setattr(
-#                       self,
-#                       self._bmfmeta.workflow_field,
-#                       self._bmfworkflow._current_state_key
-#                   )
-        if self.pk and len(self._bmfmeta.observed_fields) > 0:
-            self._bmfmeta.changelog = self._get_observed_values()
-
-    def _get_observed_values(self):
-        """
-        returns the values of every field in self._bmfmeta.observed_fields as a dictionary
-        """
-        return dict([(field, getattr(self, field)) for field in self._bmfmeta.observed_fields])
-
-    def bmfworkflow_transition(self, via, user):
-        """
-        executes the ``via`` transition of the workflow state.
-        """
-
-        transitions = dict(self._bmfworkflow._from_here())
-        if via not in transitions:
-            raise ValidationError(_("This transition is not valid"))
-
-        success_url = self._bmfworkflow._call(via, self, user)  # TODO remove me, if workflows use ajax
-        self.modified_by = user
-        self.save()
-
-        # generate a history object and signal
-        activity_workflow.send(sender=self.__class__, instance=self)
-
-        return success_url  # TODO remove me, if workflows use ajax
-
-    def get_workflow_state(self):
-        """
-        Returns the current state of the workflow attached to this model
-        """
-        return self._bmfworkflow._current_state

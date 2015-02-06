@@ -247,15 +247,18 @@ class WorkflowContainer(object):
         self.obj = workspace(state)
 
     @property
-    def state(self):
+    def object(self):
         return self.obj._current_state
 
     @property
-    def state_key(self):
+    def key(self):
         return self.obj._current_state_key
 
     def __str__(self):
         return force_text(self.obj._current_state)
+
+#   def transition(self):
+#       pass
 
 
 class DefaultWorkflow(Workflow):

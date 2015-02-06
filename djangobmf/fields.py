@@ -82,7 +82,7 @@ class WorkflowFieldV2(with_metaclass(models.SubfieldBase, models.CharField)):
 
     def get_prep_value(self, value):
         if isinstance(value, WorkflowContainer):
-            return value.state_key
+            return value.key
         return value
 
 
