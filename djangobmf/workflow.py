@@ -245,6 +245,10 @@ class WorkflowContainer(object):
 
     def __init__(self, workspace, state=None):
         self.obj = workspace(state)
+        self.model = None
+
+    def set_django_object(self, obj):
+        self.django_object = obj
 
     @property
     def object(self):
@@ -253,6 +257,14 @@ class WorkflowContainer(object):
     @property
     def key(self):
         return self.obj._current_state_key
+
+    @property
+    def default(self):
+        return self.obj._default_state_key
+
+    @property
+    def transitions(self, user):
+        return self.obj
 
     def __str__(self):
         return force_text(self.obj._current_state)

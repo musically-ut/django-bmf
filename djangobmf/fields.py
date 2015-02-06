@@ -24,8 +24,7 @@ class OptionalForeignKey(models.ForeignKey):
 
 class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
     """
-    Holds the current state of an Workflow object
-    can not be edited
+    OLD DONT USE
     """
     description = "Workflow field"
 

@@ -31,8 +31,8 @@ class TaskSerializer(Serializer):
                 'summary': d.summary if d.summary.strip() else '---',
                 'completed': d.completed,
                 'employee': str(d.employee) if d.employee else None,
-                'state': str(d.state),
-                'state_name': str(d._bmfworkflow._current_state),
+                'state': d.state.key,
+                'state_name': str(d.state),
                 # TODO: not the ideal solution ... better: use angular to format the date at the client
                 'modified': date_format(d.modified, "SHORT_DATE_FORMAT"),
                 'goal': str(d.goal) if d.goal else None,

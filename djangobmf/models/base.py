@@ -18,7 +18,6 @@ from djangobmf.fields import WorkflowFieldV2 as WorkflowField
 from djangobmf.settings import APP_LABEL
 from djangobmf.signals import activity_workflow
 from djangobmf.workflow import Workflow
-from djangobmf.workflow import DefaultWorkflow
 
 import types
 import inspect
@@ -77,9 +76,6 @@ class BMFOptions(object):
         self.search_fields = []
         self.number_cycle = None
 
-        self.workflow = DefaultWorkflow
-        self.workflow_field = None
-
         # workflow_cls
 
         self.workflow_cls = getattr(
@@ -95,22 +91,34 @@ class BMFOptions(object):
             )
 
         # workflow_field_name
-
         self.workflow_field_name = getattr(
             options, 'workflow_field_name', 'state'
         )
+
+        # shortcut to the instance workflow model
+        # is filled via a post_init signal (see below)
+        self.workflow = None
+
+        # determines if the model has an workflow
+        if self.workflow_cls and len(self.workflow_cls._transitions) > 0:
+            self.has_workflow = True
+        else:
+            self.has_workflow = False
 
         # protected =============================================================
 
         # used to detect changes
         self.changelog = {}
 
-        # set namespace of urls
+        # namespace detail
         self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+
+        # namespace api
         self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
 
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
+
         # is filles with keys if multiple create views are definied for this model (see sites.py)
         self.create_views = []
 
@@ -129,8 +137,6 @@ class BMFOptions(object):
                 'only_related',
                 'search_fields',
                 'number_cycle',
-                'workflow',
-                'workflow_field',
                 'clean',
                 'can_clone',
             ]:
@@ -146,13 +152,6 @@ class BMFOptions(object):
         if self.only_related:
             self.has_logging = False
             self.can_clone = False
-
-        # determines if the model has an workflow
-        self.has_workflow = bool(self.workflow_cls)
-
-        # TODO: remove me - BUGFIX (transition)
-        if self.has_workflow and not self.workflow_field:
-            self.workflow_field = self.workflow_field_name
 
         # determines if the model detects changes
         self.has_detectchanges = bool(self.observed_fields) and self.has_logging
@@ -223,7 +222,7 @@ class BMFModelBase(ModelBase):
                 field = WorkflowField(workflow=cls._bmfmeta.workflow_cls)
                 field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
 
-            def bmfworkflow_transition(self, via, user):
+            def bmfmodule_transition(self, via, user):
                 """
                 executes the ``via`` transition of the workflow state.
                 """
@@ -241,7 +240,7 @@ class BMFModelBase(ModelBase):
 
                 return success_url  # TODO remove me, if workflows use ajax
 
-            setattr(cls, 'bmfworkflow_transition', classmethod(bmfworkflow_transition))
+            setattr(cls, 'bmfmodule_transition', classmethod(bmfmodule_transition))
 
         # add field: modified
         try:
@@ -366,18 +365,19 @@ class BMFModelBase(ModelBase):
 
         setattr(cls, 'get_absolute_url', get_absolute_url)
 
-        # make workflow
-        if cls._bmfmeta.workflow:
-            cls._bmfworkflow = cls._bmfmeta.workflow()
-        else:
-            cls._bmfworkflow = DefaultWorkflow()
-
         if cls._bmfmeta.clean:
             if not hasattr(cls, 'bmf_clean') and not cls._meta.abstract:
                 raise ImproperlyConfigured('%s has not a bmf_clean method' % (cls.__name__))
 
         # add history signals for this model
         add_signals(cls)
+
+        if cls._bmfmeta.has_workflow:
+            def post_init(sender, instance, *args, **kwargs):
+                workflow = getattr(instance, instance._bmfmeta.workflow_field_name)
+                workflow.set_django_object(instance)
+                instance._bmfmeta.workflow = workflow
+            signals.post_init.connect(post_init, sender=cls, weak=False)
 
 #       # add signals from base-classes
 #       if hasattr(cls,'pre_save'):

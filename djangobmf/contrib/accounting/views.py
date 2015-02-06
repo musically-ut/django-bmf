@@ -28,7 +28,7 @@ class TransactionCreateView(ModuleCreateView):
         )
 
         if form.cleaned_data['draft'] is False:
-            self.object.bmfworkflow_transition('balance', self.request.user)
+            self.object.bmfmodule_transition('balance', self.request.user)
 
 
 class TransactionUpdateView(ModuleUpdateView):

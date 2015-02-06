@@ -392,8 +392,10 @@ class ModuleUpdatePermissionMixin(object):
     """
 
     def check_permissions(self):
-        return self.get_object()._bmfworkflow._current_state.update \
-            and super(ModuleUpdatePermissionMixin, self).check_permissions()
+        if self.model._bmfmeta.workflow:
+            return self.get_object()._bmfmeta.workflow.object.update and \
+                super(ModuleUpdatePermissionMixin, self).check_permissions()
+        return super(ModuleUpdatePermissionMixin, self).check_permissions()
 
     def get_permissions(self, perms=[]):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -408,8 +410,10 @@ class ModuleDeletePermissionMixin(object):
     """
 
     def check_permissions(self):
-        return self.get_object()._bmfworkflow._current_state.delete \
-            and super(ModuleDeletePermissionMixin, self).check_permissions()
+        if self.model._bmfmeta.workflow:
+            return self.get_object()._bmfmeta.workflow.object.delete and \
+                super(ModuleDeletePermissionMixin, self).check_permissions()
+        return super(ModuleDeletePermissionMixin, self).check_permissions()
 
     def get_permissions(self, perms=[]):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -484,13 +488,9 @@ class ModuleBaseMixin(object):
                 # 'verbose_name': self.model._meta.verbose_name,  # unused
             },
         })
-        if hasattr(self, 'object') and self.object:
+        if self.model._bmfmeta.has_workflow and hasattr(self, 'object') and self.object:
             kwargs.update({
-                'bmfworkflow': {
-                    'enabled': bool(len(self.model._bmfworkflow._transitions)),
-                    'state': self.object._bmfworkflow._current_state,
-                    'transitions': self.object._bmfworkflow._from_here(self.object, self.request.user),
-                },
+                'bmfworkflow': self.object._bmfmeta.workflow,
             })
         return super(ModuleBaseMixin, self).get_context_data(**kwargs)
 
