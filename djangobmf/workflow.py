@@ -193,7 +193,7 @@ class Workflow(six.with_metaclass(WorkflowMetaclass, object)):
                 start = State(_('Start'), default=True, delete=False)
                 deleted = State(_('Deleted'), update=False, delete=True)
                 accepted = State(_('Accepted'), update=False, delete=True)
-        
+
             class Transitions:
                 accept = State(_('Accept'), 'start', 'accepted')
                 delete = State(_('Delete'), ['start', 'accepted'], 'deleted', validate=False)
