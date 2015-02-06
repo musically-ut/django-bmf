@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import AppRegistryNotReady
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import signals
@@ -218,7 +219,7 @@ class BMFModelBase(ModelBase):
                         )
                     )
 
-            except models.FieldDoesNotExist:
+            except (models.FieldDoesNotExist, AppRegistryNotReady):
                 field = WorkflowField(workflow=cls._bmfmeta.workflow_cls)
                 field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
 
@@ -245,7 +246,7 @@ class BMFModelBase(ModelBase):
         # add field: modified
         try:
             cls._meta.get_field('modified')
-        except models.FieldDoesNotExist:
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
             field = models.DateTimeField(
                 _("Modified"),
                 auto_now=True,
@@ -258,7 +259,7 @@ class BMFModelBase(ModelBase):
         # add field: created
         try:
             cls._meta.get_field('created')
-        except models.FieldDoesNotExist:
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
             field = models.DateTimeField(
                 _("Created"),
                 auto_now_add=True,
@@ -271,7 +272,7 @@ class BMFModelBase(ModelBase):
         # add field: modified by
         try:
             cls._meta.get_field('modified_by')
-        except models.FieldDoesNotExist:
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
             field = models.ForeignKey(
                 getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
                 verbose_name=_("Modified by"),
@@ -283,7 +284,7 @@ class BMFModelBase(ModelBase):
         # add field: created by
         try:
             cls._meta.get_field('created_by')
-        except models.FieldDoesNotExist:
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
             field = models.ForeignKey(
                 getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
                 verbose_name=_("Created by"),
@@ -295,7 +296,7 @@ class BMFModelBase(ModelBase):
         # TODO add model from app config
         try:
             cls._meta.get_field('djangobmf_activity')
-        except models.FieldDoesNotExist:
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
             field = GenericRelation(
                 "djangobmf.Activity",
                 content_type_field='parent_ct',
@@ -306,7 +307,7 @@ class BMFModelBase(ModelBase):
         # TODO add model from app config
         try:
             cls._meta.get_field('djangobmf_notification')
-        except models.FieldDoesNotExist:
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
             field = GenericRelation(
                 "djangobmf.Notification",
                 content_type_field='watch_ct',
