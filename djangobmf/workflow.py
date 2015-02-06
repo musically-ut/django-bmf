@@ -240,6 +240,7 @@ class Workflow(six.with_metaclass(WorkflowMetaclass, object)):
         return url
 
 
+@python_2_unicode_compatible
 class WorkflowContainer(object):
 
     def __init__(self, workspace, state=None):
@@ -252,6 +253,9 @@ class WorkflowContainer(object):
     @property
     def state_key(self):
         return self.obj._current_state_key
+
+    def __str__(self):
+        return force_text(self.obj._current_state)
 
 
 class DefaultWorkflow(Workflow):

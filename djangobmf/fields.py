@@ -27,7 +27,7 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
     Holds the current state of an Workflow object
     can not be edited
     """
-    description = _("Workflow object")
+    description = "Workflow field"
 
     def __init__(self, **kwargs):
         # TODO ADD REMOVAL WARNING
@@ -44,7 +44,7 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
         super(WorkflowField, self).__init__(**defaults)
 
 
-class WorkflowFieldV2(models.CharField):
+class WorkflowFieldV2(with_metaclass(models.SubfieldBase, models.CharField)):
     """
     Holds the current state of an Workflow object
     can not be edited
@@ -54,43 +54,36 @@ class WorkflowFieldV2(models.CharField):
     def __init__(self, workflow, *args, **kwargs):
         self.workflow = workflow
         defaults = {
-            'max_length': 32,  # max length
             'db_index': True,
+            'max_length': 32,
         }
         defaults.update(kwargs)
         defaults.update({
-            'null': True,
             'blank': True,
+            'default': None,
             'editable': False,
+            'null': True,
         })
         super(WorkflowFieldV2, self).__init__(**defaults)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(WorkflowFieldV2, self).deconstruct()
+        del kwargs["blank"]
+        del kwargs["default"]
+        del kwargs["editable"]
+        del kwargs["null"]
+        kwargs["workflow"] = self.workflow
+        return name, path, args, kwargs
 
     def to_python(self, value):
         if isinstance(value, WorkflowContainer):
             return value
         return WorkflowContainer(self.workflow, value)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super(WorkflowFieldV2, self).deconstruct()
-        del kwargs["null"]
-        del kwargs["blank"]
-        del kwargs["editable"]
-        kwargs["workflow"] = self.workflow
-        return name, path, args, kwargs
-
-    def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
-        return self.get_prep_value(value)
-
     def get_prep_value(self, value):
         if isinstance(value, WorkflowContainer):
-            value = value.state_key
-        super(WorkflowFieldV2, self).get_prep_value(value)
-
-    def get_db_prep_save(self, value, *args, **kwargs):
-        if isinstance(value, WorkflowContainer):
-            value = value.state_key
-        return super(WorkflowFieldV2, self).get_db_prep_save(value, *args, **kwargs)
+            return value.state_key
+        return value
 
 
 # Currency and Money
