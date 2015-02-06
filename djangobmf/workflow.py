@@ -262,15 +262,11 @@ class WorkflowContainer(object):
     def default(self):
         return self.obj._default_state_key
 
-    @property
     def transitions(self, user):
-        return self.obj
+        return self.obj._from_here(self.django_object, user)
 
     def __str__(self):
         return force_text(self.obj._current_state)
-
-#   def transition(self):
-#       pass
 
 
 class DefaultWorkflow(Workflow):

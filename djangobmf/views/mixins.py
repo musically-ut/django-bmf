@@ -491,6 +491,7 @@ class ModuleBaseMixin(object):
         if self.model._bmfmeta.has_workflow and hasattr(self, 'object') and self.object:
             kwargs.update({
                 'bmfworkflow': self.object._bmfmeta.workflow,
+                'bmfworkflow_transitions': self.object._bmfmeta.workflow.transitions(self.request.user),
             })
         return super(ModuleBaseMixin, self).get_context_data(**kwargs)
 

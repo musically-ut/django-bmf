@@ -26,22 +26,29 @@
     </div>
     {% endif %}
 
-    {% if bmfworkflow.enabled %}
-     {% if bmfworkflow.transitions %}
-       <div class="btn-group">
-         <button type="button" class="btn btn-bmfworkflow dropdown-toggle" data-toggle="dropdown">{{ bmfworkflow.state }} <span class="caret"></span></button>
-         <ul class="dropdown-menu" role="menu">
-           {% for transition in bmfworkflow.transitions %}
-           <li><a class="bmf-edit" href="{% get_bmf_url object "workflow" transition=transition.0 %}?next={{ request.path_info }}">{{ transition.1 }}</a></li>
-           {% endfor %}
-         </ul>
-       </div>
-     {% else %}
-       <div class="btn-group">
-         <button type="button" class="btn btn-default disabled">{{ bmfworkflow.state }} <span class="caret"></span></button>
-       </div>
-     {% endif %}
+    {% if bmfworkflow %}
+        {% if bmfworkflow_transitions %}
+        <div class="btn-group">
+            <button type="button" class="btn btn-bmfworkflow dropdown-toggle" data-toggle="dropdown">
+                {{ bmfworkflow }} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                {% for key, transition in bmfworkflow_transitions %}
+                <li>
+                    <a class="bmf-edit" href="{% get_bmf_url object "workflow" transition=key %}">{{ transition }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="btn-group">
+            <button type="button" class="btn btn-default disabled">
+                {{ bmfworkflow }} <span class="caret"></span>
+            </button>
+        </div>
+        {% endif %}
     {% endif %}
+
     {% if bmfmodule.has_report %}
      <div class="btn-group">
      <a class="btn btn-bmfreport" href="{% get_bmf_url object "report" %}">
@@ -49,18 +56,19 @@
      </a>
      </div>
     {% endif %}
-    {% if bmfworkflow.state.update %}
-     <div class="btn-group">
-     <a class="btn btn-bmfupdate" href="{% get_bmf_url object "update" %}">
-       <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
-     </a>
-     </div>
+
+    {% if bmfworkflow and bmfworkflow.object.update or not bmfworkflow %}
+    <div class="btn-group">
+        <a class="btn btn-bmfupdate" href="{% get_bmf_url object "update" %}">
+            <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
+        </a>
+    </div>
     {% else %}
-     <div class="btn-group">
-     <a class="btn btn-default disabled" href="#">
-       <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
-     </a>
-     </div>
+    <div class="btn-group">
+        <a class="btn btn-default disabled" href="#">
+            <span class="glyphicon glyphicon-wrench"></span> {% trans "Edit" %}
+        </a>
+    </div>
     {% endif %}
 
     <div class="btn-group">
@@ -90,14 +98,18 @@
             </a>
         {% endif %}
 
-        {% if bmfworkflow.state.delete %}
+        {% if bmfworkflow and bmfworkflow.object.delete or not bmfworkflow %}
+        <div class="btn-group">
             <a class="btn btn-bmfdelete" href="{% get_bmf_url object "delete" %}?back=1">
                 <span class="glyphicon glyphicon-trash"></span>
             </a>
+        </div>
         {% else %}
-            <a class="btn btn-default btn-default disabled" href="#">
+        <div class="btn-group">
+            <a class="btn btn-default disabled" href="#">
                 <span class="glyphicon glyphicon-trash"></span>
             </a>
+        </div>
         {% endif %}
     </div>
 </div>
