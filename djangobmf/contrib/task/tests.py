@@ -12,6 +12,8 @@ from factory.django import DjangoModelFactory
 from .apps import TaskConfig
 from .models import Goal
 from .models import Task
+from .workflows import TaskWorkflow
+from .workflows import GoalWorkflow
 
 from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
@@ -22,6 +24,15 @@ from djangobmf.utils.testcases import ModuleTestFactory
 class TaskFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = TaskConfig
 
+    def test_goal_workflow(self):
+        transitions, objects = self.prepare_workflow_test(GoalWorkflow)
+        objects['open'] = Goal(summary="Test")
+        self.auto_workflow_test(transitions, objects)
+
+    def test_task_workflow(self):
+        transitions, objects = self.prepare_workflow_test(TaskWorkflow)
+        objects['new'] = Task(summary="Test")
+        self.auto_workflow_test(transitions, objects)
 
 # class GoalFactory(DjangoModelFactory):
 #     class Meta:
