@@ -3,24 +3,6 @@
 
 from __future__ import unicode_literals
 
-__all__ = (
-    'BMFModel',
-    'BMFModelBase',
-    'ACTION_COMMENT',
-    'ACTION_CREATED',
-    'ACTION_UPDATED',
-    'ACTION_WORKFLOW',
-    'ACTION_FILE',
-    'Activity',
-    'Dashboard',
-    'Document',
-    'Configuration',
-    'Notification',
-    'NumberCycle',
-    'Report',
-    'Serializer',
-)
-
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import signals
@@ -52,6 +34,25 @@ from .document import Document as AbstractDocument
 from .notification import Notification as AbstractNotification
 from .numbering import NumberCycle as AbstractNumberCycle
 from .report import Report as AbstractReport
+
+
+__all__ = (
+    'BMFModel',
+    'BMFModelBase',
+    'ACTION_COMMENT',
+    'ACTION_CREATED',
+    'ACTION_UPDATED',
+    'ACTION_WORKFLOW',
+    'ACTION_FILE',
+    'Activity',
+    'Dashboard',
+    'Document',
+    'Configuration',
+    'Notification',
+    'NumberCycle',
+    'Report',
+    'Serializer',
+)
 
 
 class Activity(AbstractActivity):
