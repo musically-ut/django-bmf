@@ -41,7 +41,7 @@ class OLDWorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
             'blank': True,
             'editable': False,
         })
-        super(WorkflowField, self).__init__(**defaults)
+        super(OLDWorkflowField, self).__init__(**defaults)
 
 
 class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
@@ -64,10 +64,10 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
             'editable': False,
             'null': True,
         })
-        super(WorkflowFieldV2, self).__init__(**defaults)
+        super(WorkflowField, self).__init__(**defaults)
 
     def deconstruct(self):
-        name, path, args, kwargs = super(WorkflowFieldV2, self).deconstruct()
+        name, path, args, kwargs = super(WorkflowField, self).deconstruct()
         del kwargs["blank"]
         del kwargs["default"]
         del kwargs["editable"]

@@ -289,6 +289,12 @@ class WorkflowContainer(object):
         return self.obj._current_state
 
     @property
+    def states(self):
+        """
+        """
+        return self.obj._states
+
+    @property
     def key(self):
         """
         Returns the current state key
@@ -311,24 +317,29 @@ class WorkflowContainer(object):
 
     def transitions(self, user):
         """
-        Interface to transitions
+        Show all transitions
         """
         return self.obj._from_here(self.django_object, user)
 
     def transition(self, via, user, silent=False):
         """
-        Interface to transitions
+        Make a state transition for this object
         """
         transitions = dict(self.transitions(user))
         if via not in transitions:
             raise ValidationError(_("This transition is not valid"))
 
         success_url = self.obj._call(via, self.django_object, user)
-        self.obj.modified_by = user
-        self.obj.save()
+        self.django_object.modified_by = user
+        self.django_object.save()
 
         if not silent:
-            activity_workflow.send(sender=self.obj.__class__, instance=self.obj)
+            activity_workflow.send(
+                sender=self.django_object.__class__,
+                instance=self.django_object,
+                initial=self.initial,
+                final=self.key,
+            )
 
         return success_url
 

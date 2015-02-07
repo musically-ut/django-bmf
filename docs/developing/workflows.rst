@@ -26,4 +26,4 @@ WorkflowContainer
 -------------------------
 
 .. autoclass:: djangobmf.workflow.WorkflowContainer
-   :members: object, key, default, transitions
+   :members: object, key, default, transitions, transition, initial, states

@@ -141,7 +141,7 @@ def new_state(sender, instance, **kwargs):
             parent_id=instance.pk,
             action=ACTION_WORKFLOW,
             text=json.dumps({
-                'old': instance._bmfmeta.workflow.inital,
+                'old': instance._bmfmeta.workflow.initial,
                 'new': instance._bmfmeta.workflow.key,
             }, cls=DjangoJSONEncoder),
         )
