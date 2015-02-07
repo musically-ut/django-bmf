@@ -63,6 +63,7 @@
                 if (data.success == true && data.reload == true) {
                     // reload page without refreshing the cache
                     location.reload(false);
+                    return null;
                 }
 
                 $('#bmfmodal_edit div.modal-dialog').prepend(data.html);

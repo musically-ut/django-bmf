@@ -648,7 +648,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         self.object.delete()
         return self.render_valid_form({
             'message': ugettext('Object deleted'),
-            'redirect': bool(self.request.GET.get('redirect', None)),
+            'redirect': self.request.GET.get('redirect', success_url),
         })
 
     def clean_list(self, lst):
@@ -683,16 +683,12 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
     update the state of a workflow
     """
     context_object_name = 'object'
-    success_url = None
 
     def get_permissions(self, perms):
         info = self.model._meta.app_label, self.model._meta.model_name
         perms.append('%s.change_%s' % info)
         perms.append('%s.view_%s' % info)
         return super(ModuleWorkflowView, self).get_permissions(perms)
-
-    def get_success_url(self):
-        return self.success_url
 
     def get(self, request, transition, *args, **kwargs):
         self.object = self.get_object()
@@ -712,7 +708,8 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
 
         return self.render_valid_form({
             'message': True,
-            'redirect': success_url if success_url else '/',
+            'redirect': success_url,
+            'reload': not bool(success_url),
         })
 
 
