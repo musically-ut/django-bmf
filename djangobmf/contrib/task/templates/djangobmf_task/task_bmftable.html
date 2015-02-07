@@ -12,7 +12,7 @@
     {% for obj in object_list %}
     <tr{% if obj.state == "cancelled" or obj.state == "finished" %} class="text-muted" {% endif %}>
       <td>{{ obj.pk }}</td>
-      <td>{{ obj.summary }}{% if obj.due_date %}{% if obj.state == "new" or obj.state == "started" or obj.state == "open" %}<br />
+      <td>{{ obj.summary }}{% if obj.due_date %}{% if obj.state.key == "new" or obj.state.key == "started" or obj.state.key == "open" %}<br />
         <small>
           {% if obj.due_days <= 3 %}<span class="label label-danger"><span class="glyphicon glyphicon-time"></span></span>{% endif %}
           {% if obj.due_days > 3 and obj.due_days < 7 %}<span class="label label-warning"><span class="glyphicon glyphicon-time"></span></span>{% endif %}
@@ -23,7 +23,7 @@
 
       {% endif %}{% endif %}</td>
       <td>{{ obj.employee }}</td>
-      <td>{{ obj.get_workflow_state }}</td>
+      <td>{{ obj.state }}</td>
       <td class="text-right">
         <a class="btn btn-xs btn-primary" href="{{ obj.bmfmodule_detail }}">
           <span class="glyphicon glyphicon-list"></span>

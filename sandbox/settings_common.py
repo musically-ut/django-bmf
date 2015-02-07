@@ -118,8 +118,8 @@ TEST_PROJECT_APPS = (
     'djangobmf.contrib.product',
     'djangobmf.contrib.project',
     'djangobmf.contrib.quotation',
-#   'djangobmf.contrib.shipment',
-#   'djangobmf.contrib.stock',
+    # 'djangobmf.contrib.shipment',
+    # 'djangobmf.contrib.stock',
     'djangobmf.contrib.task',
     'djangobmf.contrib.taxing',
     'djangobmf.contrib.team',
@@ -140,7 +140,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'mptt',
     'sekizai',
-    'haystack',
+    # 'haystack',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

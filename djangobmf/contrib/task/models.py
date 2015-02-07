@@ -10,7 +10,6 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.models import BMFModel
-from djangobmf.fields import WorkflowField
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_TEAM
@@ -45,8 +44,6 @@ class GoalManager(models.Manager):
 class AbstractGoal(BMFModel):
     """
     """
-    state = WorkflowField()
-
     summary = models.CharField(_("Title"), max_length=255, null=True, blank=False, )
     description = models.TextField(_("Description"), null=True, blank=True, )
 
@@ -155,7 +152,6 @@ class AbstractGoal(BMFModel):
     class BMFMeta:
         has_logging = False
         workflow = GoalWorkflow
-        workflow_field = 'state'
         can_clone = True
 
 
@@ -203,8 +199,6 @@ class TaskManager(models.Manager):
 class AbstractTask(BMFModel):
     """
     """
-
-    state = WorkflowField()
 
     summary = models.CharField(_("Title"), max_length=255, null=True, blank=False)
     description = models.TextField(_("Description"), null=True, blank=True)
@@ -287,10 +281,9 @@ class AbstractTask(BMFModel):
             return (self.due_date - time).days
 
     class BMFMeta:
+        workflow = TaskWorkflow
         has_files = True
         has_comments = True
-        workflow = TaskWorkflow
-        workflow_field = 'state'
 
 
 class Task(AbstractTask):

@@ -7,8 +7,6 @@ from __future__ import unicode_literals
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 
-from factory.django import DjangoModelFactory
-
 from .apps import TaskConfig
 from .models import Goal
 from .models import Task
@@ -33,17 +31,6 @@ class TaskFactory(ModuleTestFactory, DemoDataMixin, TestCase):
         transitions, objects = self.prepare_workflow_test(TaskWorkflow)
         objects['new'] = Task(summary="Test")
         self.auto_workflow_test(transitions, objects)
-
-# class GoalFactory(DjangoModelFactory):
-#     class Meta:
-#         model = Goal
-#     summary = 'Test summary'
-
-
-# class TaskFactory(DjangoModelFactory):
-#     class Meta:
-#         model = Goal
-#     summary = 'Test summary'
 
 
 class TaskModuleTests(ModuleMixin, TestCase):

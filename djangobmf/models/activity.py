@@ -126,8 +126,8 @@ class Activity(models.Model):
         if self.action == ACTION_WORKFLOW:
             data = json.loads(self.text)
             return {
-                'new': self.parent_object._bmfmeta.workflow._states[data['new']],
-                'old': self.parent_object._bmfmeta.workflow._states[data['old']],
+                'new': self.parent_object._bmfmeta.workflow.states[data['new']],
+                'old': self.parent_object._bmfmeta.workflow.states[data['old']],
             }
         elif self.action == ACTION_FILE:
             data = json.loads(self.text)

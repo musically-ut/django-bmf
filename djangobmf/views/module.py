@@ -3,11 +3,9 @@
 
 from __future__ import unicode_literals
 
-from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth import get_permission_codename
 from django.contrib.contenttypes.models import ContentType
-# from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage
@@ -20,20 +18,14 @@ from django.forms.fields import CharField
 from django.forms.fields import FloatField
 from django.forms.fields import DecimalField
 from django.forms.models import ModelChoiceField
-from django.http import HttpResponseRedirect, Http404, QueryDict
+from django.http import Http404
+from django.http import QueryDict
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic import View
 from django.views.generic.edit import BaseFormView
-# from django.views.generic.dates import BaseDateListView
-# from django.views.generic.dates import YearMixin
-# from django.views.generic.dates import MonthMixin
-# from django.views.generic.dates import WeekMixin
-# from django.views.generic.dates import DayMixin
-# from django.views.generic.dates import _date_from_string
-# from django.views.generic.dates import _get_next_prev
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
 from django.views.generic.list import MultipleObjectTemplateResponseMixin
@@ -41,8 +33,6 @@ from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils import six
-# from django.utils.formats import get_format
-# from django.utils.timezone import now
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
@@ -62,7 +52,6 @@ from .mixins import ModuleViewPermissionMixin
 from .mixins import ModuleAjaxMixin
 from .mixins import ModuleBaseMixin
 from .mixins import ModuleViewMixin
-from .mixins import NextMixin
 from .mixins import ModuleActivityMixin
 from .mixins import ModuleFilesMixin
 from .mixins import ModuleFormMixin
@@ -504,11 +493,11 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
         old_object = copy.copy(self.object)
         self.clone_object(form.cleaned_data, form.instance)
         form.instance.pk = None
-        if form.instance._bmfmeta.workflow_field:
+        if form.instance._bmfmeta.workflow:
             setattr(
                 form.instance,
-                form.instance._bmfmeta.workflow_field,
-                form.instance._bmfmeta.workflow._default_state_key
+                form.instance._bmfmeta.workflow_field_name,
+                form.instance._bmfmeta.workflow.default
             )
         form.instance.created_by = self.request.user
         form.instance.modified_by = self.request.user
@@ -517,8 +506,8 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
         activity_create.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
             'object_pk': self.object.pk,
-            'redirect': self.object.get_absolute_url(),
-            'message': ugettext('Object copied'),
+            'redirect': self.object.bmfmodule_detail(),
+            'message': True,
         })
 
 
@@ -536,11 +525,16 @@ class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxM
     def form_valid(self, form):
         # messages.success(self.request, 'Object updated')
         form.instance.modified_by = self.request.user
+        # TODO: get the values of all observed fields
         self.object = form.save()
+        # TODO: compare the lists of observed fields
+        # TODO: generate change signal
+        # return dict([(field, getattr(self, field)) for field in self._bmfmeta.observed_fields])
         activity_update.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
             'object_pk': self.object.pk,
-            'message': ugettext('Object updated'),
+            'redirect': self.object.bmfmodule_detail(),
+            'message': True,
         })
 
 
@@ -575,7 +569,7 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
 
         return self.render_valid_form({
             'object_pk': self.object.pk,
-            'message': ugettext('Object created'),
+            'message': True,
         })
 
 
@@ -654,8 +648,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         self.object.delete()
         return self.render_valid_form({
             'message': ugettext('Object deleted'),
-            'back': bool(self.request.GET.get('back', False)),
-            'redirect': success_url,
+            'redirect': self.request.GET.get('redirect', success_url),
         })
 
     def clean_list(self, lst):
@@ -685,12 +678,11 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         return context
 
 
-class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
+class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
     """
     update the state of a workflow
     """
     context_object_name = 'object'
-    success_url = None
 
     def get_permissions(self, perms):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -698,26 +690,27 @@ class ModuleWorkflowView(ModuleViewMixin, NextMixin, DetailView):
         perms.append('%s.view_%s' % info)
         return super(ModuleWorkflowView, self).get_permissions(perms)
 
-    def get_success_url(self):
-        return self.redirect_next()
-
-    def get(self, request, transition='', *args, **kwargs):
+    def get(self, request, transition, *args, **kwargs):
         self.object = self.get_object()
+        success_url = self.object._bmfmeta.workflow.transition(transition, self.request.user)
 
-        try:
-            # TODO also change modelbase.py, when updating to use ajax
-            self.success_url = self.object.bmfworkflow_transition(transition, self.request.user)
-        except ValidationError as e:
-            # the objects gets checks with full_clean
-            # if a validation error is raised, show an error page and don't save the object
-            return self.response_class(
-                request=self.request,
-                template=['djangobmf/module_workflow.html'],
-                context=self.get_context_data(error=e),
-            )
+#       try:
+#           # TODO also change modelbase.py, when updating to use ajax
+#           success_url = self.object.bmfmodule_transition(transition, self.request.user)
+#       except ValidationError as e:
+#           # the objects gets checks with full_clean
+#           # if a validation error is raised, show an error page and don't save the object
+#           raise e
+#           return self.render_to_json_response({
+#               'html': 'VALIDATION_ERROR',
+#           })
+#       print('GET', success_url)
 
-        messages.success(self.request, 'Workflow-State changed')
-        return HttpResponseRedirect(self.get_success_url())
+        return self.render_valid_form({
+            'message': True,
+            'redirect': success_url,
+            'reload': not bool(success_url),
+        })
 
 
 class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleObjectMixin, BaseFormView):
@@ -804,8 +797,8 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
 
         return valid, data
 
+    # Don't react on get requests
     def get(self, request, *args, **kwargs):
-        # dont react on get requests
         raise Http404
 
     def post(self, request, *args, **kwargs):

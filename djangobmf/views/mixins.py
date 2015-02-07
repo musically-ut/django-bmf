@@ -320,9 +320,9 @@ class AjaxMixin(BaseMixin):
         return self.render_to_json_response(ctx)
 
     def render_valid_form(self, context):
-        ctx = self.get_ajax_context({
-            'status': 'valid',
-        })
+        ctx = {
+            'success': True,
+        }
         ctx.update(context)
         return self.render_to_json_response(ctx)
 
@@ -392,8 +392,10 @@ class ModuleUpdatePermissionMixin(object):
     """
 
     def check_permissions(self):
-        return self.get_object()._bmfworkflow._current_state.update \
-            and super(ModuleUpdatePermissionMixin, self).check_permissions()
+        if self.model._bmfmeta.workflow:
+            return self.get_object()._bmfmeta.workflow.object.update and \
+                super(ModuleUpdatePermissionMixin, self).check_permissions()
+        return super(ModuleUpdatePermissionMixin, self).check_permissions()
 
     def get_permissions(self, perms=[]):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -408,8 +410,10 @@ class ModuleDeletePermissionMixin(object):
     """
 
     def check_permissions(self):
-        return self.get_object()._bmfworkflow._current_state.delete \
-            and super(ModuleDeletePermissionMixin, self).check_permissions()
+        if self.model._bmfmeta.workflow:
+            return self.get_object()._bmfmeta.workflow.object.delete and \
+                super(ModuleDeletePermissionMixin, self).check_permissions()
+        return super(ModuleDeletePermissionMixin, self).check_permissions()
 
     def get_permissions(self, perms=[]):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -484,13 +488,10 @@ class ModuleBaseMixin(object):
                 # 'verbose_name': self.model._meta.verbose_name,  # unused
             },
         })
-        if hasattr(self, 'object') and self.object:
+        if self.model._bmfmeta.has_workflow and hasattr(self, 'object') and self.object:
             kwargs.update({
-                'bmfworkflow': {
-                    'enabled': bool(len(self.model._bmfworkflow._transitions)),
-                    'state': self.object._bmfworkflow._current_state,
-                    'transitions': self.object._bmfworkflow._from_here(self.object, self.request.user),
-                },
+                'bmfworkflow': self.object._bmfmeta.workflow,
+                'bmfworkflow_transitions': self.object._bmfmeta.workflow.transitions(self.request.user),
             })
         return super(ModuleBaseMixin, self).get_context_data(**kwargs)
 
@@ -502,27 +503,35 @@ class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
 
     def get_ajax_context(self, context):
         ctx = {
+            # if an object is created or changed return the object's pk on success
             'object_pk': 0,
 
-            # "ok" for normal html, "valid" for valid forms, "error" if an error occured
-            'status': 'ok',
+            # on success set this to True
+            'success': False,
 
-            'html': '',
+            # reload page on success
+            'reload': False,
 
-            'message': '',
+            # OR redirect on success
+            'redirect': None,
 
-            'redirect': '',
+            # OR reload messages on success
+            'message': False,
 
-            # use the history.back method
-            'back': False,
+            # returned html
+            'html': None,
+
+            # return error messages
+            'errors': [],
         }
         ctx.update(context)
         return ctx
 
     def render_valid_form(self, context):
-        context.update({
-            'redirect': self.get_success_url(),
-        })
+        if 'redirect' not in context:
+            context.update({
+                'redirect': self.get_success_url(),
+            })
         return super(ModuleAjaxMixin, self).render_valid_form(context)
 
 

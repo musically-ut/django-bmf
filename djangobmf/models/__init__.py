@@ -3,24 +3,6 @@
 
 from __future__ import unicode_literals
 
-__all__ = (
-    'BMFModel',
-    'BMFModelBase',
-    'ACTION_COMMENT',
-    'ACTION_CREATED',
-    'ACTION_UPDATED',
-    'ACTION_WORKFLOW',
-    'ACTION_FILE',
-    'Activity',
-    'Dashboard',
-    'Document',
-    'Configuration',
-    'Notification',
-    'NumberCycle',
-    'Report',
-    'Serializer',
-)
-
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import signals
@@ -52,6 +34,25 @@ from .document import Document as AbstractDocument
 from .notification import Notification as AbstractNotification
 from .numbering import NumberCycle as AbstractNumberCycle
 from .report import Report as AbstractReport
+
+
+__all__ = (
+    'BMFModel',
+    'BMFModelBase',
+    'ACTION_COMMENT',
+    'ACTION_CREATED',
+    'ACTION_UPDATED',
+    'ACTION_WORKFLOW',
+    'ACTION_FILE',
+    'Activity',
+    'Dashboard',
+    'Document',
+    'Configuration',
+    'Notification',
+    'NumberCycle',
+    'Report',
+    'Serializer',
+)
 
 
 class Activity(AbstractActivity):
@@ -112,13 +113,14 @@ def object_created(sender, instance, **kwargs):
 def object_changed(sender, instance, **kwargs):
     if instance._bmfmeta.has_history and len(instance._bmfmeta.observed_fields) > 0:
         changes = []
-        values = instance._get_observed_values()
-        for key in instance._bmfmeta.observed_fields:
-            try:
-                if instance._bmfmeta.changelog[key] != values[key]:
-                    changes.append((key, instance._bmfmeta.changelog[key], values[key]))
-            except KeyError:
-                pass
+        # TODO detect changes
+#       values = instance._get_observed_values()
+#       for key in instance._bmfmeta.observed_fields:
+#           try:
+#               if instance._bmfmeta.changelog[key] != values[key]:
+#                   changes.append((key, instance._bmfmeta.changelog[key], values[key]))
+#           except KeyError:
+#               pass
         if len(changes) > 0:
             history = Activity(
                 user=instance.modified_by,
@@ -139,8 +141,8 @@ def new_state(sender, instance, **kwargs):
             parent_id=instance.pk,
             action=ACTION_WORKFLOW,
             text=json.dumps({
-                'old': instance._bmfworkflow._initial_state_key,
-                'new': instance._bmfworkflow._current_state_key,
+                'old': instance._bmfmeta.workflow.initial,
+                'new': instance._bmfmeta.workflow.key,
             }, cls=DjangoJSONEncoder),
         )
         history.save()

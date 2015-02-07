@@ -8,6 +8,7 @@ overwrites bmf settings from django's settings
 """
 
 from django.conf import settings
+from django.core.files.storage import get_storage_class  # TODO OLD
 
 
 APP_LABEL = getattr(settings, 'BMF_APP_LABEL', 'djangobmf')
@@ -50,8 +51,6 @@ HAYSTACK_DEFAULT_CONNECTION = getattr(settings, 'BMF_HAYSTACK_DEFAULT_CONNECTION
 
 # OLD below this line ---------------------------------------------------------
 
-
-from django.core.files.storage import get_storage_class
 
 # === activity symbols ========================================================
 

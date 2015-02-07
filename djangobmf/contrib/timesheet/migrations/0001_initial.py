@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(null=True, auto_now=True, verbose_name='Modified')),
                 ('created', models.DateTimeField(auto_now_add=True, null=True, verbose_name='Created')),
                 ('uuid', models.CharField(null=True, db_index=True, editable=False, verbose_name='UUID', blank=True, max_length=100)),
-                ('state', djangobmf.fields.WorkflowField(null=True, db_index=True, editable=False, max_length=32, blank=True)),
+                ('state', djangobmf.fields.OLDWorkflowField(null=True, db_index=True, editable=False, max_length=32, blank=True)),
                 ('summary', models.CharField(null=True, verbose_name='Title', max_length=255)),
                 ('description', models.TextField(null=True, verbose_name='Description', blank=True)),
                 ('start', models.DateTimeField(default=django.utils.timezone.now, null=True)),

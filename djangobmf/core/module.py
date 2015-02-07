@@ -188,7 +188,7 @@ class Module(object):
             )
 
         # workflow interactions
-        if bool(len(self.model._bmfworkflow._transitions)):
+        if self.model._bmfmeta.has_workflow:
             urlpatterns += patterns(
                 '',
                 url(

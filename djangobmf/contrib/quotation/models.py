@@ -15,7 +15,6 @@ from djangobmf.settings import CONTRIB_INVOICE
 from djangobmf.settings import CONTRIB_PRODUCT
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_ADDRESS
-from djangobmf.fields import WorkflowField
 from djangobmf.numbering.utils import numbercycle_get_name, numbercycle_delete_object
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
@@ -39,7 +38,6 @@ class QuotationManager(models.Manager):
 class AbstractQuotation(BMFModel):
     """
     """
-    state = WorkflowField()
     invoice = models.OneToOneField(
         CONTRIB_INVOICE,
         null=True,
@@ -181,7 +179,6 @@ class AbstractQuotation(BMFModel):
         clean = True
         number_cycle = "Q{year}/{month}-{counter:04d}"
         workflow = QuotationWorkflow
-        workflow_field = 'state'
 
 
 class Quotation(AbstractQuotation):
