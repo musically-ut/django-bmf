@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
-from djangobmf.fields import WorkflowFieldV2 as WorkflowField
+from djangobmf.fields import WorkflowField
 from djangobmf.settings import APP_LABEL
 from djangobmf.workflow import Workflow
 

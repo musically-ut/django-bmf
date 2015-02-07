@@ -23,7 +23,7 @@ class OptionalForeignKey(models.ForeignKey):
 #       return = super(OptionalForeignKey, cls).__new__(foreignname, *args, **kwargs)
 
 
-class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
+class OLDWorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
     """
     OLD DONT USE
     """
@@ -44,7 +44,7 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
         super(WorkflowField, self).__init__(**defaults)
 
 
-class WorkflowFieldV2(with_metaclass(models.SubfieldBase, models.CharField)):
+class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
     """
     Holds the current state of an Workflow object
     can not be edited

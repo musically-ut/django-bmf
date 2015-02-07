@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='quotation',
             name='state',
-            field=djangobmf.fields.WorkflowFieldV2(workflow=djangobmf.contrib.quotation.workflows.QuotationWorkflow, max_length=32, db_index=True),
+            field=djangobmf.fields.WorkflowField(workflow=djangobmf.contrib.quotation.workflows.QuotationWorkflow, max_length=32, db_index=True),
             preserve_default=True,
         ),
     ]

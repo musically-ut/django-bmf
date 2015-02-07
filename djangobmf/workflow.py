@@ -3,12 +3,14 @@
 
 from __future__ import unicode_literals
 
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ValidationError
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.signals import activity_workflow
 from djangobmf.utils.user import user_add_bmf
 
 import inspect
@@ -313,27 +315,22 @@ class WorkflowContainer(object):
         """
         return self.obj._from_here(self.django_object, user)
 
-    def transition(self, via, user):
+    def transition(self, via, user, silent=False):
         """
         Interface to transitions
         """
-        return self.obj._call(via, self.django_object, user)
+        transitions = dict(self.transitions(user))
+        if via not in transitions:
+            raise ValidationError(_("This transition is not valid"))
+
+        success_url = self.obj._call(via, self.django_object, user)
+        self.obj.modified_by = user
+        self.obj.save()
+
+        if not silent:
+            activity_workflow.send(sender=self.obj.__class__, instance=self.obj)
+
+        return success_url
 
     def __str__(self):
         return force_text(self.obj._current_state)
-
-#           def bmfmodule_transition(self, via, user):
-#               """
-#               executes the ``via`` transition of the workflow state.
-#               """
-#               transitions = dict(self._bmfmeta.workflow.transitions(user))
-#               if via not in transitions:
-#                   raise ValidationError(_("This transition is not valid"))
-#               success_url = self._bmfmeta.workflow.transition(via, user)
-#               # TODO remove me, if workflows use ajax
-#               self.modified_by = user
-#               self.save()
-#               # generate a history object and signal
-#               activity_workflow.send(sender=self.__class__, instance=self)
-#               return success_url  # TODO remove me, if workflows use ajax
-#           setattr(cls, 'bmfmodule_transition', classmethod(bmfmodule_transition))

@@ -226,8 +226,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
                     'No object given for transitions["%s"]' % key
                 )
 
-            # if obj._bmfmeta.workflow._current_state_key != trans['state']:
-            if obj._bmfworkflow._current_state_key != trans['state']:
+            if obj._bmfmeta.workflow.key != trans['state']:
                 raise ImproperlyConfigured(
                     'Object "%s" is in the wrong state for transitions["%s"]' % (
                         obj,
@@ -257,19 +256,17 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
             # collector.collect([obj])
             # print(collector.nested())
 
-            # obj._bmfmeta.workflow._call(trans['transition'], obj, user)
             # print('')
             # print(obj.state, new_obj.pk)
             # print(new_obj.state, new_obj.pk)
             # print(trans['transition'])
-            new_obj._bmfworkflow._call(trans['transition'], new_obj, user)
+            new_obj._bmfmeta.workflow.transition(trans['transition'], user)
             # print(new_obj.state, new_obj.pk)
 
             if trans['object_key']:
                 new_key = '%s:%s' % (
                     trans['object_key'],
-                    # obj._bmfmeta.workflow._current_state_key
-                    new_obj._bmfworkflow._current_state_key
+                    new_obj._bmfmeta.workflow.key
                 )
 
                 if not objects.get(new_key, None):
