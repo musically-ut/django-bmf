@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
@@ -83,6 +84,12 @@ class WorkflowFieldV2(with_metaclass(models.SubfieldBase, models.CharField)):
         if isinstance(value, WorkflowContainer):
             return value.key
         return value
+
+    def clean(self, value, *args, **kwargs):
+        if (isinstance(value, WorkflowContainer) and isinstance(value.obj, self.workflow)) \
+                or value in self.workflow._states:
+            return value
+        raise ValidationError(_('The workflow state "%s" is no valid') % value)
 
 
 # Currency and Money

@@ -9,7 +9,6 @@ from django.test import TestCase
 from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ValidationError
 
-from djangobmf.workflow import DefaultWorkflow
 from djangobmf.workflow import State
 from djangobmf.workflow import Transition
 from djangobmf.workflow import Workflow
@@ -41,8 +40,6 @@ class ClassTests(TestCase):
         self.assertEqual(obj.affected_states(), ["from1", "from2", "to"])
 
     def test_validation(self):
-        self.assertEqual(str(DefaultWorkflow()), "default")
-        self.assertRaises(ValidationError, DefaultWorkflow, 'does_not_exist')
 
         # catch validations =======================================================
 

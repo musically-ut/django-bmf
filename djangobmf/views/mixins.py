@@ -521,9 +521,10 @@ class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
         return ctx
 
     def render_valid_form(self, context):
-        context.update({
-            'redirect': self.get_success_url(),
-        })
+        if 'redirect' not in context:
+            context.update({
+                'redirect': self.get_success_url(),
+            })
         return super(ModuleAjaxMixin, self).render_valid_form(context)
 
 

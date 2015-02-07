@@ -158,7 +158,7 @@ class TaskWorkflow(Workflow):
                 end=None,
                 auto=True,
             ):
-                obj.bmfmodule_transition('finish', self.user)
+                obj.state.transition('finish', self.user)
 
     def hold(self):
         self.stop()

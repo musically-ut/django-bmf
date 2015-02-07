@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import AppRegistryNotReady
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import signals
 from django.db.models.base import ModelBase
@@ -17,7 +16,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 from djangobmf.fields import WorkflowFieldV2 as WorkflowField
 from djangobmf.settings import APP_LABEL
-from djangobmf.signals import activity_workflow
 from djangobmf.workflow import Workflow
 
 import types
@@ -222,26 +220,6 @@ class BMFModelBase(ModelBase):
             except (models.FieldDoesNotExist, AppRegistryNotReady):
                 field = WorkflowField(workflow=cls._bmfmeta.workflow_cls)
                 field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
-
-            def bmfmodule_transition(self, via, user):
-                """
-                executes the ``via`` transition of the workflow state.
-                """
-
-                transitions = dict(self._bmfworkflow._from_here())
-                if via not in transitions:
-                    raise ValidationError(_("This transition is not valid"))
-
-                success_url = self._bmfworkflow._call(via, self, user)  # TODO remove me, if workflows use ajax
-                self.modified_by = user
-                self.save()
-
-                # generate a history object and signal
-                activity_workflow.send(sender=self.__class__, instance=self)
-
-                return success_url  # TODO remove me, if workflows use ajax
-
-            setattr(cls, 'bmfmodule_transition', classmethod(bmfmodule_transition))
 
         # add field: modified
         try:
