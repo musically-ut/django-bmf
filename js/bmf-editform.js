@@ -37,16 +37,18 @@
                 show: false,
                 backdrop: 'static'
             });
+
             // delete the modals content, if closed
             $('#bmfmodal_edit').on('hidden.bs.modal', function (e) {
                 $('#bmfmodal_edit div.modal-dialog').empty();
             });
-            // reload the page if one save has appeared
-            $('#bmfmodal_edit').on('hide.bs.modal', function (e) {
-                if ($('#bmfmodal_edit > div.page-reload').length == 1) {
-                    location.reload(false);
-                }
-            });
+
+            //// reload the page if one save has appeared
+            //$('#bmfmodal_edit').on('hide.bs.modal', function (e) {
+            //    if ($('#bmfmodal_edit > div.page-reload').length == 1) {
+            //        location.reload(false);
+            //    }
+            //});
         }
 
         base.open_formular = function () {
@@ -57,52 +59,69 @@
             dict.type = "GET";
             dict.url = base.options.href;
             $.ajax(dict).done(function( data, textStatus, jqXHR ) {
+
+                if (data.success == true && data.reload == true) {
+                    // reload page without refreshing the cache
+                    location.reload(false);
+                }
+
                 $('#bmfmodal_edit div.modal-dialog').prepend(data.html);
                 $('#bmfmodal_edit').modal('show');
 
-                // TODO ..............................................................................................
+                // manipulate form url
+                // cause the template-tag which generates the form is not aware of the url
+                var parent_object = $('#bmfmodal_edit div.modal-dialog div:first-child');
+                var form_object = parent_object.find('form');
+                // form_object.attr('action', base.options.href.split("?",1)[0]);
+                form_object.attr('action', base.options.href);
+                // apply bmf-form functions
+                form_object.bmf_buildform();
 
-            // manipulate form url
-            // cause the template-tag which generates the form is not aware of the url
-            var parent_object = $('#bmfmodal_edit div.modal-dialog div:first-child');
-            var form_object = parent_object.find('form');
-            // form_object.attr('action', base.options.href.split("?",1)[0]);
-            form_object.attr('action', base.options.href);
-            // apply bmf-form functions
-            form_object.bmf_buildform();
-
-            parent_object.find('button.bmfedit-cancel').click(function (event) {
-                // TODO check if there are multile forms and close modal or show next form
-                $('#bmfmodal_edit').modal('hide');
-            });
-            parent_object.find('button.bmfedit-submit').click(function (event) {
-                dict = $.bmf.AJAX;
-                dict.type = "POST";
-                dict.data = form_object.serialize();
-                dict.url = form_object.attr('action');
-                $.ajax(dict).done(function( data, textStatus, jqXHR ) {
-
-                    console.log(data);
-                    // alert(data);
-
-                    //if (data.back) {
-                    //    window.history.back();
-                    //}
-                    if (data.status == "valid") {
-                        // TODO check if there are multile forms and close modal or show next form
-                        if ($('#bmfmodal_edit > div.page-reload').length == 0) {
-                            $('#bmfmodal_edit > div').addClass('page-reload');
-                        }
-                        $('#bmfmodal_edit').modal('hide');
-                    }
-                    else {
-                        html = $($.parseHTML( data.html ));
-                        form_object.html(html.find('form').html())
-                        form_object.bmf_buildform();
-                    }
+                parent_object.find('button.bmfedit-cancel').click(function (event) {
+                    // TODO check if there are multile forms and close modal or show next form
+                    $('#bmfmodal_edit').modal('hide');
                 });
-            });
-                // TODO ..............................................................................................
+
+                parent_object.find('button.bmfedit-submit').click(function (event) {
+                    dict = $.bmf.AJAX;
+                    dict.type = "POST";
+                    dict.data = form_object.serialize();
+                    dict.url = form_object.attr('action');
+                    $.ajax(dict).done(function( data, textStatus, jqXHR ) {
+
+                        //  # if an object is created or changed return the object's pk on success
+                        //  'object_pk': 0, TODO
+                        //  # on success set this to True
+                        //  'success': False,
+                        //  # reload page on success
+                        //  'reload': False,
+                        //  # OR redirect on success
+                        //  'redirect': None,
+                        //
+                        //  # OR reload messages on success
+                        //  'message': False, # TODO
+                        //  # returned html
+                        //  'html': None, # TODO
+                        //  # return error messages
+                        //  'errors': [], TODO
+
+                        if (data.success == false) {
+                            html = $($.parseHTML( data.html ));
+                            form_object.html(html.find('form').html());
+                            form_object.bmf_buildform();
+                        }
+                        else if (data.reload == true) {
+                            // reload page without refreshing the cache
+                            location.reload(false);
+                        }
+                        else if (data.redirect != null) {
+                            window.location.href=data.redirect;
+                        }
+                        else {
+                            $('#bmfmodal_edit').modal('hide');
+                        }
+                    });
+                });
             });
         }
       

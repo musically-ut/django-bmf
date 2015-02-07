@@ -320,9 +320,9 @@ class AjaxMixin(BaseMixin):
         return self.render_to_json_response(ctx)
 
     def render_valid_form(self, context):
-        ctx = self.get_ajax_context({
-            'status': 'valid',
-        })
+        ctx = {
+            'success': True,
+        }
         ctx.update(context)
         return self.render_to_json_response(ctx)
 
@@ -503,19 +503,26 @@ class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
 
     def get_ajax_context(self, context):
         ctx = {
+            # if an object is created or changed return the object's pk on success
             'object_pk': 0,
 
-            # "ok" for normal html, "valid" for valid forms, "error" if an error occured
-            'status': 'ok',
+            # on success set this to True
+            'success': False,
 
-            'html': '',
+            # reload page on success
+            'reload': False,
 
-            'message': '',
+            # OR redirect on success
+            'redirect': None,
 
-            'redirect': '',
+            # OR reload messages on success
+            'message': False,
 
-            # use the history.back method
-            'back': False,
+            # returned html
+            'html': None,
+
+            # return error messages
+            'errors': [],
         }
         ctx.update(context)
         return ctx

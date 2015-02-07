@@ -506,8 +506,8 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
         activity_create.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
             'object_pk': self.object.pk,
-            'redirect': self.object.get_absolute_url(),
-            'message': ugettext('Object copied'),
+            'redirect': self.object.bmfmodule_detail(),
+            'message': True,
         })
 
 
@@ -533,7 +533,8 @@ class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxM
         activity_update.send(sender=self.object.__class__, instance=self.object)
         return self.render_valid_form({
             'object_pk': self.object.pk,
-            'message': ugettext('Object updated'),
+            'redirect': self.object.bmfmodule_detail(),
+            'message': True,
         })
 
 
@@ -568,7 +569,7 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
 
         return self.render_valid_form({
             'object_pk': self.object.pk,
-            'message': ugettext('Object created'),
+            'message': True,
         })
 
 
@@ -647,8 +648,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         self.object.delete()
         return self.render_valid_form({
             'message': ugettext('Object deleted'),
-            'back': bool(self.request.GET.get('back', False)),
-            'redirect': success_url,
+            'redirect': bool(self.request.GET.get('redirect', None)),
         })
 
     def clean_list(self, lst):
@@ -708,11 +708,10 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
 #           return self.render_to_json_response({
 #               'html': 'VALIDATION_ERROR',
 #           })
-
-        print('GET', success_url)
+#       print('GET', success_url)
 
         return self.render_valid_form({
-            'message': ugettext('Workflow-state changed'),
+            'message': True,
             'redirect': success_url if success_url else '/',
         })
 
@@ -801,8 +800,8 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
 
         return valid, data
 
+    # Don't react on get requests
     def get(self, request, *args, **kwargs):
-        # dont react on get requests
         raise Http404
 
     def post(self, request, *args, **kwargs):
