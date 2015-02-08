@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,41 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bmf_module.py:45 models.py:75
+#: bmf_module.py:59 models.py:72
 msgid "Goals"
 msgstr ""
 
-#: bmf_module.py:50 models.py:232
+#: bmf_module.py:64 models.py:226
 msgid "Tasks"
+msgstr ""
+
+#: bmf_module.py:73
+msgid "My goals"
+msgstr ""
+
+#: bmf_module.py:79
+msgid "Active goals"
+msgstr ""
+
+#: bmf_module.py:85 bmf_module.py:116
+msgid "Archive"
+msgstr ""
+
+#: bmf_module.py:92
+msgid "My tasks"
+msgstr ""
+
+#: bmf_module.py:98
+msgid "Todolist"
+msgstr ""
+
+#: bmf_module.py:104
+msgid "Availalbe tasks"
+msgstr ""
+
+#: bmf_module.py:110 templates/djangobmf_task/goal_bmfdetail.html:26
+#: templates/djangobmf_task/task_bmfrelated_project.html:7
+msgid "Open tasks"
 msgstr ""
 
 #: forms.py:17
@@ -33,33 +62,28 @@ msgstr ""
 msgid "When copying unset the task's employee"
 msgstr ""
 
-#: models.py:50 models.py:209
+#: models.py:47 models.py:203
 msgid "Title"
 msgstr ""
 
-#: models.py:51 models.py:210
+#: models.py:48 models.py:204
 msgid "Description"
 msgstr ""
 
-#: models.py:69 models.py:226 workflows.py:23
+#: models.py:66 models.py:220 workflows.py:23
 msgid "Completed"
 msgstr ""
 
-#: models.py:74
+#: models.py:71
 msgid "Goal"
 msgstr ""
 
-#: models.py:211
+#: models.py:205
 msgid "Due date"
 msgstr ""
 
-#: models.py:231
+#: models.py:225
 msgid "Task"
-msgstr ""
-
-#: templates/djangobmf_task/goal_bmfdetail.html:26
-#: templates/djangobmf_task/task_bmfrelated_project.html:7
-msgid "Open tasks"
 msgstr ""
 
 #: templates/djangobmf_task/goal_bmfdetail.html:27
@@ -90,12 +114,23 @@ msgstr ""
 msgid "Current goals"
 msgstr ""
 
+#: templates/djangobmf_task/task_bmflist.html:5
+msgid "Name"
+msgstr ""
+
+#: templates/djangobmf_task/task_bmflist.html:6
 #: templates/djangobmf_task/task_inctable.html:6
 msgid "Employee"
 msgstr ""
 
+#: templates/djangobmf_task/task_bmflist.html:7
 #: templates/djangobmf_task/task_inctable.html:7
 msgid "State"
+msgstr ""
+
+#: templates/djangobmf_task/task_bmflist.html:44
+#: templates/djangobmf_task/task_inctable.html:45
+msgid "None"
 msgstr ""
 
 #: templates/djangobmf_task/task_inctable.html:35
@@ -112,38 +147,6 @@ msgstr ""
 
 #: templates/djangobmf_task/task_inctable.html:38
 msgid "todo"
-msgstr ""
-
-#: templates/djangobmf_task/task_inctable.html:45
-msgid "None"
-msgstr ""
-
-#: views.py:50 views.py:76
-msgid "Archive"
-msgstr ""
-
-#: views.py:55
-msgid "Active Goals"
-msgstr ""
-
-#: views.py:65
-msgid "My Goals"
-msgstr ""
-
-#: views.py:82
-msgid "Open Tasks"
-msgstr ""
-
-#: views.py:91
-msgid "Available Tasks"
-msgstr ""
-
-#: views.py:100
-msgid "My Tasks"
-msgstr ""
-
-#: views.py:110
-msgid "Todolist"
 msgstr ""
 
 #: workflows.py:22 workflows.py:64

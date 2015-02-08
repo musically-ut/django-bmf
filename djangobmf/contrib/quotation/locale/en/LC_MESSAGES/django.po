@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,52 +17,60 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bmf_module.py:34 models.py:161
+#: bmf_module.py:31 models.py:170
 msgid "Quotations"
 msgstr ""
 
-#: models.py:74
-msgid "Quotation number"
+#: bmf_module.py:40
+msgid "Open quotations"
+msgstr ""
+
+#: bmf_module.py:46
+msgid "All quotations"
 msgstr ""
 
 #: models.py:81
+msgid "Quotation number"
+msgstr ""
+
+#: models.py:88
 msgid "Date"
 msgstr ""
 
-#: models.py:82 templates/djangobmf_quotation/quotation_bmfdetail.html:21
+#: models.py:89 templates/djangobmf_quotation/quotation_bmfdetail.html:21
 msgid "Valid until"
 msgstr ""
 
-#: models.py:83 templates/djangobmf_quotation/quotation_bmfdetail.html:28
+#: models.py:90 templates/djangobmf_quotation/quotation_bmfdetail.html:28
 msgid "Notes"
 msgstr ""
 
-#: models.py:84 templates/djangobmf_quotation/quotation_bmfdetail.html:108
+#: models.py:91 templates/djangobmf_quotation/quotation_bmfdetail.html:108
 msgid "Term of payment"
 msgstr ""
 
-#: models.py:86
+#: models.py:93
 msgid "Completed"
 msgstr ""
 
-#: models.py:160 templates/djangobmf_quotation/quotation_bmfdetail.html:4
+#: models.py:169 templates/djangobmf_quotation/quotation_bmfdetail.html:4
 #: templates/djangobmf_quotation/quotation_bmfdetail.html:7
 msgid "Quotation"
 msgstr ""
 
-#: models.py:189 templates/djangobmf_quotation/quotation_bmfdetail.html:46
+#: models.py:197 templates/djangobmf_quotation/quotation_bmfdetail.html:46
 msgid "Name"
 msgstr ""
 
-#: models.py:194 templates/djangobmf_quotation/quotation_bmfdetail.html:47
+#: models.py:202 templates/djangobmf_quotation/quotation_bmfdetail.html:47
 msgid "Price"
 msgstr ""
 
-#: models.py:195 templates/djangobmf_quotation/quotation_bmfdetail.html:48
+#: models.py:203 templates/djangobmf_quotation/quotation_bmfdetail.html:48
 msgid "Amount"
 msgstr ""
 
-#: models.py:197
+#: models.py:205
 msgid "Description"
 msgstr ""
 
@@ -134,14 +142,6 @@ msgstr ""
 
 #: templates/djangobmf_quotation/quotation_htmlreport.html:77
 msgid "With kind regards"
-msgstr ""
-
-#: views.py:19
-msgid "All Quotations"
-msgstr ""
-
-#: views.py:24
-msgid "Open Quotations"
 msgstr ""
 
 #: workflows.py:15
