@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
-"PO-Revision-Date: 2014-09-27 14:06+0000\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
+"PO-Revision-Date: 2015-02-08 03:17+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -18,17 +18,33 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: bmf_module.py:40
-msgid "Between two Accounts"
-msgstr ""
-
-#: bmf_module.py:41
-msgid "Split Transaction"
-msgstr ""
-
-#: bmf_module.py:64 models.py:178
+#: bmf_module.py:47 models.py:189
 msgid "Transactions"
 msgstr "Buchungen"
+
+#: bmf_module.py:56
+msgid "All Accounts"
+msgstr "Alle Konten"
+
+#: bmf_module.py:61
+msgid "Open transactions"
+msgstr ""
+
+#: bmf_module.py:67
+msgid "Closed transactions"
+msgstr ""
+
+#: bmf_module.py:74
+msgid "Transaction archive"
+msgstr ""
+
+#: forms.py:36
+msgid "Amount"
+msgstr ""
+
+#: forms.py:37
+msgid "Create draft"
+msgstr ""
 
 #: models.py:38
 msgid "Income"
@@ -50,90 +66,99 @@ msgstr "Passiva"
 msgid "Equity"
 msgstr "Eigenkapital"
 
-#: models.py:74
+#: models.py:85
 msgid "Number"
 msgstr "Nummer"
 
-#: models.py:75
+#: models.py:86
 msgid "Name"
 msgstr "Name"
 
-#: models.py:77
+#: models.py:88
 msgid "Type"
 msgstr "Typ"
 
-#: models.py:79
+#: models.py:90
 msgid "Read-only"
 msgstr "Schreibgeschützt"
 
-#: models.py:101
+#: models.py:99 templates/djangobmf_accounting/transaction_bmfdetail.html:25
+#: templates/djangobmf_accounting/transactionitem_bmflist.html:5
 msgid "Account"
 msgstr "Konto"
 
-#: models.py:102
+#: models.py:100
 msgid "Accounts"
 msgstr "Konten"
 
-#: models.py:132
+#: models.py:129
 msgid "The type does not match the model parents type"
 msgstr ""
 
-#: models.py:134
+#: models.py:131
 msgid "Root accounts must define a type"
 msgstr ""
 
-#: models.py:143
+#: models.py:140
 msgid "Comment"
 msgstr "Kommentar"
 
-#: models.py:170
+#: models.py:179
 msgid "Posting text"
 msgstr "Verwendungszweck"
 
-#: models.py:172 models.py:226
+#: models.py:181 models.py:260
 msgid "Draft"
 msgstr "Entwurf"
 
-#: models.py:177
+#: models.py:188 templates/djangobmf_accounting/transaction_bmfdetail.html:6
+#: templates/djangobmf_accounting/transaction_bmfdetail.html:9
 msgid "Transaction"
 msgstr "Buchung"
 
-#: models.py:223
+#: models.py:257 templates/djangobmf_accounting/transaction_bmfdetail.html:27
+#: templates/djangobmf_accounting/transactionitem_bmflist.html:8
 msgid "Credit"
 msgstr ""
 
-#: models.py:223
+#: models.py:257 templates/djangobmf_accounting/transaction_bmfdetail.html:26
+#: templates/djangobmf_accounting/transactionitem_bmflist.html:7
 msgid "Debit"
 msgstr ""
 
-#: views.py:22
-msgid "All Accounts"
-msgstr "Alle Konten"
-
-#: views.py:27
-msgid "All Transactions"
+#: templates/djangobmf_accounting/transaction_bmfdetail.html:11
+msgid "Project"
 msgstr ""
 
-#: views.py:32
-msgid "Open Transactions"
-msgstr "Offene Transaktionen"
+#: templates/djangobmf_accounting/transaction_bmfdetail.html:15
+msgid "None"
+msgstr ""
 
-#: workflows.py:13
+#: templates/djangobmf_accounting/transaction_bmfdetail.html:23
+#: templates/djangobmf_accounting/transactionitem_bmflist.html:6
+msgid "Date"
+msgstr ""
+
+#: workflows.py:16
 msgid "Open"
 msgstr "Offen"
 
-#: workflows.py:14
+#: workflows.py:17
 msgid "Balanced"
 msgstr "Bilanziert"
 
-#: workflows.py:15
+#: workflows.py:18
 msgid "Cancelled"
 msgstr "Abgebrochen"
 
-#: workflows.py:18
+#: workflows.py:21
 msgid "Balance"
 msgstr "Bilanz"
 
-#: workflows.py:19
+#: workflows.py:22
 msgid "Cancel"
 msgstr "Abbrechen"
+
+#: workflows.py:26
+msgid "The transaction is not balanced"
+msgstr ""

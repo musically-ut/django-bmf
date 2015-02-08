@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-15 06:07+0100\n"
-"PO-Revision-Date: 2015-01-15 05:10+0000\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
+"PO-Revision-Date: 2015-02-08 03:17+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -26,35 +26,35 @@ msgstr "Benutzername"
 msgid "Password"
 msgstr "Passwort"
 
-#: categories.py:29
+#: categories.py:31
 msgid "Project Management"
 msgstr "Projekt Management"
 
-#: categories.py:34
+#: categories.py:36
 msgid "Document Management"
 msgstr "Dokumenten Management"
 
-#: categories.py:39
+#: categories.py:41
 msgid "Sales"
 msgstr "Verkauf"
 
-#: categories.py:44
+#: categories.py:46
 msgid "Human Resources"
 msgstr "Personalwesen"
 
-#: categories.py:49
+#: categories.py:51
 msgid "Customer Relationship"
 msgstr "Kundenbeziehung (CRM)"
 
-#: categories.py:54
+#: categories.py:56
 msgid "Accounting"
 msgstr "Buchführung"
 
-#: categories.py:59
+#: categories.py:61
 msgid "Warehouse"
 msgstr "Lager"
 
-#: categories.py:64
+#: categories.py:66
 msgid "Time and attendance"
 msgstr ""
 
@@ -80,70 +80,75 @@ msgctxt "currency formatting"
 msgid "%(val)s %(sym)s"
 msgstr "%(val)s %(sym)s"
 
-#: fields.py:29
-msgid "Workflow object"
-msgstr "Arbeitsfluss-objekt"
+#: fields.py:52
+msgid "Workflow Field"
+msgstr ""
 
-#: fields.py:83
+#: fields.py:92
+#, python-format
+msgid "The workflow state \"%s\" is no valid"
+msgstr ""
+
+#: fields.py:133
 msgid "Currency Field"
 msgstr "Währungsfeld"
 
-#: fields.py:122
+#: fields.py:172
 msgid "Money Field"
 msgstr "Geldfeld"
 
-#: models/activity.py:38
+#: models/activity.py:30
 msgid "Comment"
 msgstr "Kommentar"
 
-#: models/activity.py:39 models/base.py:240 models/document.py:43
+#: models/activity.py:31 models/base.py:242 models/document.py:43
 msgid "Created"
 msgstr "Erstellt"
 
-#: models/activity.py:40
+#: models/activity.py:32
 msgid "Updated"
 msgstr "Aktualisiert"
 
-#: models/activity.py:41
+#: models/activity.py:33
 msgid "Workflow"
 msgstr "Arbeitsfluss"
 
-#: models/activity.py:42 models/document.py:21
+#: models/activity.py:34 models/document.py:21
 msgid "File"
 msgstr "Datei"
 
-#: models/activity.py:73
+#: models/activity.py:65
 msgid "Topic"
 msgstr "Betreff"
 
-#: models/activity.py:74
+#: models/activity.py:66
 msgid "Text"
 msgstr "Text"
 
-#: models/activity.py:76
+#: models/activity.py:68
 msgid "Action"
 msgstr "Aktion"
 
-#: models/activity.py:83 models/numbering.py:41
+#: models/activity.py:75 models/numbering.py:41
 msgid "Template"
 msgstr "Vorlange"
 
-#: models/activity.py:90 models/base.py:239 models/document.py:42
+#: models/activity.py:82 models/base.py:229 models/document.py:42
 #: models/notification.py:40 models/report.py:55
 msgid "Modified"
 msgstr "Modifiziert"
 
-#: models/activity.py:96 models/activity.py:97
+#: models/activity.py:88 models/activity.py:89
 msgid "Activity"
 msgstr ""
 
-#: models/base.py:67
-msgid "No category"
-msgstr "Keine Kategorie"
+#: models/base.py:256
+msgid "Modified by"
+msgstr ""
 
-#: models/base.py:284 workflows.py:211
-msgid "This transition is not valid"
-msgstr "Dieser Übergang ist nicht valide"
+#: models/base.py:268
+msgid "Created by"
+msgstr ""
 
 #: models/configuration.py:49
 msgid "Application"
@@ -166,8 +171,7 @@ msgstr "Konfiguration"
 msgid "Configurations"
 msgstr "Konfigurationen"
 
-#: models/dashboard.py:19 models/document.py:20
-#: templates/djangobmf/module_list.html:5
+#: models/document.py:20 templates/djangobmf/module_list.html:5
 msgid "Name"
 msgstr "Name"
 
@@ -242,40 +246,6 @@ msgstr "Bericht"
 msgid "Reports"
 msgstr "Berichte"
 
-#: models/workspace.py:46 models/workspace.py:47 models/workspace.py:114
-msgid "Workspace"
-msgstr "Arbeitsplatz"
-
-#: models/workspace.py:75
-#, python-format
-msgid "This object's parent must be a %s"
-msgstr ""
-
-#: models/workspace.py:79
-msgid "This object parent must be a empty"
-msgstr ""
-
-#: models/workspace.py:87
-#, python-format
-msgid "You can not append to a %s"
-msgstr ""
-
-#: models/workspace.py:92
-msgid "You need to define a ContentType"
-msgstr ""
-
-#: models/workspace.py:96
-msgid "The ContentType does not belong to an BMF-Module"
-msgstr ""
-
-#: models/workspace.py:111
-msgid "View"
-msgstr "Ansicht"
-
-#: models/workspace.py:113
-msgid "Category"
-msgstr "Kategorie"
-
 #: templates/djangobmf/account/login.html:5
 #: templates/djangobmf/account/login.html:26
 #: templates/djangobmf/account/logout.html:16
@@ -289,7 +259,7 @@ msgstr "Bitte melden Sie sich an"
 #: templates/djangobmf/account/logout.html:5
 #: templates/djangobmf/account/modal_logout.html:6
 #: templates/djangobmf/account/modal_logout.html:11
-#: templates/djangobmf/base.html:113
+#: templates/djangobmf/base.html:121
 msgid "Logout"
 msgstr "Ausloggen"
 
@@ -304,6 +274,7 @@ msgstr "Sind Sie sicher, dass Sie sich ausloggen wollen?"
 #: templates/djangobmf/account/modal_logout.html:10
 #: templates/djangobmf/module_clone.html:9
 #: templates/djangobmf/module_create.html:9
+#: templates/djangobmf/module_delete.html:30
 #: templates/djangobmf/module_update.html:9
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -344,7 +315,7 @@ msgstr "Die nachfolgenden Attribute wurden geändert"
 msgid "State"
 msgstr "Status"
 
-#: templates/djangobmf/base.html:38 templates/djangobmf/base.html.py:64
+#: templates/djangobmf/base.html:36 templates/djangobmf/base.html.py:61
 #: templates/djangobmf/dashboard/detail.html:4
 #: templates/djangobmf/dashboard/detail.html:12
 #: templates/djangobmf/dashboard/sitebar.html:3
@@ -352,31 +323,31 @@ msgstr "Status"
 msgid "Dashboards"
 msgstr "Dashboards"
 
-#: templates/djangobmf/base.html:54
+#: templates/djangobmf/base.html:51
 msgid "Toogle navigation"
 msgstr ""
 
-#: templates/djangobmf/base.html:78
+#: templates/djangobmf/base.html:76
 #: templates/djangobmf/notification/index.html:5
 #: templates/djangobmf/notification/index.html:51
 msgid "Notifications"
 msgstr "Benachrichtigungen"
 
-#: templates/djangobmf/base.html:99
+#: templates/djangobmf/base.html:100
 msgid "Timesheet"
 msgstr "Stundenzettel"
 
-#: templates/djangobmf/base.html:105
+#: templates/djangobmf/base.html:107
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: templates/djangobmf/base.html:107
+#: templates/djangobmf/base.html:112
 #: templates/djangobmf/dashboard/sitebar.html:18
 #: templates/djangobmf/modules.html:4 templates/djangobmf/modules.html.py:9
 msgid "Module overview"
 msgstr "Modulübersicht"
 
-#: templates/djangobmf/base.html:109
+#: templates/djangobmf/base.html:116
 msgid "Administration"
 msgstr ""
 
@@ -408,8 +379,8 @@ msgid "Click on \"add\" to create a new dashboard"
 msgstr ""
 
 #: templates/djangobmf/dashboard/update.html:8
-#: templates/djangobmf/module_detail.html:55
-#: templates/djangobmf/module_detail.html:61
+#: templates/djangobmf/module_detail.html:63
+#: templates/djangobmf/module_detail.html:69
 #: templates/djangobmf/module_workflow.html:12
 #: templates/djangobmf/notification/index.html:42
 msgid "Edit"
@@ -462,21 +433,37 @@ msgstr "Erstelle %(object)s"
 msgid "Create object"
 msgstr "Erstelle Objekt"
 
-#: templates/djangobmf/module_delete.html:10
-#: templates/djangobmf/module_delete_default.html:8
-#: templates/djangobmf/module_workflow.html:11
-msgid "Back"
-msgstr "Zurück"
+#: templates/djangobmf/module_delete.html:9
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
+"related objects, but your account doesn't have permission to delete the "
+"following types of objects:"
+msgstr ""
 
-#: templates/djangobmf/module_delete_default.html:9
-msgid "Confirm"
-msgstr "Bestätigen"
+#: templates/djangobmf/module_delete.html:16
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the"
+" following protected related objects:"
+msgstr ""
+
+#: templates/djangobmf/module_delete.html:24
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
+"All of the following related items will be deleted:"
+msgstr ""
+
+#: templates/djangobmf/module_delete.html:32
+msgid "Delete Object"
+msgstr ""
 
 #: templates/djangobmf/module_detail.html:11
 msgid "Files"
 msgstr "Dateien"
 
-#: templates/djangobmf/module_detail.html:48
+#: templates/djangobmf/module_detail.html:55
 msgid "Print"
 msgstr "Drucken"
 
@@ -512,7 +499,11 @@ msgid ""
 "This object is not valid. You need to edit it in order to change it's state."
 msgstr ""
 
-#: templates/djangobmf/modules.html:20
+#: templates/djangobmf/module_workflow.html:11
+msgid "Back"
+msgstr "Zurück"
+
+#: templates/djangobmf/modules.html:15
 msgid "You don't have access to any modules"
 msgstr "Sie haben keinen Zugriff auf Module"
 
@@ -579,24 +570,29 @@ msgstr ""
 msgid "empty"
 msgstr "leer"
 
-#: views.py:632
-msgid "Object copied"
-msgstr "Datensatz kopiert"
+#: views/module.py:650
+msgid "Object deleted"
+msgstr ""
 
-#: views.py:654
-msgid "Object updated"
-msgstr "Datensatz aktualisiert"
+#: views/module.py:666
+#, python-format
+msgid "Cannot delete %(name)s"
+msgstr ""
 
-#: views.py:689
-msgid "Object created"
-msgstr "Datensatz erstellt"
+#: views/module.py:670
+msgid "Are you sure?"
+msgstr ""
 
-#: views.py:768
+#: views/module.py:740
 #, python-format
 msgid "No %(verbose_name)s found matching the query"
 msgstr ""
 
-#: workflows.py:203
+#: workflow.py:229
 #, python-format
 msgid "The state %s is not valid"
 msgstr "Der Status %s ist nicht valide"
+
+#: workflow.py:237 workflow.py:330
+msgid "This transition is not valid"
+msgstr "Dieser Übergang ist nicht valide"
