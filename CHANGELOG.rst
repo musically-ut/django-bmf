@@ -1,8 +1,15 @@
-Version 0.2.2 (currently in development)
+Version 0.2.3 (currently in development)
+========================================
+
+Version 0.2.2 (2015-02-08)
 ========================================
 
 * Removed core dependency of django-mptt (but it's still used in the contrib applications)
-
+* Refactor of Workflows
+* Ajax calls used for deleted
+* Ajax calls used for workflow changes
+* Testcases for BMF modules
+* Updated BMFModel (now uses a improved ModelBase metaclass)
 
 Version 0.2.1 (2015-01-15)
 ========================================
