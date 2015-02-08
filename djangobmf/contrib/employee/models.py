@@ -84,7 +84,7 @@ class AbstractEmployee(BaseEmployee):
         search_fields = ['name', 'email', 'user__username']
 
     def __str__(self):
-        return self.name
+        return self.name or '%s' % self.user
 
 
 class Employee(AbstractEmployee):

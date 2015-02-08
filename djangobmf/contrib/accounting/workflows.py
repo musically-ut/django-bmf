@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.workflows import Workflow, State, Transition
+from djangobmf.workflow import Workflow, State, Transition
 
 from .tasks import bmfcontrib_accounting_calc_balance
 

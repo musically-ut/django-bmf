@@ -3,33 +3,33 @@
 
 from __future__ import unicode_literals
 
-from django import forms
+# from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.sites import site
-
-from .apps import ProductConfig
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 
+# from .apps import ProductConfig
 
 from .models import Product
-from .models import PRODUCT_SERVICE
-from .views import ProductIndexView
+# from .models import PRODUCT_SERVICE
+
 from .views import ProductCreateView
-from .views import ProductDetailView
 from .views import ProductUpdateView
+
 
 site.register_module(Product, **{
     'create': ProductCreateView,
-    'detail': ProductDetailView,
     'update': ProductUpdateView,
 })
 
-SETTINGS = {
-    'default': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
-}
-site.register_settings(ProductConfig.label, SETTINGS)
+
+# SETTINGS = {
+#     'default': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
+# }
+# site.register_settings(ProductConfig.label, SETTINGS)
 
 
 class ProductCategory(BaseCategory):
@@ -37,6 +37,26 @@ class ProductCategory(BaseCategory):
     slug = "products"
 
 
-site.register_dashboard(Sales)
-site.register_category(Sales, ProductCategory)
-site.register_view(Product, ProductCategory, ProductIndexView)
+site.register_dashboards(
+    Sales(
+        ProductCategory(
+            ViewFactory(
+                model=Product,
+                name=_("Sellable products"),
+                slug="sell",
+                manager="can_sold",
+            ),
+            ViewFactory(
+                model=Product,
+                name=_("Purchaseable products"),
+                slug="purchase",
+                manager="can_purchased",
+            ),
+            ViewFactory(
+                model=Product,
+                name=_("All products"),
+                slug="all",
+            ),
+        ),
+    ),
+)

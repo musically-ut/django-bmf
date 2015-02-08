@@ -3,28 +3,34 @@
 
 from __future__ import unicode_literals
 
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-# from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
-# from django.db.models.query import QuerySet
+from django.forms.models import modelform_factory
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
-from django.views.defaults import permission_denied
 
 from djangobmf import get_version
 from djangobmf.decorators import login_required
+from djangobmf.document.forms import UploadDocument
+from djangobmf.notification.forms import HistoryCommentForm
+from djangobmf.models import Activity
+from djangobmf.models import Document
 from djangobmf.models import Notification
-from djangobmf.models import Workspace
+from djangobmf.settings import APP_LABEL
 from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
-
-from collections import OrderedDict
+from djangobmf.views.defaults import bad_request
+from djangobmf.views.defaults import permission_denied
+from djangobmf.views.defaults import page_not_found
+from djangobmf.views.defaults import server_error
 
 import json
 import datetime
@@ -44,6 +50,7 @@ class BaseMixin(object):
     this is used so we don't neet to define a middleware
     """
     permissions = []
+    bmf_cache_timeout = 600
 
     def get_permissions(self, permissions=[]):
         """
@@ -62,7 +69,16 @@ class BaseMixin(object):
         return True
 
     def read_session_data(self):
-        return self.request.session.get("djangobmf", {'version': get_version()})
+        """
+        returns the data saved in the session or an
+        default dictionary containing the version of
+        the bmf
+        """
+        return self.request.session.get("djangobmf", {
+            'version': get_version(),
+            'active_dashboard': None,
+            # 'active_view': None,
+        })
 
     def write_session_data(self, data):
         # reload sessiondata, because we can not be sure, that the
@@ -86,102 +102,92 @@ class BaseMixin(object):
         if not self.check_permissions() or not self.request.user.has_perms(self.get_permissions([])):
             return permission_denied(self.request)
 
+        # === DJANGO BMF SITE OBJECT ======================================
+
+        self.request.djangobmf_site = apps.get_app_config(APP_LABEL).site
+
         # === EMPLOYEE AND TEAMS ==========================================
 
+        # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
         user_add_bmf(self.request.user)
 
+        # check if bmf has a employee model and if so do a validation of the
+        # employee instance (users, who are not employees are not allowed to access)
         if self.request.user.djangobmf_has_employee and not self.request.user.djangobmf_employee:
             logger.debug("User %s does not have permission to access djangobmf" % self.request.user)
             if self.request.user.is_superuser:
                 return redirect('djangobmf:wizard', permanent=False)
             else:
-                raise PermissionDenied
+                return permission_denied(self.request)
 
         # =================================================================
 
-        return super(BaseMixin, self).dispatch(*args, **kwargs)
+        response = super(BaseMixin, self).dispatch(*args, **kwargs)
 
-    def update_workspace(self, workspace=None):
-        """
-        This function reads all workspaces for a user instance, builds the
-        navigation-tree and updates the active workspace (if neccessary)
+        # Catch HTTP error codes and redirect to a bmf-specific template
+        if response.status_code in [400, 403, 404, 500] and not settings.DEBUG:
 
-        workspace can either be None, the workspaces primary key or None
+            if response.status_code == 400:
+                return bad_request(self.request)
+
+            if response.status_code == 403:
+                return permission_denied(self.request)
+
+            if response.status_code == 404:
+                return page_not_found(self.request)
+
+            if response.status_code == 500:
+                return server_error(self.request)
+
+        return response
+
+    def get_dashboards_cache_key(self):
+        return 'bmf_dashboards_%s_%s' % (self.request.user.pk, get_language())
+
+    def update_dashboards(self):
         """
-        cache_key = 'bmf_workspace_%s_%s' % (self.request.user.pk, get_language())
-        cache_timeout = 600
+        This functions loads all dashboards for one user instance
+        """
+
+        # store information about all user dashboards
+        cache_key = self.get_dashboards_cache_key()
 
         # get navigation key from cache
-        data = cache.get(cache_key)
-        if not data:
-            logger.debug("Reload workspace cache (%s) for user %s" % (cache_key, self.request.user))
+        dashboards = cache.get(cache_key)
 
-            data = {
-                "relations": {},
-                "dashboards": {},
-                "workspace": {},
-            }
+        if not dashboards:  # pragma: no branch
+            logger.debug("Reload cache: %s" % cache_key)
 
-            cur_dashboard = None
-            cur_category = None
-            new_category = False
-            for ws in Workspace.objects.all():
-                if not ws.module_cls:
-                    # TODO generate warning!
-                    continue
+            dashboards = {}
 
-                if ws.level == 1:
-                    cur_category = ws
-                    new_category = True
-                    continue
-                if ws.level == 0:
-                    cur_dashboard = ws
-                    data['relations'][ws.pk] = (cur_dashboard.pk, None)
-                    continue
+            # update all dashboards
+            for dashboard in self.request.djangobmf_site.dashboards:
+                dashboards[dashboard.key] = {}
+                for category in dashboard:
+                    dashboards[dashboard.key][category.key] = {}
+                    for view in category:
+                        model = view.model
+                        permissions = view.view(model=model).get_permissions([])
+                        if self.request.user.has_perms(permissions):
+                            dashboards[dashboard.key][category.key][view.key] = reverse(
+                                'djangobmf:dashboard_view',
+                                kwargs={
+                                    'dashboard': dashboard.key,
+                                    'category': category.key,
+                                    'view': view.key,
+                                },
+                            )
 
-                model = ws.ct.model_class()
-                permissions = ws.module_cls(model=model, workspace=ws).get_permissions([])
+                    # test if category has no views and delete empty categories
+                    if not dashboards[dashboard.key][category.key]:
+                        del dashboards[dashboard.key][category.key]
 
-                if self.request.user.has_perms(permissions):
-                    data['relations'][ws.pk] = (cur_dashboard.pk, cur_category.pk)
+                # test if dashboard has no categories and delete empty dashboards
+                if not dashboards[dashboard.key]:
+                    del dashboards[dashboard.key]
 
-                    if cur_dashboard.pk not in data['dashboards'].keys():
-
-                        data['dashboards'][cur_dashboard.pk] = {
-                            "url": cur_dashboard.get_absolute_url(),
-                            "name": '%s' % cur_dashboard.module_cls.name,
-                        }
-
-                        data['workspace'][cur_dashboard.pk] = {
-                            "url": cur_dashboard.get_absolute_url(),
-                            "name": '%s' % cur_dashboard.module_cls.name,
-                            "categories": OrderedDict()
-                        }
-                    if new_category:
-                        data['workspace'][cur_dashboard.pk]["categories"][cur_category.pk] = {
-                            "name": '%s' % cur_category.module_cls.name,
-                            "views": OrderedDict()
-                        }
-                        new_category = False
-                    data['workspace'][cur_dashboard.pk]["categories"][cur_category.pk]["views"][ws.pk] = {
-                        "name": '%s' % ws.module_cls.name,
-                        "url": ws.get_absolute_url(),
-                    }
-            cache.set(cache_key, data, cache_timeout)
-
-        # build current workspace
-        if isinstance(workspace, Workspace):
-            workspace = workspace.pk
-
-        db, cat = data['relations'].get(workspace, (None, None))
-        if cat:
-            view = data['workspace'][db]["categories"][cat]["views"][workspace]
-        else:
-            view = None
-
-        if not db:
-            return data["dashboards"], None, None, None, None
-        return data["dashboards"], data["workspace"][db], db, workspace, view
+            cache.set(cache_key, dashboards, self.bmf_cache_timeout)
+        return dashboards
 
     def update_notification(self, count=None):
         """
@@ -213,34 +219,70 @@ class ViewMixin(BaseMixin):
 
         session_data = self.read_session_data()
 
-        # load the current workspace
-        dashboards, workspace, db_active, ws_active, ws_view = self.update_workspace(
-            getattr(self, 'workspace', session_data.get('workspace', None))
-        )
+        # load dashboard
+        if hasattr(self, 'get_dashboard_view'):
+            current_dashboard = self.get_dashboard()
+            current_view = self.get_dashboard_view()
+        elif hasattr(self, 'get_dashboard'):
+            current_dashboard = self.get_dashboard()
+            current_view = None
+        else:
+            try:
+                current_dashboard = self.request.djangobmf_site.get_dashboard(session_data['active_dashboard'])
+            except KeyError:
+                current_dashboard = None
+            current_view = None
 
         # update session
-        if db_active and ws_active and session_data.get('dashboard') != db_active \
-                or db_active != ws_active and session_data.get('workspace') != ws_active:
-            logger.debug("Update session for %s: (dashboard %s->%s) (workspace %s->%s)" % (
-                self.request.user,
-                session_data.get('dashboard', None),
-                db_active,
-                session_data.get('workspace', None),
-                ws_active,
-            ))
-            session_data['dashboard'] = db_active
-            session_data['workspace'] = ws_active
+        if current_dashboard and current_dashboard.key != session_data['active_dashboard']:
+            session_data['active_dashboard'] = current_dashboard.key
             self.write_session_data(session_data)
+
+        dashboards = self.update_dashboards()
+
+        # collect data
+        sidebar = []
+        if current_dashboard:
+            for category in current_dashboard:
+                for view in category:
+                    try:
+                        url = dashboards[current_dashboard.key][category.key][view.key]
+                    except KeyError:
+                        continue
+                    sidebar.append({
+                        'category': category.name,
+                        'view': view,
+                        'url': url,
+                        'active': current_view == view,
+                    })
+
+        navigation_dashboard = []
+        for key in dashboards.keys():
+            obj = self.request.djangobmf_site.get_dashboard(key)
+            url = reverse(
+                'djangobmf:dashboard',
+                kwargs={
+                    'dashboard': key,
+                },
+            )
+            navigation_dashboard.append({
+                'name': obj.name,
+                'url': url,
+                'active': current_dashboard == obj,
+            })
 
         # update context with session data
         kwargs.update({
             'djangobmf': self.read_session_data(),
-            'bmfworkspace': {
-                'dashboards': dashboards,
-                'workspace': workspace,
-                'workspace_active': session_data.get('dashboard', None),
-                'dashboard_active': session_data.get('workspace', None),
-            },
+            'sidebar': sidebar,
+            'navigation_dashboard': navigation_dashboard,
+            'active_dashboard': current_dashboard,
+            'active_dashboard_view': current_view,
+            #   'bmfworkspace': {
+            #       'dashboards': dashboards,
+            #       'workspace': workspace,
+            #       'workspace_active': session_data.get('dashboard', None),
+            #   },
         })
 
         # always read current version, if in development mode
@@ -266,7 +308,7 @@ class AjaxMixin(BaseMixin):
         response_kwargs['content_type'] = 'application/json'
         return HttpResponse(data, **response_kwargs)
 
-    def get_ajax_context(self, context):
+    def get_ajax_context(self, context={}):
         return context
 
     def render_to_response(self, context, **response_kwargs):
@@ -278,9 +320,9 @@ class AjaxMixin(BaseMixin):
         return self.render_to_json_response(ctx)
 
     def render_valid_form(self, context):
-        ctx = self.get_ajax_context({
-            'status': 'valid',
-        })
+        ctx = {
+            'success': True,
+        }
         ctx.update(context)
         return self.render_to_json_response(ctx)
 
@@ -350,8 +392,10 @@ class ModuleUpdatePermissionMixin(object):
     """
 
     def check_permissions(self):
-        return self.get_object()._bmfworkflow._current_state.update \
-            and super(ModuleUpdatePermissionMixin, self).check_permissions()
+        if self.model._bmfmeta.workflow:
+            return self.get_object()._bmfmeta.workflow.object.update and \
+                super(ModuleUpdatePermissionMixin, self).check_permissions()
+        return super(ModuleUpdatePermissionMixin, self).check_permissions()
 
     def get_permissions(self, perms=[]):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -366,8 +410,10 @@ class ModuleDeletePermissionMixin(object):
     """
 
     def check_permissions(self):
-        return self.get_object()._bmfworkflow._current_state.delete \
-            and super(ModuleDeletePermissionMixin, self).check_permissions()
+        if self.model._bmfmeta.workflow:
+            return self.get_object()._bmfmeta.workflow.object.delete and \
+                super(ModuleDeletePermissionMixin, self).check_permissions()
+        return super(ModuleDeletePermissionMixin, self).check_permissions()
 
     def get_permissions(self, perms=[]):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -442,38 +488,50 @@ class ModuleBaseMixin(object):
                 # 'verbose_name': self.model._meta.verbose_name,  # unused
             },
         })
-        if hasattr(self, 'object') and self.object:
+        if self.model._bmfmeta.has_workflow and hasattr(self, 'object') and self.object:
             kwargs.update({
-                'bmfworkflow': {
-                    'enabled': bool(len(self.model._bmfworkflow._transitions)),
-                    'state': self.object._bmfworkflow._current_state,
-                    'transitions': self.object._bmfworkflow._from_here(self.object, self.request.user),
-                },
+                'bmfworkflow': self.object._bmfmeta.workflow,
+                'bmfworkflow_transitions': self.object._bmfmeta.workflow.transitions(self.request.user),
             })
         return super(ModuleBaseMixin, self).get_context_data(**kwargs)
 
 
 class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
     """
-    base mixin for update, clone and create views (ajax-forms)
-    and form-api
+    base mixin for update, clone, delete and create views (ajax-forms)
     """
 
     def get_ajax_context(self, context):
         ctx = {
+            # if an object is created or changed return the object's pk on success
             'object_pk': 0,
-            'status': 'ok',  # "ok" for normal html, "valid" for valid forms, "error" if an error occured
-            'html': '',
-            'message': '',
-            'redirect': '',
+
+            # on success set this to True
+            'success': False,
+
+            # reload page on success
+            'reload': False,
+
+            # OR redirect on success
+            'redirect': None,
+
+            # OR reload messages on success
+            'message': False,
+
+            # returned html
+            'html': None,
+
+            # return error messages
+            'errors': [],
         }
         ctx.update(context)
         return ctx
 
     def render_valid_form(self, context):
-        context.update({
-            'redirect': self.get_success_url(),
-        })
+        if 'redirect' not in context:
+            context.update({
+                'redirect': self.get_success_url(),
+            })
         return super(ModuleAjaxMixin, self).render_valid_form(context)
 
 
@@ -514,3 +572,98 @@ class ModuleSearchMixin(object):
             return "%s__search" % field_name[1:]
         else:
             return "%s__icontains" % field_name
+
+
+class ModuleActivityMixin(object):
+    """
+    Parse history to view (as a context variable)
+    """
+
+    def get_context_data(self, **kwargs):
+        ct = ContentType.objects.get_for_model(self.object)
+
+        try:
+            watch = Notification.objects.get(
+                user=self.request.user,
+                watch_ct=ct,
+                watch_id=self.object.pk
+            )
+            if watch.unread:
+                watch.unread = False
+                watch.save()
+            notification = watch
+            watching = watch.is_active()
+        except Notification.DoesNotExist:
+            notification = None
+            watching = False
+
+        kwargs.update({
+            'bmfactivity': {
+                'qs': Activity.objects.filter(parent_ct=ct, parent_id=self.object.pk),
+                'enabled': (self.model._bmfmeta.has_comments or self.model._bmfmeta.has_history),
+                'comments': self.model._bmfmeta.has_comments,
+                'log': self.model._bmfmeta.has_history,
+                'pk': self.object.pk,
+                'ct': ct.pk,
+                'notification': notification,
+                'watch': watching,
+                'log_data': None,
+                'comment_form': None,
+                'object_ct': ct,
+                'object_pk': self.object.pk,
+            },
+        })
+        if self.model._bmfmeta.has_history:
+            kwargs['bmfactivity']['log_data'] = Activity.objects.select_related('user') \
+                .filter(parent_ct=ct, parent_id=self.object.pk)
+        if self.model._bmfmeta.has_comments:
+            kwargs['bmfactivity']['comment_form'] = HistoryCommentForm()
+        return super(ModuleActivityMixin, self).get_context_data(**kwargs)
+
+
+class ModuleFilesMixin(object):
+    """
+    Parse files to view (as a context variable)
+    """
+
+    def get_context_data(self, **kwargs):
+        if self.model._bmfmeta.has_files:
+            ct = ContentType.objects.get_for_model(self.object)
+
+            kwargs.update({
+                'has_files': True,
+                'history_file_form': UploadDocument,
+                'files': Document.objects.filter(content_type=ct, content_id=self.object.pk),
+            })
+        return super(ModuleFilesMixin, self).get_context_data(**kwargs)
+
+
+class ModuleFormMixin(object):
+    """
+    make an BMF-Form
+    """
+    fields = None
+    exclude = []
+
+    def get_form_class(self, *args, **kwargs):
+        """
+        Returns the form class to use in this view.
+        """
+        if not self.form_class:
+            if self.model is not None:
+                # If a model has been explicitly provided, use it
+                model = self.model
+            elif hasattr(self, 'object') and self.object is not None:
+                # If this view is operating on a single object, use
+                # the class of that object
+                model = self.object.__class__
+            else:
+                # Try to get a queryset and extract the model class
+                # from that
+                model = self.get_queryset().model
+
+            if isinstance(self.fields, list):
+                self.form_class = modelform_factory(model, fields=self.fields)
+            else:
+                self.form_class = modelform_factory(model, exclude=self.exclude)
+        return self.form_class

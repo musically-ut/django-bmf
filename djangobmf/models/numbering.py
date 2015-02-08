@@ -44,6 +44,9 @@ class NumberCycle(models.Model):
     counter_start = models.PositiveIntegerField(null=True, blank=False, default=1)
     current_period = models.DateField(null=True, blank=False, default=now)
 
+    class Meta:
+        abstract = True
+
     def __str__(self):
         return self.name_template
 

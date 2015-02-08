@@ -183,7 +183,7 @@ class Wallet(object):
 
     def __bool__(self):
         for key, currency in self.items():
-            if currency:
+            if currency:  # pragma: no branch
                 return True
         return False
 

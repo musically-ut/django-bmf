@@ -6,12 +6,11 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.categories import BaseCategory
+from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Address
-
-from .views import AddressIndexView
 
 
 site.register_module(Address)
@@ -22,7 +21,14 @@ class AddressCategory(BaseCategory):
     slug = "address"
 
 
-site.register_dashboard(Sales)
-
-site.register_category(Sales, AddressCategory)
-site.register_view(Address, AddressCategory, AddressIndexView)
+site.register_dashboards(
+    Sales(
+        AddressCategory(
+            ViewFactory(
+                model=Address,
+                name=_("All Addresses"),
+                slug="all",
+            ),
+        ),
+    ),
+)

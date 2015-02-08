@@ -11,18 +11,7 @@ BASEDIR = os.path.dirname(env.real_fabfile)
 PYTHON = BASEDIR + "/virtenv/bin/python"
 DEVELOP = BASEDIR + "/develop.py"
 
-FIXTURES = (
-    'fixtures/sites.json',
-    'fixtures/users.json',
-    'fixtures/demodata.json',
-    'fixtures/contrib_accounting.json',
-    'fixtures/contrib_invoice.json',
-    'fixtures/contrib_project.json',
-    'fixtures/contrib_quotation.json',
-    'fixtures/contrib_task.json',
-    'fixtures/contrib_team.json',
-    'fixtures/admin_dashboard.json',
-)
+from djangobmf.demo import FIXTURES
 
 APPS = [
     'accounting',
@@ -83,6 +72,8 @@ def js():
             'js/menu.js',
         )
 
+        local('cp bower_components/jquery/dist/jquery.min.js djangobmf/static/djangobmf/js/')
+        local('cp bower_components/jquery/dist/jquery.min.map djangobmf/static/djangobmf/js/')
         local('cp bower_components/angular/angular.min.js djangobmf/static/djangobmf/js/')
         local('cp bower_components/angular/angular.min.js.map djangobmf/static/djangobmf/js/')
 

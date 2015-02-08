@@ -34,12 +34,12 @@ class ModuleTemplate(AppConfig):
 
     def ready(self):
         # if ready was already called
-        if hasattr(self, 'bmf_config'):
+        if hasattr(self, 'bmf_config'):  # pragma: no cover
             return True
 
         self.bmf_config = apps.get_app_config(self.bmf_label)
 
-        if not hasattr(self.bmf_config, 'site'):
+        if not hasattr(self.bmf_config, 'site'):  # pragma: no cover
             raise ImproperlyConfigured(
                 "Can not find a site attribute in %(cls)s. "
                 "Please import the BMF-Framework before you "
@@ -49,7 +49,7 @@ class ModuleTemplate(AppConfig):
             )
 
         # autodiscover bmf modules ============================================
-        if module_has_submodule(self.module, "bmf_module"):
+        if module_has_submodule(self.module, "bmf_module"):  # pragma: no branch
 
             # load instructions of bmf_module.py
             import_module('%s.%s' % (self.name, "bmf_module"))
@@ -94,21 +94,21 @@ class CurrencyTemplate(ModuleTemplate):
 def checks(app_configs, **kwargs):  # noqa
     errors = []
 
-    if not apps.is_installed('django.contrib.admin'):
+    if not apps.is_installed('django.contrib.admin'):  # pragma: no cover
         errors.append(Error(
             'django.contrib.admin not found',
             hint="Put 'django.contrib.admin' in your INSTALLED_APPS setting",
             id='djangobmf.E001',
         ))
 
-    if not apps.is_installed('django.contrib.contenttypes'):
+    if not apps.is_installed('django.contrib.contenttypes'):  # pragma: no cover
         errors.append(Error(
             'django.contrib.contenttypes not found',
             hint="Put 'django.contrib.contenttypes' in your INSTALLED_APPS setting",
             id='djangobmf.E002',
         ))
 
-    if 'django.contrib.auth.context_processors.auth' not in settings.TEMPLATE_CONTEXT_PROCESSORS:
+    if 'django.contrib.auth.context_processors.auth' not in settings.TEMPLATE_CONTEXT_PROCESSORS:  # pragma: no cover
         errors.append(Error(
             'django.contrib.auth.context_processors not found',
             hint="Put 'django.contrib.auth.context_processors' in your TEMPLATE_CONTEXT_PROCESSORS setting",

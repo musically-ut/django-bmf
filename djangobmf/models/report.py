@@ -58,6 +58,7 @@ class Report(models.Model):
         verbose_name = _('Report')
         verbose_name_plural = _('Reports')
         get_latest_by = "modified"
+        abstract = True
 
     def __str__(self):
         return '%s' % self.contenttype

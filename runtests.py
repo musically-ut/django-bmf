@@ -19,7 +19,6 @@ from djangobmf import currency as bmfcurrencies
 from djangobmf import reports as bmfreports
 
 from argparse import ArgumentParser
-from coverage import coverage
 from importlib import import_module
 from flake8.engine import get_style_guide
 
@@ -35,10 +34,21 @@ def main(modules, verbosity=2, failfast=False, contrib=None, nocontrib=False):
 
     # run flake8 first
     styleguide = get_style_guide(
-        parse_argv=False,
-        config_file="tox.ini",
+        # TODO: Check if we can read a config file
+        # parse_argv=False,
+        # config_file="setup.cfg",
+        ignore=["T000"],
         max_complexity=-1,
-        jobs='1',
+        doctests=False,
+        max_line_length=120,
+        exclude=[
+            '__pycache__',
+            '.git',
+            '.tox',
+            'virtenv',
+            '*egg',
+            'migrations',
+        ],
     )
     styleguide.options.report.start()
     styleguide.input_dir("djangobmf")

@@ -6,30 +6,18 @@ from __future__ import unicode_literals
 from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.http import HttpResponseRedirect
-from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
 
-from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleUpdateView
-from djangobmf.views import ModuleDetailView
-from djangobmf.viewmixins import ModuleViewMixin
+from djangobmf.views import ModuleViewMixin
 
 import re
 import datetime
 
-from .models import Position
 from .forms import PositionForm
 
-
-class AllPositionView(ModuleListView):
-    name = _("All Positions")
-    slug = "all"
-
-
-class OpenPositionView(ModuleListView):
-    name = _("Open Positions")
-    slug = "open"
+from .models import Position
 
 
 class PositionCreateView(ModuleCreateView):
@@ -46,10 +34,6 @@ class PositionCreateView(ModuleCreateView):
 
 
 class PositionUpdateView(ModuleUpdateView):
-    form_class = PositionForm
-
-
-class PositionDetailView(ModuleDetailView):
     form_class = PositionForm
 
 

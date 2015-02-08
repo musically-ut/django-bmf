@@ -2,15 +2,13 @@
 Model
 *****
 
-.. autoclass:: djangobmf.models.BMFSimpleModel
+.. autoclass:: djangobmf.models.BMFModelBase
    :members:
+   :show-inheritance:
 
 .. autoclass:: djangobmf.models.BMFModel
    :members:
    :show-inheritance:
-
-.. autoclass:: djangobmf.models.BMFMPTTModel
-   :members:
 
 
 How to setup an bmf-model

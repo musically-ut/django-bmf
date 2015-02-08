@@ -6,23 +6,30 @@ from __future__ import unicode_literals
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+# from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TransactionTestCase as DjangoTransactionTestCase
 from django.test import TestCase as DjangoTestCase
 from django.utils.translation import activate
 
+from djangobmf.demo import FIXTURES
+from djangobmf.settings import APP_LABEL
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.sites import site
 
+from collections import OrderedDict
+
 import json
+
+# from unittest import expectedFailure
 
 
 class BaseTestCase(object):
+
     def setUp(self):  # noqa
         site.activate(test=True)
         activate('en')
-
         super(BaseTestCase, self).setUp()
 
     def create_user(self, username, is_staff=False, is_superuser=False,
@@ -69,7 +76,204 @@ class BaseTestCase(object):
         self.client.login(username=username, password=username)
 
 
-class ModuleMixin(object):
+class DemoDataMixin(object):
+    """
+    Adds the demo data from the fixtures to the testcase
+    """
+    fixtures = FIXTURES
+
+
+class SuperuserMixin(object):
+    """
+    Adds a superuser to the clients and authenticates itself with this user
+    """
+
+    def setUp(self):  # noqa
+        super(SuperuserMixin, self).setUp()
+        self.user = self.create_user("superuser", is_superuser=True)
+        self.client_login("superuser")
+
+
+class ModuleTestFactory(SuperuserMixin, BaseTestCase):
+    """
+    Test generic module views within app-config ``app``
+
+    Currently detail, get and list views are tested.
+
+    The test includes only the template rendering of those classes. No
+    data is accessed or changed.
+    """
+
+    # the modules app config
+    app = None
+
+    def setUp(self):  # noqa
+        super(BaseTestCase, self).setUp()
+        self.user = self.create_user("superuser", is_superuser=True)
+        self.client_login("superuser")
+        self.appconf = [app for app in apps.get_app_configs() if isinstance(app, self.app)][0]
+        self.models = [m for m in self.appconf.get_models() if m in site.models.values()]
+
+    def test_module_create(self):
+        for model in self.models:
+
+            ns = model._bmfmeta.namespace_api
+
+            for key, slug, view in site.modules[model].list_creates():
+                url = reverse('%s:create' % ns, kwargs={
+                    'key': key,
+                })
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                self.assertEqual(response.status_code, 200)
+
+    def test_module_update(self):
+        for model in self.models:
+            ns = model._bmfmeta.namespace_api
+
+            for obj in model.objects.all():
+                url = reverse('%s:update' % ns, kwargs={
+                    'pk': obj.pk,
+                })
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                self.assertTrue(response.status_code in [200, 403])
+
+    def test_module_delete(self):
+        for model in self.models:
+            ns = model._bmfmeta.namespace_api
+
+            for obj in model.objects.all():
+                url = reverse('%s:delete' % ns, kwargs={
+                    'pk': obj.pk,
+                })
+                response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                self.assertTrue(response.status_code in [200, 403])
+
+    def test_module_detail(self):
+        for model in self.models:
+            for obj in model.objects.all():
+                response = self.client.get(obj.bmfmodule_detail())
+                self.assertEqual(response.status_code, 200)
+
+    def test_module_lists_and_gets(self):
+        views = []
+        for model in self.models:
+            for dashboard in site.dashboards:
+                for category in dashboard:
+                    for view in category:
+                        if view.model == model:
+                            views.append((model, view, dashboard.key, category.key, view.key))
+
+        for v in views:
+            url = reverse('%s:dashboard_view' % APP_LABEL, kwargs={
+                'dashboard': v[2],
+                'category': v[3],
+                'view': v[4],
+            })
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+
+            url = response.context['get_data_url']
+
+            response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            self.assertEqual(response.status_code, 200)
+
+    def prepare_workflow_test(self, workflow_cls):
+        workflow = workflow_cls()
+
+        states = list(workflow._states.keys())
+        states.remove(workflow._initial_state_key)
+        heap = [
+            (workflow._initial_state_key + '->' + key + '->' + transition.target)
+            for key, transition in workflow._from_here()
+        ]
+
+        heap.reverse()
+        objects = {workflow._initial_state_key: None}
+        transitions = OrderedDict()
+
+        while len(heap) > 0:
+            current = heap.pop()
+            obj, transition, target = current.split('->')
+            transitions[current] = {
+                'object': None,
+                'object_key': obj,
+                'state': obj.rsplit(':', 1)[-1],
+                'user': None,
+                'transition': transition,
+            }
+
+            if target in states:
+                workflow._set_state(target)
+                objects['%s:%s' % (obj, target)] = None
+                for key, transition in workflow._from_here():
+                    heap.insert(0, '%s:%s->%s->%s' % (
+                        obj,
+                        target,
+                        key,
+                        transition.target,
+                    ))
+                states.remove(target)
+
+        return transitions, objects
+
+    # this does not work, we need to copy the object instance
+    # otherwise the stored object is changed and the next loop fails
+    def auto_workflow_test(self, transitions, objects):
+        pass
+#       for key, trans in transitions.items():
+
+#           obj = trans['object'] or objects.get(trans['object_key'])
+
+#           if not obj:
+#               raise ImproperlyConfigured(
+#                   'No object given for transitions["%s"]' % key
+#               )
+
+#           if obj._bmfmeta.workflow.key != trans['state']:
+#               raise ImproperlyConfigured(
+#                   'Object "%s" is in the wrong state for transitions["%s"]' % (
+#                       obj,
+#                       key,
+#                   )
+#               )
+
+#           user = trans['user'] or self.user
+
+#           if not obj.pk:
+#               obj.save()
+
+#           oldpk = obj.pk
+#           obj.pk = None
+#           obj.save()
+#           newpk = obj.pk
+#           obj.pk = oldpk
+
+#           new_obj = obj.__class__.objects.get(pk=newpk)
+
+#           # use collector to copy related objects
+#           # from django.contrib.admin.utils import NestedObjects
+#           # collector = NestedObjects(using='default')
+#           # collector.collect([obj])
+#           # print(collector.nested())
+
+#           print('')
+#           print(obj.state, new_obj.pk)
+#           print(new_obj.state, new_obj.pk)
+#           print(trans['transition'])
+#           new_obj._bmfmeta.workflow.transition(trans['transition'], user, silent=True)
+#           print(new_obj.state, new_obj.pk)
+
+#           if trans['object_key']:
+#               new_key = '%s:%s' % (
+#                   trans['object_key'],
+#                   new_obj._bmfmeta.workflow.key
+#               )
+
+#               if not objects.get(new_key, None):
+#                   objects[new_key] = new_obj
+
+
+class ModuleMixin(SuperuserMixin):
     model = None
 
     def get_latest_object(self):

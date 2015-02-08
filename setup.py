@@ -46,7 +46,7 @@ setup(
         'pytz',
         'django-sekizai',
         'django-mptt',
-        'django-haystack',
+        # 'django-haystack',
         'markdown',
     ],
     include_package_data=True,

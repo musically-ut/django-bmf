@@ -57,6 +57,7 @@ class Configuration(models.Model):
         verbose_name = _('Configuration')
         verbose_name_plural = _('Configurations')
         default_permissions = ('change',)
+        abstract = True
 
     objects = ConfigurationManager()
 

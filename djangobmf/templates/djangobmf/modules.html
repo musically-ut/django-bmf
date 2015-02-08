@@ -8,15 +8,11 @@
 <div class="page-header">
 <h1>{% trans "Module overview" %}</h1>
 </div>
-{% regroup modules|dictsort:"category" by category as module_list %}
-{% for module in module_list %}
-<h2>{{ module.grouper }}</h2>
 <ul>
-  {% for item in module.list|dictsort:"name" %}
+  {% for item in modules|dictsort:"name" %}
   <li><a href="{{ item.url }}">{{ item.name }}</a></li>
+  {% empty %}
+  <li><p>{% trans "You don't have access to any modules" %}</p></li>
   {% endfor %}
 </ul>
-{% empty %}
-  <p>{% trans "You don't have access to any modules" %}</p>
-{% endfor %}
 {% endblock %}

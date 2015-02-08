@@ -7,9 +7,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.core.dashboard import Dashboard as BaseDashboard
 from djangobmf.core.category import Category as BaseCategory
+from djangobmf.core.view import View as ViewFactory
 
 
 __all__ = [
+    'ViewFactory',
     'BaseDashboard',
     'BaseCategory',
     'ProjectManagement',

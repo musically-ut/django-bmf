@@ -7,7 +7,9 @@ from django.db import models
 
 from djangobmf.models import BMFModel
 from djangobmf.fields import WorkflowField
-from djangobmf.workflows import Workflow, State, Transition
+from djangobmf.workflow import Workflow
+from djangobmf.workflow import State
+from djangobmf.workflow import Transition
 
 
 class TestWorkflow(Workflow):
@@ -20,7 +22,6 @@ class TestWorkflow(Workflow):
 
 
 class TestView(BMFModel):
-    state = WorkflowField()
     field = models.CharField(max_length=3)
     field_b = models.CharField(max_length=4, blank=True, null=True)
 
@@ -29,4 +30,3 @@ class TestView(BMFModel):
         has_comments = True
         observed_fields = ['field', ]
         workflow = TestWorkflow
-        workflow_field = 'state'

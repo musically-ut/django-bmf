@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
-from djangobmf.workflows import Workflow, State, Transition
+from djangobmf.workflow import Workflow, State, Transition
 
 
 def validate_condition(object, user):

@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(auto_now=True, null=True, verbose_name='Modified')),
                 ('created', models.DateTimeField(auto_now_add=True, null=True, verbose_name='Created')),
                 ('uuid', models.CharField(blank=True, db_index=True, editable=False, null=True, max_length=100, verbose_name='UUID')),
-                ('state', djangobmf.fields.WorkflowField(editable=False, null=True, blank=True, max_length=32, db_index=True)),
+                ('state', djangobmf.fields.OLDWorkflowField(editable=False, null=True, blank=True, max_length=32, db_index=True)),
                 ('quotation_number', models.CharField(null=True, max_length=255, verbose_name='Quotation number')),
                 ('net', models.FloatField(editable=False, blank=True, null=True)),
                 ('date', models.DateField(null=True, verbose_name='Date')),

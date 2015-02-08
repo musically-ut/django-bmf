@@ -12,17 +12,11 @@ from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.admin.sites import NotRegistered
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-from django.db.utils import OperationalError
-from django.db.utils import ProgrammingError
 
-from djangobmf.categories import BaseDashboard
-from djangobmf.categories import BaseCategory
 from djangobmf.core.module import Module
 from djangobmf.core.setting import Setting
 from djangobmf.models import NumberCycle
 from djangobmf.settings import APP_LABEL
-
-from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -41,7 +35,7 @@ class Site(object):
         self.clear()
 
     # TODO add some generic register function, which functions as a decorator and can be used on different objects
-    def register(self, *args, **kwargs):
+    def register(self, *args, **kwargs):  # pragma: no cover
         pass
 
     def clear(self):
@@ -60,8 +54,8 @@ class Site(object):
         # all reports should be stored here
         self.reports = {}
 
-        # all workspaces are stored here
-        self.workspace = OrderedDict()
+        # all dashboards are stored here
+        self.dashboards = []
 
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
@@ -74,7 +68,7 @@ class Site(object):
 
     def activate(self, test=False):
 
-        if self.is_active or not test:
+        if self.is_active or not test:  # pragma: no cover
             return True
 
         # ~~~~ numbercycles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,12 +76,12 @@ class Site(object):
         for model in self.numbercycles:
             ct = ContentType.objects.get_for_model(model)
             count = NumberCycle.objects.filter(ct=ct).count()
-            if not count:
+            if not count:  # pragma: no branch
                 obj = NumberCycle(ct=ct, name_template=model._bmfmeta.number_cycle)
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
 
-        # ~~~~ END ~ acticate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~ END ~ activate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.is_active = True
         return True
@@ -186,163 +180,25 @@ class Site(object):
     def register_numbercycle(self, model):
         self.numbercycles.append(model)
 
-    # --- workspace -----------------------------------------------------------
+    # --- dashboards ----------------------------------------------------------
 
-#   def register_workspace_views(self, app_config):
-#       # try:
-#       #     app_config.check_models_ready()
-#       # except AppRegistryNotReady:
-#       #     return False
+    def register_dashboards(self, *args):
+        for dashboard in args:
+            if dashboard in self.dashboards:
+                # merge
+                i = self.dashboards.index(dashboard)
+                self.dashboards[i].merge(dashboard)
+            else:
+                # append
+                self.dashboards.append(dashboard)
 
-#       if not hasattr(app_config, 'bmf_views'):
-#           return False
+    def get_dashboard(self, key):
+        data = [i for i in self.dashboards if i.key == key]
+        if len(data) == 1:
+            return data[0]
+        raise KeyError(key)
 
-#       for dashboard in app_config.bmf_views:
-#           self.register_dashboard(dashboard)
-
-#           for category in dashboard.data:
-#               self.register_category(dashboard, category)
-
-#   #           for key, viewdata in category.data.items():
-#   #               model = app_config.get_model(viewdata['model'])
-#   #               self.register_view(self, model, category, view, **kwargs)
-
-#   #     for dashboard in app_config.bmf_views:
-#   #         # create dictionary
-#   #         if dashboard.slug not in self.workspace:
-#   #             self.workspace[dashboard.slug] = OrderedDict()
-
-#   #         for category in dashboard.data:
-#   #             # create dictionary
-#   #             if category.slug not in self.workspace[dashboard.slug]:
-#   #                 self.workspace[dashboard.slug][category.slug] = OrderedDict()
-
-#   #             for key, viewdata in category.data.items():
-#   #                 # TODO add validation
-#   #                 model = app_config.get_model(viewdata['model'])
-
-#   #                 view_kwargs = {
-#   #                     'model': model,
-#   #                     'name': viewdata['name'],
-#   #                     'manager': viewdata.get('manager', None),
-#   #                     'template_name': viewdata.get('template_name', None),
-#   #                 }
-
-#   #                 self.workspace[dashboard.slug][category.slug][key] = {
-#   #                     'name': viewdata['name'],
-#   #                     'slug': key,
-#   #                     'kwargs': view_kwargs,
-#   #                 }
-
-#   # def get_workspace_urls(self):
-#   #     urlpatterns = patterns('')
-#   #     for slug1, dashboard in self.workspace.items():
-#   #         for slug2, category in dashboard.items():
-#   #             for slug3, view in category.items():
-#   #                 urlpatterns += patterns(
-#   #                     '',
-#   #                     url(
-#   #                         r'^%s/%s/%s/$' % (slug1, slug2, slug3),
-#   #                         ModuleListView(**view['kwargs']),
-#   #                     ),
-#   #                 )
-#   #     return urlpatterns
-
-    def register_dashboard(self, dashboard):
-
-        if isinstance(dashboard, BaseDashboard):
-            obj = dashboard
-        else:
-            obj = dashboard()
-
-        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-        workspace = apps.get_model(APP_LABEL, "Workspace")
-
-        try:
-            ws, created = workspace.objects.get_or_create(module=label, level=0)
-        except (OperationalError, ProgrammingError, ImproperlyConfigured):
-            logger.debug('Database not ready, skipping registration of Dashboard %s' % label)
-            return False
-
-        if created or ws.slug != obj.slug or ws.url != obj.slug:
-            ws.slug = obj.slug
-            ws.url = obj.slug
-            ws.editable = False
-            ws.save()
-            logger.debug('Dashboard %s registered' % label)
-
-        return True
-
-    def register_category(self, dashboard, category):
-
-        if isinstance(dashboard, BaseDashboard):
-            parent = dashboard
-        else:
-            parent = dashboard()
-
-        if isinstance(category, BaseCategory):
-            obj = category
-        else:
-            obj = category()
-
-        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-        parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
-        workspace = apps.get_model(APP_LABEL, "Workspace")
-
-        try:
-            parent_workspace = workspace.objects.get(module=parent_label)
-        except (OperationalError, ProgrammingError, ImproperlyConfigured):
-            logger.debug('Database not ready, skipping registration of Category %s' % label)
-            return False
-        except workspace.DoesNotExist:
-            logger.error('%s does not exist - skipping registration of Category %s' % (parent_label, label))
-            return False
-
-        ws, created = workspace.objects \
-            .select_related('parent') \
-            .get_or_create(module=label, parent=parent_workspace)
-
-        if created or ws.slug != obj.slug or ws.url != ws.get_url():
-            ws.slug = obj.slug
-            ws.editable = False
-            ws.update_url()
-            ws.save()
-            logger.debug('Category %s registered' % label)
-
-        return True
-
-    def register_view(self, model, category, view, **kwargs):
-
-        parent = category()
-        obj = view()
-        label = '%s.%s' % (obj.__module__, obj.__class__.__name__)
-        parent_label = '%s.%s' % (parent.__module__, parent.__class__.__name__)
-        workspace = apps.get_model(APP_LABEL, "Workspace")
-
-        try:
-            parent_workspace = workspace.objects.get(module=parent_label)
-        except (OperationalError, ProgrammingError, ImproperlyConfigured):
-            logger.debug('Database not ready, skipping registration of View %s' % label)
-            return False
-        except workspace.DoesNotExist:
-            logger.error('%s does not exist - skipping registration of View %s' % (parent_label, label))
-            return False
-
-        ct = ContentType.objects.get_for_model(model)
-
-        ws, created = workspace.objects \
-            .select_related('parent') \
-            .get_or_create(module=label, parent=parent_workspace)
-
-        if created or ws.slug != obj.slug or ws.url != ws.get_url() or ws.ct != ct:
-            ws.ct = ct
-            ws.slug = obj.slug
-            ws.editable = False
-            ws.update_url()
-            ws.save()
-            logger.debug('View %s registered' % label)
-
-        return True
+    # --- url generation ------------------------------------------------------
 
     # --- misc methods --------------------------------------------------------
 
@@ -359,13 +215,21 @@ class Site(object):
         return models
 
     def get_urls(self):
+
         from djangobmf.urls import urlpatterns
 
         self.activate()
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
-            ct = ContentType.objects.get_for_model(module)
+
+            try:
+                ct = ContentType.objects.get_for_model(module)
+            except RuntimeError:
+                # During the first migrate command, contenttypes are not ready
+                # and raise a Runtime error. We ignore that error and return
+                # an empty pattern - the urls are not needed during migrations.
+                return patterns('')
 
             # set the apis
             urlpatterns += patterns(
@@ -385,14 +249,5 @@ class Site(object):
                         include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
                     ),
                 )
-
-#       # build workspaces
-#       urlpatterns += patterns(
-#           '',
-#           url(
-#               r'^workspace',
-#               include((self.get_workspace_urls(), self.app_name, "workspace"))
-#           ),
-#       )
 
         return urlpatterns

@@ -20,8 +20,8 @@ from django.views.generic import UpdateView
 from djangobmf.models import Activity
 from djangobmf.models import Notification
 
-from djangobmf.viewmixins import ViewMixin
-from djangobmf.viewmixins import AjaxMixin
+from djangobmf.views.mixins import ViewMixin
+from djangobmf.views.mixins import AjaxMixin
 
 from djangobmf.settings import ACTIVITY_WORKFLOW
 from djangobmf.settings import ACTIVITY_COMMENT

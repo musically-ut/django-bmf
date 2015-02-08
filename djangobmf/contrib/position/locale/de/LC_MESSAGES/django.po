@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-27 14:10+0200\n"
-"PO-Revision-Date: 2014-09-27 14:08+0000\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
+"PO-Revision-Date: 2015-02-08 03:17+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -18,54 +18,54 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: bmf_module.py:35 models.py:93
+#: bmf_module.py:32 models.py:97
 msgid "Positions"
 msgstr "Positionen"
 
-#: models.py:46 templates/djangobmf_position/position_bmfindex.html:13
+#: bmf_module.py:41
+msgid "Open Positions"
+msgstr "Offene Positionen"
+
+#: bmf_module.py:47
+msgid "All positions"
+msgstr ""
+
+#: models.py:50 templates/djangobmf_position/position_bmflist.html:8
 msgid "Date"
 msgstr "Datum"
 
-#: models.py:47 templates/djangobmf_position/position_bmfindex.html:14
+#: models.py:51 templates/djangobmf_position/position_bmflist.html:9
 msgid "Name"
 msgstr "Name"
 
-#: models.py:57
+#: models.py:61
 msgid "Invoiceable"
 msgstr "Berechenbar"
 
-#: models.py:61
+#: models.py:65
 msgid "Price"
 msgstr "Preis"
 
-#: models.py:62
+#: models.py:66
 msgid "Amount"
 msgstr "Menge"
 
-#: models.py:63
+#: models.py:67
 msgid "Description"
 msgstr "Beschreibung"
 
-#: models.py:92
+#: models.py:96
 msgid "Position"
 msgstr "Position"
 
-#: templates/djangobmf_position/position_bmfindex.html:15
+#: templates/djangobmf_position/position_bmflist.html:10
 msgid "Product"
 msgstr "Produkt"
 
-#: templates/djangobmf_position/position_bmfindex.html:16
+#: templates/djangobmf_position/position_bmflist.html:11
 msgid "Project"
 msgstr "Projekt"
 
-#: templates/djangobmf_position/position_bmfindex.html:17
+#: templates/djangobmf_position/position_bmflist.html:12
 msgid "Employee"
 msgstr "Mitarbeiter"
-
-#: views.py:29
-msgid "All Positions"
-msgstr "Alle Positionen"
-
-#: views.py:35
-msgid "Open Positions"
-msgstr "Offene Positionen"

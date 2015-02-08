@@ -15,7 +15,6 @@ from djangobmf.settings import CONTRIB_INVOICE
 from djangobmf.settings import CONTRIB_PRODUCT
 from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.settings import CONTRIB_ADDRESS
-from djangobmf.fields import WorkflowField
 from djangobmf.numbering.utils import numbercycle_get_name, numbercycle_delete_object
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
@@ -26,11 +25,19 @@ from decimal import Decimal
 from .workflows import QuotationWorkflow
 
 
+class QuotationManager(models.Manager):
+
+    def open(self, request):
+        return self.get_queryset().filter(
+            # completed=False,
+            state__in=['draft', 'send', 'accepted'],
+        )
+
+
 @python_2_unicode_compatible
 class AbstractQuotation(BMFModel):
     """
     """
-    state = WorkflowField()
     invoice = models.OneToOneField(
         CONTRIB_INVOICE,
         null=True,
@@ -84,6 +91,8 @@ class AbstractQuotation(BMFModel):
     term_of_payment = models.TextField(_("Term of payment"), blank=True, null=True)
 
     completed = models.BooleanField(_("Completed"), default=False, editable=False)
+
+    objects = QuotationManager()
 
     def __init__(self, *args, **kwargs):
         super(AbstractQuotation, self).__init__(*args, **kwargs)
@@ -170,7 +179,6 @@ class AbstractQuotation(BMFModel):
         clean = True
         number_cycle = "Q{year}/{month}-{counter:04d}"
         workflow = QuotationWorkflow
-        workflow_field = 'state'
 
 
 class Quotation(AbstractQuotation):

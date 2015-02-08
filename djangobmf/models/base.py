@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import AppRegistryNotReady
 from django.db import models
 from django.db.models import signals
 from django.db.models.base import ModelBase
@@ -15,21 +15,22 @@ from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
 from djangobmf.fields import WorkflowField
-from djangobmf.models.activity import Activity
-from djangobmf.models.notification import Notification
-from djangobmf.signals import activity_workflow
-from djangobmf.workflows import DefaultWorkflow
+from djangobmf.settings import APP_LABEL
+from djangobmf.workflow import Workflow
 
 import types
 import inspect
-
-from mptt.managers import TreeManager
-from mptt.models import MPTTModelBase, MPTTModel
-
-APP_LABEL = "djangobmf"
+# import logging
+# logger = logging.getLogger(__name__)
 
 
 def add_signals(cls):
+    # TODO add model from app config
+    from djangobmf.models import Activity
+
+    # TODO add model from app config
+    from djangobmf.models import Notification
+
     # cleanup history and follows
     def post_delete(sender, instance, *args, **kwargs):
         Activity.objects.filter(
@@ -58,13 +59,12 @@ class BMFOptions(object):
 
       class MyModel(BMFModel):
         class BMFMeta:
-          category = 'mycategory'
+          workflow = MyWorkflow
     """
 
     def __init__(self, cls, meta, options=None):
 
         # overwriteable =========================================================
-        self.category = _("No category")
         self.has_logging = True
         self.has_comments = False
         self.has_files = False
@@ -74,17 +74,50 @@ class BMFOptions(object):
         self.observed_fields = []
         self.search_fields = []
         self.number_cycle = None
-        self.workflow = DefaultWorkflow
-        self.workflow_field = None
+
+        # workflow_cls
+
+        self.workflow_cls = getattr(
+            options, 'workflow', None
+        )
+
+        if self.workflow_cls and not issubclass(self.workflow_cls, Workflow):
+            raise ImproperlyConfigured(
+                "%s is not a Workflow in %s" % (
+                    self.workflow_cls.__name__,
+                    cls.__name__
+                )
+            )
+
+        # workflow_field_name
+        self.workflow_field_name = getattr(
+            options, 'workflow_field_name', 'state'
+        )
+
+        # shortcut to the instance workflow model
+        # is filled via a post_init signal (see below)
+        self.workflow = None
+
+        # determines if the model has an workflow
+        if self.workflow_cls and len(self.workflow_cls._transitions) > 0:
+            self.has_workflow = True
+        else:
+            self.has_workflow = False
 
         # protected =============================================================
+
         # used to detect changes
         self.changelog = {}
-        # set namespace of urls
+
+        # namespace detail
         self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+
+        # namespace api
         self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
+
         # is filles with keys if multiple create views are definied for this model (see sites.py)
         self.create_views = []
 
@@ -97,15 +130,12 @@ class BMFOptions(object):
         for key, value in options:
             # auto-set known options (no validation!)
             if key in [
-                'category',
                 'has_logging',
                 'has_comments',
                 'has_files',
                 'only_related',
                 'search_fields',
                 'number_cycle',
-                'workflow',
-                'workflow_field',
                 'clean',
                 'can_clone',
             ]:
@@ -122,17 +152,14 @@ class BMFOptions(object):
             self.has_logging = False
             self.can_clone = False
 
-        # determin if the model has an workflow
-        self.has_workflow = bool(self.workflow_field) and self.has_logging
-
-        # determin if the model detects changes
+        # determines if the model detects changes
         self.has_detectchanges = bool(self.observed_fields) and self.has_logging
 
-        # determin if the model can be watched by a user
+        # determines if the model can be watched by a user
         self.has_watchfunction = self.has_workflow or self.has_detectchanges \
             or self.has_comments or self.has_files
 
-        # determin if the model has an activity
+        # determines if the model has an activity
         self.has_activity = self.has_logging or self.has_comments or self.has_files
 
         self.has_history = self.has_logging  # TODO OLD REMOVE ME
@@ -178,22 +205,144 @@ class BMFModelBase(ModelBase):
                 ('addfile_' + cls._meta.model_name, u'Can add files to %s' % cls.__name__),
             )
 
-        # make workflow
-        cls._bmfworkflow = cls._bmfmeta.workflow()
+        # add field: workflow field
         if cls._bmfmeta.has_workflow:
             try:
-                if not isinstance(cls.__dict__[cls._bmfmeta.workflow_field].field, WorkflowField):
+                field = cls._meta.get_field(cls._bmfmeta.workflow_field_name)
+                if not isinstance(field, WorkflowField):
                     raise ImproperlyConfigured(
                         '%s is not a WorkflowField in %s' % (
-                            cls._bmfmeta.workflow_field, cls._meta.model.__class__.__name__
+                            cls._bmfmeta.workflow_field_name,
+                            cls.__name__
                         )
                     )
-            except KeyError:
-                raise ImproperlyConfigured(
-                    '%s is not a WorkflowField in %s' % (
-                        cls._bmfmeta.workflow_field, cls._meta.model.__class__.__name__
-                    )
-                )
+
+            except (models.FieldDoesNotExist, AppRegistryNotReady):
+                field = WorkflowField(workflow=cls._bmfmeta.workflow_cls)
+                field.contribute_to_class(cls, cls._bmfmeta.workflow_field_name)
+
+        # add field: modified
+        try:
+            cls._meta.get_field('modified')
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
+            field = models.DateTimeField(
+                _("Modified"),
+                auto_now=True,
+                editable=False,
+                null=True,
+                blank=False,
+            )
+            field.contribute_to_class(cls, 'modified')
+
+        # add field: created
+        try:
+            cls._meta.get_field('created')
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
+            field = models.DateTimeField(
+                _("Created"),
+                auto_now_add=True,
+                editable=False,
+                null=True,
+                blank=False,
+            )
+            field.contribute_to_class(cls, 'created')
+
+        # add field: modified by
+        try:
+            cls._meta.get_field('modified_by')
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
+            field = models.ForeignKey(
+                getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+                verbose_name=_("Modified by"),
+                null=True, blank=True, editable=False,
+                related_name="+", on_delete=models.SET_NULL
+            )
+            field.contribute_to_class(cls, 'modified_by')
+
+        # add field: created by
+        try:
+            cls._meta.get_field('created_by')
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
+            field = models.ForeignKey(
+                getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+                verbose_name=_("Created by"),
+                null=True, blank=True, editable=False,
+                related_name="+", on_delete=models.SET_NULL
+            )
+            field.contribute_to_class(cls, 'created_by')
+
+        # TODO add model from app config
+        try:
+            cls._meta.get_field('djangobmf_activity')
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
+            field = GenericRelation(
+                "djangobmf.Activity",
+                content_type_field='parent_ct',
+                object_id_field='parent_id',
+            )
+            field.contribute_to_class(cls, 'djangobmf_activity')
+
+        # TODO add model from app config
+        try:
+            cls._meta.get_field('djangobmf_notification')
+        except (models.FieldDoesNotExist, AppRegistryNotReady):
+            field = GenericRelation(
+                "djangobmf.Notification",
+                content_type_field='watch_ct',
+                object_id_field='watch_id',
+            )
+            field.contribute_to_class(cls, 'djangobmf_notification')
+
+        # classmethod: has_permissions
+        def has_permissions(cls, qs, user):
+            """
+            Overwrite this function to enable object bases permissions. It must return
+            a queryset.
+
+            Default: queryset
+            """
+            return qs
+
+        setattr(cls, 'has_permissions', classmethod(has_permissions))
+
+        # instancemethod: bmfget_project
+        def bmfget_project(self):
+            """
+            The result of this value is currently used by the document-management system
+            to connect the file uploaded to this model with a project instance
+
+            Default: None
+            """
+            return None
+
+        setattr(cls, 'bmfget_project', bmfget_project)
+
+        # instancemethod: bmfget_customer
+        def bmfget_customer(self):
+            """
+            The result of this value is currently used by the document-management system
+            to connect the file uploaded to this model with a customer instance
+
+            Default: None
+            """
+            return None
+
+        setattr(cls, 'bmfget_customer', bmfget_customer)
+
+        # instancemethod: bmfmodule_detail
+        def bmfmodule_detail(self):
+            """
+            A permalink to the default view of this model in the BMF-System
+            """
+            return ('%s:detail' % self._bmfmeta.namespace_detail, (), {"pk": self.pk})
+
+        setattr(cls, 'bmfmodule_detail', models.permalink(bmfmodule_detail))
+
+        # instancemethod: get_absolute_url
+        def get_absolute_url(self):
+            return self.bmfmodule_detail()
+
+        setattr(cls, 'get_absolute_url', get_absolute_url)
 
         if cls._bmfmeta.clean:
             if not hasattr(cls, 'bmf_clean') and not cls._meta.abstract:
@@ -201,6 +350,13 @@ class BMFModelBase(ModelBase):
 
         # add history signals for this model
         add_signals(cls)
+
+        if cls._bmfmeta.has_workflow:
+            def post_init(sender, instance, *args, **kwargs):
+                workflow = getattr(instance, instance._bmfmeta.workflow_field_name)
+                workflow.set_django_object(instance)
+                instance._bmfmeta.workflow = workflow
+            signals.post_init.connect(post_init, sender=cls, weak=False)
 
 #       # add signals from base-classes
 #       if hasattr(cls,'pre_save'):
@@ -236,113 +392,5 @@ class BMFModel(six.with_metaclass(BMFModelBase, models.Model)):
     """
     Base class for BMF models.
     """
-    modified = models.DateTimeField(_("Modified"), auto_now=True, editable=False, null=True, blank=False)
-    created = models.DateTimeField(_("Created"), auto_now_add=True, editable=False, null=True, blank=False)
-    modified_by = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
-        null=True, blank=True, editable=False,
-        related_name="+", on_delete=models.SET_NULL)
-    created_by = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
-        null=True, blank=True, editable=False,
-        related_name="+", on_delete=models.SET_NULL)
-    djangobmf_activity = GenericRelation(Activity, content_type_field='parent_ct', object_id_field='parent_id')
-    djangobmf_notification = GenericRelation(Notification, content_type_field='watch_ct', object_id_field='watch_id')
-
-    class Meta:
-        abstract = True
-
-    def __init__(self, *args, **kwargs):
-        super(BMFModel, self).__init__(*args, **kwargs)
-        # update the state of the workflow with object data
-        if self._bmfmeta.workflow_field:
-            if hasattr(self, self._bmfmeta.workflow_field):
-                self._bmfworkflow = self._bmfmeta.workflow(getattr(self, self._bmfmeta.workflow_field))
-                if getattr(self, self._bmfmeta.workflow_field) is None:
-                    # set default value in new objects
-                    setattr(
-                        self,
-                        self._bmfmeta.workflow_field,
-                        self._bmfworkflow._current_state_key
-                    )
-        if self.pk and len(self._bmfmeta.observed_fields) > 0:
-            self._bmfmeta.changelog = self._get_observed_values()
-
-    def _get_observed_values(self):
-        """
-        returns the values of every field in self._bmfmeta.observed_fields as a dictionary
-        """
-        return dict([(field, getattr(self, field)) for field in self._bmfmeta.observed_fields])
-
-    def bmfworkflow_transition(self, via, user):
-        """
-        executes the ``via`` transition of the workflow state.
-        """
-
-        transitions = dict(self._bmfworkflow._from_here())
-        if via not in transitions:
-            raise ValidationError(_("This transition is not valid"))
-
-        success_url = self._bmfworkflow._call(via, self, user)  # TODO remove me, if workflows use ajax
-        self.modified_by = user
-        self.save()
-
-        # generate a history object and signal
-        activity_workflow.send(sender=self.__class__, instance=self)
-
-        return success_url  # TODO remove me, if workflows use ajax
-
-    def get_workflow_state(self):
-        """
-        Returns the current state of the workflow attached to this model
-        """
-        return self._bmfworkflow._current_state
-
-    @classmethod
-    def has_permissions(cls, qs, user):  # DRAFT!!
-        """
-        Overwrite this function to enable object bases permissions. It must return
-        a queryset.
-
-        Default: queryset
-        """
-        return qs
-
-    def bmfget_project(self):
-        """
-        The result of this value is currently used by the document-management system
-        to connect the file uploaded to this model with a project instance
-
-        Default: None
-        """
-        return None
-
-    def bmfget_customer(self):
-        """
-        The result of this value is currently used by the document-management system
-        to connect the file uploaded to this model with a customer instance
-
-        Default: None
-        """
-        return None
-
-    @models.permalink
-    def bmfmodule_detail(self):
-        """
-        A permalink to the default view of this model in the BMF-System
-        """
-        return ('%s:detail' % self._bmfmeta.namespace_detail, (), {"pk": self.pk})
-
-    def get_absolute_url(self):
-        return self.bmfmodule_detail()
-
-
-class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
-    pass
-
-
-class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
-    objects = TreeManager()
-
     class Meta:
         abstract = True

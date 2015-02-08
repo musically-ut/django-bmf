@@ -15,8 +15,9 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.http import last_modified
 
 from djangobmf import get_version
-from djangobmf.dashboard.views import DashboardView
 from djangobmf.views import ModuleOverviewView
+from djangobmf.views.dashboard import DashboardView
+from djangobmf.views.dashboard import dashboard_view_factory
 
 
 @cache_page(86400, key_prefix='bmf-js18n-%s' % get_version())
@@ -39,13 +40,20 @@ urlpatterns = patterns(
     #   r'^api/module/' via sites
     url(r'^config/', include('djangobmf.configuration.urls')),
     #   r'^detail/' via sites
-    url(r'^dashboard/', include('djangobmf.dashboard.urls')),
+    url(
+        r'^dashboard/(?P<dashboard>[\w-]+)/$',
+        DashboardView.as_view(),
+        name="dashboard",
+    ),
+    url(
+        r'^dashboard/(?P<dashboard>[\w-]+)/(?P<category>[\w-]+)/(?P<view>[\w-]+)/$',
+        dashboard_view_factory,
+        name="dashboard_view",
+    ),
     url(r'^document/', include('djangobmf.document.urls')),
     url(r'^i18n/', i18n_javascript, name="jsi18n"),
     #  url(r'^messages/', include('djangobmf.message.urls')),
     url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),
     url(r'^notifications/', include('djangobmf.notification.urls')),
     url(r'^wizard/', include('djangobmf.wizard.urls')),
-    #   r'^workspace/' also via sites
-    url(r'^workspace/', include('djangobmf.workspace.urls')),
 )
