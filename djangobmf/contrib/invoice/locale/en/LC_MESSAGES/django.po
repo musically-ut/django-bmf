@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-15 06:07+0100\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,48 +17,56 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bmf_module.py:33 models.py:67
+#: bmf_module.py:31 models.py:74
 msgid "Invoices"
 msgstr ""
 
-#: models.py:41
+#: bmf_module.py:40
+msgid "Open invoices"
+msgstr ""
+
+#: bmf_module.py:46
+msgid "All invoices"
+msgstr ""
+
+#: models.py:47
 msgid "Invoice number"
 msgstr ""
 
-#: models.py:44
+#: models.py:50
 msgid "Date"
 msgstr ""
 
-#: models.py:66 templates/djangobmf_invoice/invoice_bmfdetail.html:4
+#: models.py:73 templates/djangobmf_invoice/invoice_bmfdetail.html:4
 #: templates/djangobmf_invoice/invoice_bmfdetail.html:7
 msgid "Invoice"
 msgstr ""
 
-#: models.py:89
+#: models.py:96
 msgid "Due"
 msgstr ""
 
-#: models.py:90 templates/djangobmf_invoice/invoice_bmfdetail.html:19
+#: models.py:97 templates/djangobmf_invoice/invoice_bmfdetail.html:19
 msgid "Notes"
 msgstr ""
 
-#: models.py:91 templates/djangobmf_invoice/invoice_bmfdetail.html:99
+#: models.py:98 templates/djangobmf_invoice/invoice_bmfdetail.html:99
 msgid "Term of payment"
 msgstr ""
 
-#: models.py:172 templates/djangobmf_invoice/invoice_bmfdetail.html:37
+#: models.py:179 templates/djangobmf_invoice/invoice_bmfdetail.html:37
 msgid "Name"
 msgstr ""
 
-#: models.py:177 templates/djangobmf_invoice/invoice_bmfdetail.html:38
+#: models.py:184 templates/djangobmf_invoice/invoice_bmfdetail.html:38
 msgid "Price"
 msgstr ""
 
-#: models.py:178 templates/djangobmf_invoice/invoice_bmfdetail.html:39
+#: models.py:185 templates/djangobmf_invoice/invoice_bmfdetail.html:39
 msgid "Amount"
 msgstr ""
 
-#: models.py:180
+#: models.py:187
 msgid "Description"
 msgstr ""
 
@@ -130,14 +138,6 @@ msgstr ""
 
 #: templates/djangobmf_invoice/invoice_htmlreport.html:81
 msgid "With kind regards"
-msgstr ""
-
-#: views.py:18
-msgid "All Invoices"
-msgstr ""
-
-#: views.py:24
-msgid "Open Invoices"
 msgstr ""
 
 #: workflows.py:14

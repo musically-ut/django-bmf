@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-bmf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-15 06:07+0100\n"
-"PO-Revision-Date: 2015-01-15 05:10+0000\n"
+"POT-Creation-Date: 2015-02-08 04:15+0100\n"
+"PO-Revision-Date: 2015-02-08 03:17+0000\n"
 "Last-Translator: Sebastian Braun <sebastian@elmnt.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-bmf/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -18,9 +18,21 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: bmf_module.py:36 models.py:156
+#: bmf_module.py:36 models.py:172
 msgid "Products"
 msgstr "Produkte"
+
+#: bmf_module.py:45
+msgid "Sellable products"
+msgstr ""
+
+#: bmf_module.py:51
+msgid "Purchaseable products"
+msgstr ""
+
+#: bmf_module.py:57
+msgid "All products"
+msgstr ""
 
 #: models.py:27
 msgid "Service"
@@ -34,42 +46,38 @@ msgstr "Hat eine Chargennummer"
 msgid "Has serial number"
 msgstr "Hat eine Seriennummer"
 
-#: models.py:47
+#: models.py:60
 msgid "Name"
 msgstr "Name"
 
-#: models.py:53
+#: models.py:66
 msgid "Product Code"
 msgstr ""
 
-#: models.py:60
+#: models.py:73
 msgid "Product type"
 msgstr ""
 
-#: models.py:67
+#: models.py:80
 msgid "Can be sold"
 msgstr ""
 
-#: models.py:70
+#: models.py:83
 msgid "Can be purchased"
 msgstr ""
 
-#: models.py:72
+#: models.py:85
 msgid "Description"
 msgstr "Beschreibung"
 
-#: models.py:77
+#: models.py:90
 msgid "Price"
 msgstr "Preis"
 
-#: models.py:155
+#: models.py:171
 msgid "Product"
 msgstr "Produkt"
 
-#: models.py:222
+#: models.py:238
 msgid "Is the tax included in the price?"
-msgstr ""
-
-#: views.py:18
-msgid "All Products"
 msgstr ""
