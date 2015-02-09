@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 
 # from django.conf.urls import patterns
 
+from djangobmf.sites import site
+
 from collections import OrderedDict
 
 from .category import Category
@@ -21,6 +23,7 @@ class Dashboard(object):
 
     def __init__(self, *args):
         self.data = OrderedDict()
+        self.modules = []
         for category in args:
             self.add_category(category)
 
@@ -61,6 +64,11 @@ class Dashboard(object):
         """
         Adds a category to the dashboard
         """
+        for model in category.models:
+            module = site.get_module(model)
+            if self not in module.dashboards:
+                module.dashboards.append(self)
+
         if category in self.data.values():
             self.data[category.key].merge(category)
         else:

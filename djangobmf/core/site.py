@@ -103,6 +103,9 @@ class Site(object):
             raise NotRegistered('The model %s is not registered' % module.__name__)
         del self.modules[module]
 
+    def get_module(self, module):
+        return self.modules[module]
+
     # --- currencies ----------------------------------------------------------
 
     def register_currency(self, currency):

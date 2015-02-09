@@ -32,7 +32,7 @@ class Module(object):
 
     def __init__(self, model, **options):
         self.model = model
-
+        self.dashboards = []
         self.create = options.get('create', ModuleCreateView)
         self.detail = options.get('detail', ModuleDetailView)
         self.update = options.get('update', ModuleUpdateView)

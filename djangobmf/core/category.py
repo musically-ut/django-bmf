@@ -19,6 +19,7 @@ class Category(object):
 
     def __init__(self, *args):
         self.data = OrderedDict()
+        self.models = []
 
         # the dashboards gets set during the registation
         self.dashboard = None  # auto
@@ -64,6 +65,8 @@ class Category(object):
         Adds a view to the category
         """
         if view not in self.data.values():
+            if view.model not in self.models:
+                self.models.append(view.model)
             self.data[view.key] = view
 
     def merge(self, other):
