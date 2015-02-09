@@ -16,8 +16,6 @@ from djangobmf.sites import site
 
 import json
 
-SETTING_KEY = "%s.%s"
-
 
 class ConfigurationView(ViewMixin, ListView):
     model = Configuration
@@ -28,7 +26,7 @@ class ConfigurationEdit(ViewMixin, FormView):
     template_name = "djangobmf/configuration/edit.html"
 
     def get_form_class(self):
-        key = SETTING_KEY % (self.kwargs['app_label'], self.kwargs['name'])
+        app_label = self.kwargs['app_label']
         name = self.kwargs['name']
 
         class ConfigForm(forms.Form):
@@ -37,8 +35,17 @@ class ConfigurationEdit(ViewMixin, FormView):
             """
             def __init__(self, *args, **kwargs):
                 super(ConfigForm, self).__init__(*args, **kwargs)
-                self.fields[name] = site.settings[key].field
+                self.fields[name] = site.get_setting_field(app_label, name)
         return ConfigForm
+
+    def get_form(self, *args, **kwargs):
+        form = super(ConfigurationEdit, self).get_form(*args, **kwargs)
+        # update initial data
+        form.fields[self.kwargs['name']].initial = Configuration.get_setting(
+            self.kwargs['app_label'],
+            self.kwargs['name'],
+        )
+        return form
 
     def form_valid(self, form, *args, **kwargs):
         obj, created = Configuration.objects.get_or_create(

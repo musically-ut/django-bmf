@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 
 from djangobmf.core.module import Module
+from djangobmf.models import Configuration
 from djangobmf.models import NumberCycle
 
 import logging
@@ -67,14 +68,17 @@ class Site(object):
             'currency': forms.CharField(
                 max_length=10,
                 required=True,
-                initial=None,
             ),
         })
 
     def activate(self, test=False):
+        # at this point the apps are NOT ready,
+        # but we can make database connections
 
-        if self.is_active or not test:  # pragma: no cover
+        if self.is_active and not test:  # pragma: no cover
             return True
+
+        logger.debug('Site activation started')
 
         # ~~~~ numbercycles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -86,9 +90,33 @@ class Site(object):
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
 
+        # ~~~~ settings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        register_settings = list(self.settings.keys())
+        for setting in Configuration.objects.all():
+            key = '.'.join((setting.app_label, setting.field_name))
+
+            if key in self.settings:
+                if not setting.active:
+                    setting.active = True
+                    setting.save()
+                register_settings.remove(key)
+
+            elif setting.active:
+                setting.active = False
+                setting.save()
+
+        if register_settings:
+            logger.debug('Need to register new settings')
+            for setting in register_settings:
+                app, name = setting.split('.', 1)
+                Configuration.objects.create(app_label=app, field_name=name)
+                logger.debug('Registered setting %s' % setting)
+
         # ~~~~ END ~ activate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.is_active = True
+        logger.debug('Site is now active')
         return True
 
     # --- modules -------------------------------------------------------------

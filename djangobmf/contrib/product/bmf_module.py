@@ -11,8 +11,6 @@ from djangobmf.categories import BaseCategory
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 
-from .apps import ProductConfig
-
 from .models import Product
 from .models import PRODUCT_SERVICE
 
@@ -26,8 +24,9 @@ site.register_module(Product, **{
 })
 
 
-site.register_settings(ProductConfig.label, {
+site.register_settings('bmfcontrib_product', {
     'default': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
+    'testasd': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
 })
 
 

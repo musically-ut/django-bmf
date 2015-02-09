@@ -262,7 +262,7 @@
  "fields": {
   "field_name": "customer",
   "value": "2",
-  "app_label": "bmfcontib_accounting"
+  "app_label": "bmfcontrib_accounting"
  },
  "model": "djangobmf.configuration",
  "pk": 4

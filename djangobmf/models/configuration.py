@@ -19,14 +19,14 @@ CACHE_KEY_TEMPLATE = 'bmfconfig.%s.%s'
 
 class ConfigurationManager(models.Manager):
 
-    def get_setting(self, app, name):
+    def get_setting(self, app, name, init_value=None):
         """
         Returns the current ``Configuration`` based on the app-label and
         the name of the setting. The ``Configuration`` object is cached in the
         bmf default cache connection (which should be shared throughout all instances)
         """
         # We need a database connection, and thus the apps to be ready
-        if not apps.ready:
+        if not apps.ready:  # pragma: no cover
             return None
 
         cache = caches[CACHE_DEFAULT_CONNECTION]
@@ -34,20 +34,23 @@ class ConfigurationManager(models.Manager):
         value = cache.get(key)
 
         if not value:
-            from djangobmf.sites import site
-
-            # check if the field exists
-            field = site.get_setting_field(app, name)
-
-            object, created = self.get_or_create(app_label=app, field_name=name)
-
-            if object.value:
+            if init_value:
                 value = json.loads(object.value)
+            else:
+                from djangobmf.sites import site
 
-            elif created:
-                object.value = json.dumps(field.initial)
-                object.save()
-                value = field.initial
+                # check if the field exists
+                field = site.get_setting_field(app, name)
+
+                object, created = self.get_or_create(app_label=app, field_name=name)
+
+                if object.value:
+                    value = json.loads(object.value)
+
+                elif created:
+                    object.value = json.dumps(field.initial)
+                    object.save()
+                    value = field.initial
 
             cache.set(key, value)
 
@@ -67,6 +70,7 @@ class Configuration(models.Model):
         _("Fieldname"), max_length=100, editable=False, null=True, blank=False,
     )
     value = models.TextField(_("Value"), null=True, blank=False)
+    active = models.BooleanField(_("Active"), null=False, default=True)
 
     objects = ConfigurationManager()
 
@@ -74,6 +78,7 @@ class Configuration(models.Model):
         verbose_name = _('Configuration')
         verbose_name_plural = _('Configurations')
         default_permissions = ('change',)
+        ordering = ["app_label", "field_name"]
         abstract = True
 
     def remove_cached_value(self):
