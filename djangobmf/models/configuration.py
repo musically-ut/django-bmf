@@ -34,22 +34,20 @@ class ConfigurationManager(models.Manager):
         value = cache.get(key)
 
         if not value:
+            from djangobmf.sites import site
+
+            # check if the field exists
+            field = site.get_setting_field(app, name)
+
             object, created = self.get_or_create(app_label=app, field_name=name)
 
-            if created:
-                from djangobmf.sites import site
-
-                try:
-                    field = site.get_setting_field(app, name)
-                except KeyError:
-                    object.delete()
-                    raise
-
-                object.value = json.dumps(field.initial)
-                value = field.initial
-
-            else:
+            if object.value:
                 value = json.loads(object.value)
+
+            elif created:
+                object.value = json.dumps(field.initial)
+                object.save()
+                value = field.initial
 
             cache.set(key, value)
 
