@@ -98,10 +98,8 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
 
 
 def get_default_currency():
-    # FIXME when settings are properly cached
-    return 'EUR'
-    from .sites import site
-    return site.get_lazy_setting('djangobmf', 'currency')
+    from djangobmf.models import Configuration
+    return Configuration.get_setting('djangobmf', 'currency')
 
 
 class MoneyProxy(object):

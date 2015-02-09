@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 from django import forms
-from django.apps import apps
 from django.conf.urls import include
 from django.conf.urls import patterns
 from django.conf.urls import url
@@ -14,13 +13,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 
 from djangobmf.core.module import Module
-from djangobmf.core.setting import Setting
 from djangobmf.models import NumberCycle
 
 import logging
 logger = logging.getLogger(__name__)
-
-SETTING_KEY = "%s.%s"
 
 
 class Site(object):
@@ -60,10 +56,19 @@ class Site(object):
         self.settings = {}
         self.settings_valid = False
         self.register_settings(self.app_name, {
-            'company_name': forms.CharField(max_length=100, required=True,),
-            'company_email': forms.EmailField(required=True,),
+            'company_name': forms.CharField(
+                max_length=100,
+                required=True,
+            ),
+            'company_email': forms.EmailField(
+                required=True,
+            ),
             # TODO add validation / use dropdown
-            'currency': forms.CharField(max_length=10, required=True,),
+            'currency': forms.CharField(
+                max_length=10,
+                required=True,
+                initial=None,
+            ),
         })
 
     def activate(self, test=False):
@@ -113,6 +118,10 @@ class Site(object):
             raise AlreadyRegistered('The currency %s is already registered' % currency.__name__)
         self.currencies[currency.iso] = currency
 
+        # set the first registered currency as the initial one
+        if len(self.currencies) == 1:
+            self.get_setting_field("djangobmf", "currency").initial = currency.iso
+
     def unregister_currency(self, currency):
         if currency.iso not in self.currencies:
             raise NotRegistered('The currency %s is not registered' % currency.__name__)
@@ -132,51 +141,25 @@ class Site(object):
 
     # --- settings ------------------------------------------------------------
 
-    # TODO move settings to cache backend!
     def register_settings(self, app_label, settings_dict):
-        pass
-        for setting_name, options in settings_dict.items():
-            self.register_setting(app_label, setting_name, options)
+        for setting_name, field in settings_dict.items():
+            self.register_setting(app_label, setting_name, field)
 
-    # TODO move settings to cache backend!
-    def register_setting(self, app_label, setting_name, options):
-        name = SETTING_KEY % (app_label, setting_name)
+    def register_setting(self, app_label, setting_name, field):
+        name = '.'.join([app_label, setting_name])
         if name in self.settings:
             raise AlreadyRegistered('The setting %s is already registered' % name)
-        self.settings[name] = Setting(app_label, setting_name, options)
+        self.settings[name] = field
 
-    # TODO move settings to cache backend!
     def unregister_setting(self, app_label, setting_name):
-        name = SETTING_KEY % (app_label, setting_name)
+        name = '.'.join([app_label, setting_name])
         if name not in self.settings:
             raise NotRegistered('The setting %s is not registered' % name)
         del self.settings[name]
 
-    # TODO move settings to cache backend!
-    def check_settings(self):
-        self.settings_valid = False
-        for key, setting in self.settings:
-            if not setting.value and setting.field.required:
-                self.settings_valid = False
-                return False
-        return True
-
-    # TODO move settings to cache backend!
-    def get_lazy_setting(self, app_label, setting_name):
-        """
-        will allways return None, if the django apps are not ready
-        """
-        if apps.ready:
-            return self.get_setting(app_label, setting_name)
-        return None
-
-    # TODO move settings to cache backend!
-    def get_setting(self, app_label, setting_name):
-        name = SETTING_KEY % (app_label, setting_name)
-        try:
-            return self.settings[name].value
-        except KeyError:
-            raise NotRegistered('The setting %s is not registered' % name)
+    def get_setting_field(self, app_label, setting_name):
+        name = '.'.join([app_label, setting_name])
+        return self.settings[name]
 
     # --- number cycle --------------------------------------------------------
 
