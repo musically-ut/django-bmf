@@ -13,6 +13,18 @@ Default: ``True``
 If enabled the Framework will use celery.
 
 
+.. setting:: BMF_CACHE_DEFAULT_CONNECTION
+
+BMF_CACHE_DEFAULT_CONNECTION
+-----------------------------
+
+Default: ``default``
+
+Django BMF uses a cache to save and read custom settings, like the default currency. Make sure to use a
+Cache-Backend which distributes the keys stored in it to every web and worker instance.
+
+By default we are using the djangos default cache backend.
+
 -------------------------
 Document Management
 -------------------------

@@ -1,29 +1,39 @@
-{% extends "djangobmf/base.html" %}
+{% extends "djangobmf/base_full.html" %}
 
 {% load i18n %}
 
 {% block title %}{% trans "Configuration" %}{% endblock %}
 
-{% block full_content %}
+{% block base_headline %}
+<div class="page-header">
+    <h1>{% trans "Configuration" %}</h1>
+</div>
+{% endblock %}
+
+{% block base_content %}
 
 <table class="table">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Value</th>
-            <th>Required</th>
-            <th>Changed</th>
+            <th>{% trans "Name" %}</th>
+            <th>{% trans "Name" %}</th>
+            <th>{% trans "Application" %}</th>
+            <th>{% trans "Value" %}</th>
+            <th>{% trans "Required" %}</th>
+            <th>{% trans "Changed" %}</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        {% for item, object in settings.items %}
+        {% for object in object_list %}
         <tr>
-            <td>{{ object.label }}</td>
-            <td>{{ object.value }}</td>
-            <td>{{ object.required }}</td>
-            <td>{{ object.changed }}</td>
-            <td><a href="{% url 'djangobmf:configuration' object.app_label object.name %}">edit</a></td>
+            <td>{{ object }}</td>
+            <td>{{ object.field.label }}</td>
+            <td></td>
+            <td>{{ object.field.value }}</td>
+            <td>{{ object.field.required }}</td>
+            <td>{{ object.field.changed }}</td>
+            <td><a href="{{ object.get_absolute_url }}">edit</a></td>
         </tr>
         {% endfor %}
     </tbody>

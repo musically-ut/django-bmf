@@ -6,36 +6,28 @@ from __future__ import unicode_literals
 from django import forms
 from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
-# from django.core import serializers
 from django.db import models
-from django.views.generic import TemplateView
+from django.views.generic import ListView
 from django.views.generic import FormView
 
 from djangobmf.views.mixins import ViewMixin
 from djangobmf.models import Configuration
+from djangobmf.sites import site
 
 import json
 
 SETTING_KEY = "%s.%s"
 
 
-class ConfigurationView(ViewMixin, TemplateView):
+class ConfigurationView(ViewMixin, ListView):
+    model = Configuration
     template_name = "djangobmf/configuration/index.html"
-
-    def get_context_data(self, **kwargs):
-        from djangobmf.sites import site
-        kwargs.update({
-            'settings': site.settings,
-        })
-        return super(ConfigurationView, self).get_context_data(**kwargs)
 
 
 class ConfigurationEdit(ViewMixin, FormView):
     template_name = "djangobmf/configuration/edit.html"
 
     def get_form_class(self):
-        from djangobmf.sites import site
-
         key = SETTING_KEY % (self.kwargs['app_label'], self.kwargs['name'])
         name = self.kwargs['name']
 

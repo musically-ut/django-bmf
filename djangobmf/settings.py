@@ -15,6 +15,7 @@ APP_LABEL = getattr(settings, 'BMF_APP_LABEL', 'djangobmf')
 
 USE_CELERY = getattr(settings, 'BMF_USE_CELERY', True)
 
+CACHE_DEFAULT_CONNECTION = getattr(settings, 'BMF_CACHE_DEFAULT_CONNECTION', 'default')
 
 # swappable contrib models
 
