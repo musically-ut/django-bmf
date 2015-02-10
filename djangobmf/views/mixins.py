@@ -278,11 +278,6 @@ class ViewMixin(BaseMixin):
             'navigation_dashboard': navigation_dashboard,
             'active_dashboard': current_dashboard,
             'active_dashboard_view': current_view,
-            #   'bmfworkspace': {
-            #       'dashboards': dashboards,
-            #       'workspace': workspace,
-            #       'workspace_active': session_data.get('dashboard', None),
-            #   },
         })
 
         # always read current version, if in development mode

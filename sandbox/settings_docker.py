@@ -3,18 +3,12 @@ from sandbox.settings_common import *
 # Django settings
 
 import os
+import sys
 
 INSTALLED_APPS += (
     'celery',
 )
 INSTALLED_APPS += TEST_PROJECT_APPS
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake-439478'
-    }
-}
 
 # BMF ==============================================================================
 
@@ -44,15 +38,19 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-INSTALLED_APPS += (
-    'debug_toolbar',
-)
-MIDDLEWARE_CLASSES += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
-DEBUG_TOOLBAR_CONFIG = {
-    'JQUERY_URL': None,
-}
+if 'runserver' in sys.argv:
+
+    INSTALLED_APPS += (
+        'debug_toolbar',
+    )
+    
+    MIDDLEWARE_CLASSES += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+    
+    DEBUG_TOOLBAR_CONFIG = {
+        'JQUERY_URL': None,
+    }
 
 try:
     from sandbox.settings_local import *

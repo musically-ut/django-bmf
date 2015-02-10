@@ -145,6 +145,15 @@ INSTALLED_APPS = (
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# CACHE ===========================================================================
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake-439478'
+    }
+}
+
 # LOGGING =========================================================================
 
 # A sample logging configuration. The only tangible logging

@@ -683,6 +683,11 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
     update the state of a workflow
     """
     context_object_name = 'object'
+    template_name_suffix = '_bmfworkflow'
+
+    def get_template_names(self):
+        return super(ModuleWorkflowView, self).get_template_names() \
+            + ["djangobmf/module_workflow.html"]
 
     def get_permissions(self, perms):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -692,19 +697,13 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
 
     def get(self, request, transition, *args, **kwargs):
         self.object = self.get_object()
-        success_url = self.object._bmfmeta.workflow.transition(transition, self.request.user)
 
-#       try:
-#           # TODO also change modelbase.py, when updating to use ajax
-#           success_url = self.object.bmfmodule_transition(transition, self.request.user)
-#       except ValidationError as e:
-#           # the objects gets checks with full_clean
-#           # if a validation error is raised, show an error page and don't save the object
-#           raise e
-#           return self.render_to_json_response({
-#               'html': 'VALIDATION_ERROR',
-#           })
-#       print('GET', success_url)
+        try:
+            success_url = self.object._bmfmeta.workflow.transition(transition, self.request.user)
+        except ValidationError as e:
+            return self.render_to_response({
+                'error': e,
+            })
 
         return self.render_valid_form({
             'message': True,

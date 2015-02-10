@@ -26,7 +26,6 @@ site.register_module(Product, **{
 
 site.register_settings('bmfcontrib_product', {
     'default': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
-    'testasd': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
 })
 
 
