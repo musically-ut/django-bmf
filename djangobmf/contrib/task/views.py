@@ -47,7 +47,11 @@ class GoalCloneView(ModuleCloneView):
                 task.completed = False
                 task.work_date = None
                 task.seconds_on = 0
-                setattr(task, task._bmfmeta.workflow_field, task._bmfmeta.workflow._default_state_key)
+                setattr(
+                    task,
+                    task._bmfmeta.workflow_field_name,
+                    task._bmfmeta.workflow.default
+                )
                 task.save()
 
 
