@@ -55,7 +55,6 @@ class Site(object):
 
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
-        self.settings_valid = False
         self.register_settings(self.app_name, {
             'company_name': forms.CharField(
                 max_length=100,

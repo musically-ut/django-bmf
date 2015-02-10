@@ -19,7 +19,7 @@ CACHE_KEY_TEMPLATE = 'bmfconfig.%s.%s'
 
 class ConfigurationManager(models.Manager):
 
-    def get_setting(self, app, name, init_value=None):
+    def get_setting(self, app, name):
         """
         Returns the current ``Configuration`` based on the app-label and
         the name of the setting. The ``Configuration`` object is cached in the
@@ -34,25 +34,22 @@ class ConfigurationManager(models.Manager):
         value = cache.get(key)
 
         if not value:
-            if init_value:
+            from djangobmf.sites import site
+
+            # check if the field exists
+            field = site.get_setting_field(app, name)
+
+            object, created = self.get_or_create(app_label=app, field_name=name)
+
+            if created:
+                object.value = json.dumps(field.initial)
+                object.save()
+                value = field.initial
+
+            elif object.value:
                 value = json.loads(object.value)
-            else:
-                from djangobmf.sites import site
 
-                # check if the field exists
-                field = site.get_setting_field(app, name)
-
-                object, created = self.get_or_create(app_label=app, field_name=name)
-
-                if object.value:
-                    value = json.loads(object.value)
-
-                elif created:
-                    object.value = json.dumps(field.initial)
-                    object.save()
-                    value = field.initial
-
-            cache.set(key, value)
+        cache.set(key, value)
 
         return value
 
