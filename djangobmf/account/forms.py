@@ -20,6 +20,7 @@ class BMFAuthenticationForm(AuthenticationForm):
         field = self.fields.get('password')
         field.widget = PasswordInput(attrs={'placeholder': _('Password'), 'class': 'form-control'})
 
+
 class BMFPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super(PasswordChangeForm, self).__init__(*args, **kwargs)

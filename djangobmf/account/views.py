@@ -57,6 +57,7 @@ class LoginView(FormView, NextMixin):
         self.request.session.set_test_cookie()
         return super(LoginView, self).get(request, *args, **kwargs)
 
+
 class PasswordChange(ViewMixin, FormView):
     template_name = 'djangobmf/account/change_password.html'
 
