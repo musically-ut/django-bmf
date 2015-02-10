@@ -17,20 +17,27 @@ from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
+from djangobmf.utils.testcases import WorkflowTestFactory
 
 
 class TaskFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = TaskConfig
 
-    def test_goal_workflow(self):
-        transitions, objects = self.prepare_workflow_test(GoalWorkflow)
-        objects['open'] = Goal(summary="Test")
-        self.auto_workflow_test(transitions, objects)
 
-    def test_task_workflow(self):
-        transitions, objects = self.prepare_workflow_test(TaskWorkflow)
-        objects['new'] = Task(summary="Test")
-        self.auto_workflow_test(transitions, objects)
+class GoalWorkflowFactory(WorkflowTestFactory, DemoDataMixin, TestCase):
+    workflow = GoalWorkflow
+
+    def test_goal_workflow_superuser(self):
+        self.objects['open'] = Goal(summary="Test")
+        self.auto_workflow_test()
+
+
+class TaskWorkflowFactory(WorkflowTestFactory, DemoDataMixin, TestCase):
+    workflow = TaskWorkflow
+
+    def test_task_workflow_superuser(self):
+        self.objects['new'] = Task(summary="Test")
+        self.auto_workflow_test()
 
 
 class TaskModuleTests(ModuleMixin, DemoDataMixin, TestCase):
@@ -176,16 +183,3 @@ class TaskModuleTests(ModuleMixin, DemoDataMixin, TestCase):
 
 #       r = self.client.get(reverse(namespace+':workflow', None, None, {'pk': goal1.pk, 'transition': 'complete'}))
 #       self.assertEqual(r.status_code, 200)
-
-
-# class TaskWorkflowTests(WorkflowTestCase):
-
-#     def test_goal_workflow(self):
-#         self.object = GoalFactory()
-#         workflow = self.workflow_build()
-#         workflow = self.workflow_autotest()
-#  
-#     def test_task_workflow(self):
-#         self.object = TaskFactory()
-#         workflow = self.workflow_build()
-#         workflow = self.workflow_autotest()

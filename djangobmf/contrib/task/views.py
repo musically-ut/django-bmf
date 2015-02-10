@@ -11,18 +11,7 @@ from .forms import GoalCloneForm
 
 
 class GoalGetView(ModuleGetView):
-    def get_item_data(self, data):
-        l = []
-        for d in data:
-            l.append({
-                'name': str(d),
-                'completed': d.completed,
-                'referee': str(d.referee),
-                'project': str(d.project),
-                'url': d.bmfmodule_detail(),
-                'states': d.get_states(),
-            })
-        return l
+    pass
 
 
 class TaskGetView(ModuleGetView):

@@ -6,7 +6,8 @@ from __future__ import unicode_literals
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-# from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TransactionTestCase as DjangoTransactionTestCase
@@ -177,8 +178,20 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
             response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
             self.assertEqual(response.status_code, 200)
 
-    def prepare_workflow_test(self, workflow_cls):
-        workflow = workflow_cls()
+
+class WorkflowTestFactory(SuperuserMixin, BaseTestCase):
+    """
+    """
+    workflow = None
+
+    def setUp(self):  # noqa
+        super(BaseTestCase, self).setUp()
+        self.user = self.create_user("superuser", is_superuser=True)
+        self.client_login("superuser")
+        self.prepare_workflow_test()
+
+    def prepare_workflow_test(self):
+        workflow = self.workflow()
 
         states = list(workflow._states.keys())
         states.remove(workflow._initial_state_key)
@@ -188,13 +201,13 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
         ]
 
         heap.reverse()
-        objects = {workflow._initial_state_key: None}
-        transitions = OrderedDict()
+        self.objects = {workflow._initial_state_key: None}
+        self.transitions = OrderedDict()
 
         while len(heap) > 0:
             current = heap.pop()
             obj, transition, target = current.split('->')
-            transitions[current] = {
+            self.transitions[current] = {
                 'object': None,
                 'object_key': obj,
                 'state': obj.rsplit(':', 1)[-1],
@@ -204,7 +217,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
 
             if target in states:
                 workflow._set_state(target)
-                objects['%s:%s' % (obj, target)] = None
+                self.objects['%s:%s' % (obj, target)] = None
                 for key, transition in workflow._from_here():
                     heap.insert(0, '%s:%s->%s->%s' % (
                         obj,
@@ -214,63 +227,68 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
                     ))
                 states.remove(target)
 
-        return transitions, objects
+    def get_object(self, key):
+        """
+        return a new object copied from the one saved in self.objects
+        """
 
-    # this does not work, we need to copy the object instance
-    # otherwise the stored object is changed and the next loop fails
-    def auto_workflow_test(self, transitions, objects):
-        pass
-#       for key, trans in transitions.items():
+        old = self.objects.get(key, None)
 
-#           obj = trans['object'] or objects.get(trans['object_key'])
+        if not old:
+            raise ImproperlyConfigured(
+                'No object given for key "%s"' % key
+            )
 
-#           if not obj:
-#               raise ImproperlyConfigured(
-#                   'No object given for transitions["%s"]' % key
-#               )
+        if not old.pk:
+            old.save()
 
-#           if obj._bmfmeta.workflow.key != trans['state']:
-#               raise ImproperlyConfigured(
-#                   'Object "%s" is in the wrong state for transitions["%s"]' % (
-#                       obj,
-#                       key,
-#                   )
-#               )
+#       # use collector to copy related objects
+#       # from django.contrib.admin.utils import NestedObjects
+#       # collector = NestedObjects(using='default')
+#       # collector.collect([obj])
+#       # print(collector.nested())
 
-#           user = trans['user'] or self.user
+        old.pk = None
+        old.save()
 
-#           if not obj.pk:
-#               obj.save()
+        new = old._default_manager.get(pk=old.pk)
 
-#           oldpk = obj.pk
-#           obj.pk = None
-#           obj.save()
-#           newpk = obj.pk
-#           obj.pk = oldpk
+        return new
 
-#           new_obj = obj.__class__.objects.get(pk=newpk)
+    def auto_workflow_test(self):
+        for key, trans in self.transitions.items():
 
-#           # use collector to copy related objects
-#           # from django.contrib.admin.utils import NestedObjects
-#           # collector = NestedObjects(using='default')
-#           # collector.collect([obj])
-#           # print(collector.nested())
+            obj = trans['object'] or self.get_object(trans['object_key'])
 
-#           print('')
-#           print(obj.state, new_obj.pk)
-#           print(new_obj.state, new_obj.pk)
-#           print(trans['transition'])
-#           new_obj._bmfmeta.workflow.transition(trans['transition'], user, silent=True)
-#           print(new_obj.state, new_obj.pk)
+            if obj._bmfmeta.workflow.key != trans['state']:
+                raise ImproperlyConfigured(
+                    'Object "%s" is in the wrong state for transitions["%s"]' % (
+                        obj,
+                        key,
+                    )
+                )
 
-#           if trans['object_key']:
-#               new_key = '%s:%s' % (
-#                   trans['object_key'],
-#                   new_obj._bmfmeta.workflow.key
-#               )
+            user = trans['user'] or self.user
 
-#               if not objects.get(new_key, None):
-#                   objects[new_key] = new_obj
+            try:
+                obj._bmfmeta.workflow.transition(trans['transition'], user, silent=True)
+            except ValidationError as e:
+                raise ImproperlyConfigured(
+                    'Object "%s" raised a Validation error for transitions["%s"]: %s' % (
+                        obj,
+                        key,
+                        e,
+                    )
+                )
+
+            if trans['object_key']:
+                new_key = '%s:%s' % (
+                    trans['object_key'],
+                    obj._bmfmeta.workflow.key
+                )
+
+                if not self.objects.get(new_key, None):
+                    self.objects[new_key] = obj
 
 
 class ModuleMixin(SuperuserMixin):
