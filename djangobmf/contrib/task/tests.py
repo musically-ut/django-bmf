@@ -33,41 +33,25 @@ class TaskFactory(ModuleTestFactory, DemoDataMixin, TestCase):
         self.auto_workflow_test(transitions, objects)
 
 
-class TaskModuleTests(ModuleMixin, TestCase):
+class TaskModuleTests(ModuleMixin, DemoDataMixin, TestCase):
 
     def test_goal_views(self):
         self.model = Goal
-#       data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
-#       data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
-#       # self.autotest_get('index', 200)
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
 
-#       obj = self.get_latest_object()
-#       a = '%s'%obj # check if object name has any errors
+        obj = self.get_latest_object()
+        a = '%s'%obj # check if object name has any errors
 
-#       self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
-#       data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
-#      #self.autotest_get('delete', status_code=403, kwargs={'pk': obj.pk})
-#      #self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'complete'})
-#      #self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'reopen'})
-#       self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'complete'})
-#       self.autotest_get('delete', kwargs={'pk': obj.pk})
-#       self.autotest_post('delete', status_code=302, kwargs={'pk': obj.pk})
+#       self.autotest_ajax_post('delete', kwargs={'pk': obj.pk}, data=None)
 
     def test_task_views(self):
         self.model = Task
-#       # self.autotest_get('index')
-#       data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
-#       data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
 
-#       obj = self.get_latest_object()
-#       a = '%s'%obj # check if object name has any errors
+        obj = self.get_latest_object()
+        a = '%s'%obj # check if object name has any errors
 
-#       self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
-#       data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
-#       self.autotest_get('delete', status_code=403, kwargs={'pk': obj.pk})
-#       self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'finish'})
-#       self.autotest_get('delete', kwargs={'pk': obj.pk})
-#       self.autotest_post('delete', status_code=302, kwargs={'pk': obj.pk})
+#       self.autotest_ajax_post('delete', kwargs={'pk': obj.pk}, data=None)
 
     def test_task_workflows(self):
         """
