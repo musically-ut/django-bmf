@@ -18,13 +18,13 @@ from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 
 from djangobmf import get_version
+from djangobmf.conf import settings as bmfsettings
 from djangobmf.decorators import login_required
 from djangobmf.document.forms import UploadDocument
 from djangobmf.notification.forms import HistoryCommentForm
 from djangobmf.models import Activity
 from djangobmf.models import Document
 from djangobmf.models import Notification
-from djangobmf.settings import APP_LABEL
 from djangobmf.utils.serializers import DjangoBMFEncoder
 from djangobmf.utils.user import user_add_bmf
 from djangobmf.views.defaults import bad_request
@@ -104,7 +104,7 @@ class BaseMixin(object):
 
         # === DJANGO BMF SITE OBJECT ======================================
 
-        self.request.djangobmf_site = apps.get_app_config(APP_LABEL).site
+        self.request.djangobmf_site = apps.get_app_config(bmfsettings.APP_LABEL).site
 
         # === EMPLOYEE AND TEAMS ==========================================
 

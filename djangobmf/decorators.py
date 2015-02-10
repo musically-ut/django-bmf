@@ -3,13 +3,15 @@
 
 from __future__ import unicode_literals
 
-from functools import wraps
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.utils.encoding import force_str
 from django.contrib.auth.views import redirect_to_login
-
 from django.shortcuts import resolve_url
 from django.utils.decorators import available_attrs
+from django.utils.encoding import force_str
+
+from djangobmf.conf import settings
+
+from functools import wraps
 
 
 def login_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME):
@@ -26,3 +28,16 @@ def login_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME):
             force_str(resolve_url('djangobmf:login')),
             redirect_field_name)
     return wrapped_view
+
+
+def optional_celery(func):
+    """
+    """
+    @wraps(func, assigned=available_attrs(func))
+    def wrapped_task(*args, **kwargs):
+        if settings.USE_CELERY:
+            from celery import shared_task
+            return shared_task(func).apply_async(args, kwargs)
+        else:
+            return func(*args, **kwargs)
+    return wrapped_task

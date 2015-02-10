@@ -3,15 +3,16 @@
 
 from __future__ import unicode_literals
 
-# from django.conf import settings
 from django.utils.timezone import now
 
+from djangobmf.decorators import optional_celery
 from djangobmf.utils.user import user_add_bmf
 
 import logging
 logger = logging.getLogger(__name__)
 
 
+@optional_celery
 def djangobmf_user_watch(pk):
     from djangobmf.models import Activity
     from djangobmf.models import Notification

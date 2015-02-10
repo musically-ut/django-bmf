@@ -7,13 +7,15 @@ from __future__ import unicode_literals
 overwrites bmf settings from django's settings
 """
 
+# TODO OLD FILE REMOVE ME
+
 from django.conf import settings
 from django.core.files.storage import get_storage_class  # TODO OLD
 
 
 APP_LABEL = getattr(settings, 'BMF_APP_LABEL', 'djangobmf')
 
-USE_CELERY = getattr(settings, 'BMF_USE_CELERY', True)
+USE_CELERY = getattr(settings, 'BMF_USE_CELERY', False)
 
 CACHE_DEFAULT_CONNECTION = getattr(settings, 'BMF_CACHE_DEFAULT_CONNECTION', 'default')
 
