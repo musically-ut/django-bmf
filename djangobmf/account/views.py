@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from django.contrib.auth import logout
 from django.contrib.auth import login
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic.base import TemplateView
@@ -13,8 +14,10 @@ from django.views.generic.edit import FormView
 
 from djangobmf.views.mixins import AjaxMixin
 from djangobmf.views.mixins import NextMixin
+from djangobmf.views.mixins import ViewMixin
 
 from .forms import BMFAuthenticationForm
+from .forms import BMFPasswordChangeForm
 
 
 class LogoutModal(AjaxMixin, TemplateView):
@@ -53,3 +56,20 @@ class LoginView(FormView, NextMixin):
     def get(self, request, *args, **kwargs):
         self.request.session.set_test_cookie()
         return super(LoginView, self).get(request, *args, **kwargs)
+
+class PasswordChange(ViewMixin, FormView):
+    template_name = 'djangobmf/account/change_password.html'
+
+    @method_decorator(never_cache)
+    def dispatch(self, *args, **kwargs):
+        return super(PasswordChange, self).dispatch(*args, **kwargs)
+
+    def get_form(self, *args, **kwargs):
+        return BMFPasswordChangeForm(user=self.request.user, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        # TODO add message
+        return super(PasswordChange, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('djangobmf:dashboard')
