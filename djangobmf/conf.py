@@ -24,11 +24,6 @@ class Settings(object):
     ACTIVITY_CREATED = "glyphicon-file"
     ACTIVITY_UNKNOWN = "glyphicon-question-sign"
 
-    def get_contrib(self, setting, model):
-        if not hasattr(djsettings, setting):
-            setattr(djsettings, setting, model)
-        return getattr(djsettings, setting)
-
     @property
     def APP_LABEL(self):  # noqa
         return getattr(djsettings, 'BMF_APP_LABEL', 'djangobmf')
@@ -43,66 +38,66 @@ class Settings(object):
 
     @property
     def CONTRIB_ACCOUNT(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_ACCOUNT', 'djangobmf_accounting.Account')
+        return getattr(djsettings, 'BMF_CONTRIB_ACCOUNT', 'djangobmf_accounting.Account')
 
     @property
     def CONTRIB_ADDRESS(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_ADDRESS', 'djangobmf_address.Address')
+        return getattr(djsettings, 'BMF_CONTRIB_ADDRESS', 'djangobmf_address.Address')
 
     @property
     def CONTRIB_CUSTOMER(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_CUSTOMER', 'djangobmf_customer.Customer')
+        return getattr(djsettings, 'BMF_CONTRIB_CUSTOMER', 'djangobmf_customer.Customer')
 
     @property
     def CONTRIB_EMPLOYEE(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_EMPLOYEE', 'djangobmf_employee.Employee')
+        return getattr(djsettings, 'BMF_CONTRIB_EMPLOYEE', 'djangobmf_employee.Employee')
 
     @property
     def CONTRIB_GOAL(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_GOAL', 'djangobmf_task.Goal')
+        return getattr(djsettings, 'BMF_CONTRIB_GOAL', 'djangobmf_task.Goal')
 
     @property
     def CONTRIB_INVOICE(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_INVOICE', 'djangobmf_invoice.Invoice')
+        return getattr(djsettings, 'BMF_CONTRIB_INVOICE', 'djangobmf_invoice.Invoice')
 
     @property
     def CONTRIB_TAX(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_TAX', 'djangobmf_taxing.Tax')
+        return getattr(djsettings, 'BMF_CONTRIB_TAX', 'djangobmf_taxing.Tax')
 
     @property
     def CONTRIB_TASK(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_TASK', 'djangobmf_task.Task')
+        return getattr(djsettings, 'BMF_CONTRIB_TASK', 'djangobmf_task.Task')
 
     @property
     def CONTRIB_TEAM(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_TEAM', 'djangobmf_team.Team')
+        return getattr(djsettings, 'BMF_CONTRIB_TEAM', 'djangobmf_team.Team')
 
     @property
     def CONTRIB_POSITION(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_POSITION', 'djangobmf_position.Position')
+        return getattr(djsettings, 'BMF_CONTRIB_POSITION', 'djangobmf_position.Position')
 
     @property
     def CONTRIB_PRODUCT(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_PRODUCT', 'djangobmf_product.Product')
+        return getattr(djsettings, 'BMF_CONTRIB_PRODUCT', 'djangobmf_product.Product')
 
     @property
     def CONTRIB_PROJECT(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_PROJECT', 'djangobmf_project.Project')
+        return getattr(djsettings, 'BMF_CONTRIB_PROJECT', 'djangobmf_project.Project')
 
     @property
     def CONTRIB_QUOTATION(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_QUOTATION', 'djangobmf_quotation.Quotation')
+        return getattr(djsettings, 'BMF_CONTRIB_QUOTATION', 'djangobmf_quotation.Quotation')
 
     @property
     def CONTRIB_TIMESHEET(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_TIMESHEET', 'djangobmf_timesheet.Timesheet')
+        return getattr(djsettings, 'BMF_CONTRIB_TIMESHEET', 'djangobmf_timesheet.Timesheet')
 
     @property
     def CONTRIB_TRANSACTION(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_TRANSACTION', 'djangobmf_accounting.Transaction')
+        return getattr(djsettings, 'BMF_CONTRIB_TRANSACTION', 'djangobmf_accounting.Transaction')
 
     @property
     def CONTRIB_TRANSACTIONITEM(self):  # noqa
-        return self.get_contrib('BMF_CONTRIB_TRANSACTIONITEM', 'djangobmf_accounting.TransactionItem')
+        return getattr(djsettings, 'BMF_CONTRIB_TRANSACTIONITEM', 'djangobmf_accounting.TransactionItem')
 
 settings = Settings()
