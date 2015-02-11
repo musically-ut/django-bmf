@@ -60,7 +60,7 @@ class TaskModuleTests(ModuleMixin, DemoDataMixin, TestCase):
 
 #       self.autotest_ajax_post('delete', kwargs={'pk': obj.pk}, data=None)
 
-    def test_goal_clone(self):
+    def test_goal_clone1(self):
         self.model = Goal
 
         obj = Goal(summary="test")
@@ -68,7 +68,39 @@ class TaskModuleTests(ModuleMixin, DemoDataMixin, TestCase):
         obj.task_set.create(summary="test1")
         obj.task_set.create(summary="test2")
         obj.task_set.create(summary="test3")
-        data = self.autotest_ajax_post('clone', kwargs={'pk': obj.pk}, data={'summary':'test'})
+        data = self.autotest_ajax_post(
+            'clone',
+            kwargs={'pk': obj.pk},
+            data={'summary':'test'},
+        )
+
+    def test_goal_clone2(self):
+        self.model = Goal
+
+        obj = Goal(summary="test")
+        obj.save()
+        obj.task_set.create(summary="test1")
+        obj.task_set.create(summary="test2")
+        obj.task_set.create(summary="test3")
+        data = self.autotest_ajax_post(
+            'clone',
+            kwargs={'pk': obj.pk},
+            data={'summary':'test', 'copy_tasks': True},
+        )
+
+    def test_goal_clone3(self):
+        self.model = Goal
+
+        obj = Goal(summary="test")
+        obj.save()
+        obj.task_set.create(summary="test1")
+        obj.task_set.create(summary="test2")
+        obj.task_set.create(summary="test3")
+        data = self.autotest_ajax_post(
+            'clone',
+            kwargs={'pk': obj.pk},
+            data={'summary':'test', 'copy_tasks': True, 'clear_employee': True},
+        )
 
     def test_task_workflows(self):
         """
