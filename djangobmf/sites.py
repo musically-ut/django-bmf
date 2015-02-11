@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 from django.apps import apps
 
-from djangobmf.settings import APP_LABEL
+from djangobmf.conf import settings
 
 
 # shortcut to the site instance to provide a simple
@@ -15,4 +15,4 @@ from djangobmf.settings import APP_LABEL
 # queries). Importing this to early leads to an exception
 # which is a feature and not a bug.
 if apps.apps_ready:
-    site = apps.get_app_config(APP_LABEL).site
+    site = apps.get_app_config(settings.APP_LABEL).site

@@ -12,13 +12,6 @@ overwrites bmf settings from django's settings
 from django.conf import settings
 from django.core.files.storage import get_storage_class  # TODO OLD
 
-
-APP_LABEL = getattr(settings, 'BMF_APP_LABEL', 'djangobmf')
-
-USE_CELERY = getattr(settings, 'BMF_USE_CELERY', False)
-
-CACHE_DEFAULT_CONNECTION = getattr(settings, 'BMF_CACHE_DEFAULT_CONNECTION', 'default')
-
 # swappable contrib models
 
 
@@ -45,15 +38,7 @@ CONTRIB_TIMESHEET = get_contrib('BMF_CONTRIB_TIMESHEET', 'djangobmf_timesheet.Ti
 CONTRIB_TRANSACTION = get_contrib('BMF_CONTRIB_TRANSACTION', 'djangobmf_accounting.Transaction')
 CONTRIB_TRANSACTIONITEM = get_contrib('BMF_CONTRIB_TRANSACTIONITEM', 'djangobmf_accounting.TransactionItem')
 
-# TEST CODE below this line ---------------------------------------------------
-
-REPORTING_SERVER = getattr(settings, 'BMF_REPORTING_SERVER', None)
-
-HAYSTACK_DEFAULT_CONNECTION = getattr(settings, 'BMF_HAYSTACK_DEFAULT_CONNECTION', 'default')
-
-
 # OLD below this line ---------------------------------------------------------
-
 
 # === activity symbols ========================================================
 
@@ -110,15 +95,3 @@ DOCUMENT_URL = CFG_STORAGE['OPTIONS']['base_url']
 STORAGE = get_storage_class(CFG_STORAGE['ENGINE'])
 STORAGE_OPTIONS = CFG_STORAGE['OPTIONS']
 STORAGE_STATIC_PREFIX = CFG_STORAGE['STATIC_PREFIX']
-
-DEMO_FIXTURES = [
-    'fixtures/sites.json',
-    'fixtures/users.json',
-    'fixtures/demodata.json',
-    'fixtures/contrib_accounting.json',
-    'fixtures/contrib_invoice.json',
-    'fixtures/contrib_project.json',
-    'fixtures/contrib_quotation.json',
-    'fixtures/contrib_task.json',
-    'fixtures/contrib_team.json',
-]

@@ -14,9 +14,8 @@ from django.test import TransactionTestCase as DjangoTransactionTestCase
 from django.test import TestCase as DjangoTestCase
 from django.utils.translation import activate
 
+from djangobmf.conf import settings
 from djangobmf.demo import FIXTURES
-from djangobmf.settings import APP_LABEL
-from djangobmf.settings import CONTRIB_EMPLOYEE
 from djangobmf.sites import site
 
 from collections import OrderedDict
@@ -58,7 +57,7 @@ class BaseTestCase(object):
 
         # create employee object for user
         try:
-            apps.get_model(CONTRIB_EMPLOYEE).objects.create(user=user_obj)
+            apps.get_model(settings.CONTRIB_EMPLOYEE).objects.create(user=user_obj)
         except LookupError:
             pass
 
@@ -165,7 +164,7 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
                             views.append((model, view, dashboard.key, category.key, view.key))
 
         for v in views:
-            url = reverse('%s:dashboard_view' % APP_LABEL, kwargs={
+            url = reverse('%s:dashboard_view' % settings.APP_LABEL, kwargs={
                 'dashboard': v[2],
                 'category': v[3],
                 'view': v[4],

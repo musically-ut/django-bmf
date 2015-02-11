@@ -9,7 +9,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.settings import CACHE_DEFAULT_CONNECTION
+from djangobmf.conf import settings
 
 import json
 
@@ -29,7 +29,7 @@ class ConfigurationManager(models.Manager):
         if not apps.ready:  # pragma: no cover
             return None
 
-        cache = caches[CACHE_DEFAULT_CONNECTION]
+        cache = caches[settings.CACHE_DEFAULT_CONNECTION]
         key = CACHE_KEY_TEMPLATE % (app, name)
         value = cache.get(key)
 
@@ -82,7 +82,7 @@ class Configuration(models.Model):
         """
         removes the cache key to ensure it is reloaded if needed
         """
-        cache = caches[CACHE_DEFAULT_CONNECTION]
+        cache = caches[settings.CACHE_DEFAULT_CONNECTION]
         key = CACHE_KEY_TEMPLATE % (self.app_label, self.field_name)
         cache.delete(key)
 
@@ -112,5 +112,5 @@ class Configuration(models.Model):
 
 #   def clear_cache(self):
 #       """Clears the ``Configuration`` object cache."""
-#       cache = caches[CACHE_DEFAULT_CONNECTION]
+#       cache = caches[settings.CACHE_DEFAULT_CONNECTION]
 #       cache.clear()

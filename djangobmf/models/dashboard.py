@@ -8,8 +8,6 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 # from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.core import site_lazy
-
 
 @python_2_unicode_compatible
 class Dashboard(models.Model):
@@ -33,7 +31,8 @@ class Dashboard(models.Model):
         return not bool(self.key)
 
     def has_view(self):
-        return self.key in [i.key for i in getattr(site_lazy(), 'dashboards', [])]
+        from djangobmf.sites import site
+        return self.key in [i.key for i in getattr(site, 'dashboards', [])]
 
     class Meta:
         abstract = True

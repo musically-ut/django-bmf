@@ -17,6 +17,13 @@ class Settings(object):
     with variable settings
     """
 
+    ACTIVITY_WORKFLOW = "glyphicon-random"
+    ACTIVITY_COMMENT = "glyphicon-comment"
+    ACTIVITY_UPDATED = "glyphicon-pencil"
+    ACTIVITY_FILE = "glyphicon-paperclip"
+    ACTIVITY_CREATED = "glyphicon-file"
+    ACTIVITY_UNKNOWN = "glyphicon-question-sign"
+
     def get_contrib(self, setting, model):
         if not hasattr(djsettings, setting):
             setattr(djsettings, setting, model)
@@ -29,6 +36,10 @@ class Settings(object):
     @property
     def USE_CELERY(self):  # noqa
         return getattr(djsettings, 'BMF_USE_CELERY', False)
+
+    @property
+    def CACHE_DEFAULT_CONNECTION(self):  # noqa
+        return getattr(djsettings, 'BMF_CACHE_DEFAULT_CONNECTION', 'default')
 
     @property
     def CONTRIB_ACCOUNT(self):  # noqa

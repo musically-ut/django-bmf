@@ -14,8 +14,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.fields import GenericRelation
 
+from djangobmf.conf import settings as bmfsettings
 from djangobmf.fields import WorkflowField
-from djangobmf.settings import APP_LABEL
 from djangobmf.workflow import Workflow
 
 import types
@@ -110,10 +110,10 @@ class BMFOptions(object):
         self.changelog = {}
 
         # namespace detail
-        self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_detail = '%s:detail_%s_%s' % (bmfsettings.APP_LABEL, meta.app_label, meta.model_name)
 
         # namespace api
-        self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_api = '%s:moduleapi_%s_%s' % (bmfsettings.APP_LABEL, meta.app_label, meta.model_name)
 
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False

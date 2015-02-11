@@ -1,7 +1,11 @@
+#!/usr/bin/python
+# ex:set fileencoding=utf-8:
+
+from __future__ import unicode_literals
+
 from django.apps import apps
 
-from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.settings import CONTRIB_TEAM
+from djangobmf.conf import settings
 
 
 def user_add_bmf(user):
@@ -12,7 +16,7 @@ def user_add_bmf(user):
 
     if not hasattr(user, 'djangobmf_employee'):
         try:
-            employee = apps.get_model(CONTRIB_EMPLOYEE)
+            employee = apps.get_model(settings.CONTRIB_EMPLOYEE)
             try:
                 setattr(
                     user,
@@ -30,7 +34,7 @@ def user_add_bmf(user):
 
     if not hasattr(user, 'djangobmf_teams'):
         try:
-            teams = apps.get_model(CONTRIB_TEAM)
+            teams = apps.get_model(settings.CONTRIB_TEAM)
             setattr(
                 user,
                 'djangobmf_teams',

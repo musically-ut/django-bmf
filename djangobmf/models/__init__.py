@@ -8,8 +8,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import signals
 from django.dispatch import receiver
 
+from djangobmf.conf import settings
 from djangobmf.core.serializer import Serializer
-from djangobmf.settings import APP_LABEL
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 from djangobmf.signals import activity_addfile
@@ -58,43 +58,43 @@ __all__ = (
 class Activity(AbstractActivity):
     class Meta(AbstractActivity.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 class Configuration(AbstractConfiguration):
     class Meta(AbstractConfiguration.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 class Dashboard(AbstractDashboard):
     class Meta(AbstractDashboard.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 class Document(AbstractDocument):
     class Meta(AbstractDocument.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 class Notification(AbstractNotification):
     class Meta(AbstractNotification.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 class NumberCycle(AbstractNumberCycle):
     class Meta(AbstractNumberCycle.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 class Report(AbstractReport):
     class Meta(AbstractReport.Meta):
         abstract = False
-        app_label = APP_LABEL
+        app_label = settings.APP_LABEL
 
 
 @receiver(activity_create)
