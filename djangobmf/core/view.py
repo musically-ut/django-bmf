@@ -23,4 +23,5 @@ class View(object):
         self.dashboard = None  # auto
         self.key = slug
         self.view = view or ModuleListView
+        self.manager = kwargs.get('manager', None)
         self.kwargs = kwargs

@@ -43,6 +43,7 @@ class Module(object):
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
+        self.manager = {}
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -119,7 +120,18 @@ class Module(object):
             ),
             url(
                 r'^get/$',
-                self.get.as_view(model=self.model, serializer=self.serializer),
+                self.get.as_view(
+                    model=self.model,
+                    serializer=self.serializer,
+                ),
+                name='get',
+            ),
+            url(
+                r'^get/(?P<manager>\w+)/$',
+                self.get.as_view(
+                    model=self.model,
+                    serializer=self.serializer,
+                ),
                 name='get',
             ),
             url(

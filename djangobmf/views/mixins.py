@@ -427,7 +427,7 @@ class ModuleBaseMixin(object):
         Return the list of items for this view.
         `QuerySet` in which case `QuerySet` specific behavior will be enabled.
         """
-        if self.model and manager and hasattr(self.model._default_manager, manager):
+        if self.model and manager and manager != "all" and hasattr(self.model._default_manager, manager):
             qs = getattr(self.model._default_manager, manager)(self.request)
         elif self.model is not None:
             qs = self.model._default_manager.all()
@@ -438,24 +438,6 @@ class ModuleBaseMixin(object):
                     'cls': self.__class__.__name__
                 }
             )
-
-#       return qs
-
-#   def get_queryset(self):
-#       if self.queryset is not None:
-#           queryset = self.queryset
-#           if isinstance(queryset, QuerySet):
-#               queryset = queryset.all()
-#       elif self.model is not None:
-#           queryset = self.model._default_manager.all()
-#       else:
-#           raise ImproperlyConfigured(
-#               "%(cls)s is missing a QuerySet. Define "
-#               "%(cls)s.model, %(cls)s.queryset, or override "
-#               "%(cls)s.get_queryset()." % {
-#                   'cls': self.__class__.__name__
-#               }
-#           )
 
         # load employee and team data into user
         user_add_bmf(self.request.user)

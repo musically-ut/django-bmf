@@ -134,7 +134,10 @@ class ModuleListView(
             return self.model._meta.verbose_name_plural
 
     def get_data_url(self):
-        url = reverse('%s:get' % self.model._bmfmeta.namespace_api)
+        url = reverse(
+            '%s:get' % self.model._bmfmeta.namespace_api,
+            kwargs={'manager': getattr(self, 'manager', None)}
+        )
         args = {}
 
         page = self.request.GET.get('page')
@@ -144,9 +147,6 @@ class ModuleListView(
                 args['page'] = int(page)
             except ValueError:
                 pass
-
-        if self.manager:
-            args['manager'] = self.manager
 
         if not self.paginate:
             args['paginate'] = 'no'
@@ -392,7 +392,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         """
         return self.serializer(self.model, data).serialize()
 
-    def get(self, request):
+    def get(self, request, manager=None):
         pk = int(self.request.GET.get('pk', 0))
 
         # activate pagination
@@ -401,7 +401,7 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         search = self.request.GET.get('search', None)
         page = self.request.GET.get('page', 1)
 
-        queryset = self.get_queryset(self.request.GET.get('manager', None))
+        queryset = self.get_queryset(manager)
 
         # select only models connected to a related model
         # defined by the models contenttype and pk
