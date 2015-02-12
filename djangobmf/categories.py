@@ -9,9 +9,12 @@ from djangobmf.core.dashboard import Dashboard as BaseDashboard
 from djangobmf.core.category import Category as BaseCategory
 from djangobmf.core.view import View as ViewFactory
 
+from djangobmf.sites import Dashboard
+
 
 __all__ = [
     'ViewFactory',
+    'Dashboard',
     'BaseDashboard',
     'BaseCategory',
     'ProjectManagement',
@@ -27,41 +30,41 @@ __all__ = [
 # --- Predefined Dashboards ---------------------------------------------------
 
 
-class ProjectManagement(BaseDashboard):
+class ProjectManagement(Dashboard):
     name = _('Project Management')
     slug = "projects"
 
 
-class DocumentManagement(BaseDashboard):
+class DocumentManagement(Dashboard):
     name = _('Document Management')
     slug = "dms"
 
 
-class Sales(BaseDashboard):
+class Sales(Dashboard):
     name = _('Sales')
     slug = "sales"
 
 
-class HumanResources(BaseDashboard):
+class HumanResources(Dashboard):
     name = _('Human Resources')
     slug = "hr"
 
 
-class CustomerRelationship(BaseDashboard):
+class CustomerRelationship(Dashboard):
     name = _('Customer Relationship')
     slug = "cr"
 
 
-class Accounting(BaseDashboard):
+class Accounting(Dashboard):
     name = _('Accounting')
     slug = "accounting"
 
 
-class Warehouse(BaseDashboard):
+class Warehouse(Dashboard):
     name = _('Warehouse')
     slug = "warehouse"
 
 
-class TimeAndAttendance(BaseDashboard):
+class TimeAndAttendance(Dashboard):
     name = _('Time and attendance')
     slug = "attendance"

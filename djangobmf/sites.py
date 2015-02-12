@@ -6,6 +6,18 @@ from __future__ import unicode_literals
 from django.apps import apps
 
 from djangobmf.conf import settings
+from djangobmf.core.category import Category
+from djangobmf.core.dashboard import Dashboard
+from djangobmf.core.module import Module
+
+
+__all__ = [
+    'Category',
+    'Dashboard',
+    'Module',
+    'register',
+    'site',
+]
 
 
 # shortcut to the site instance to provide a simple
@@ -16,3 +28,16 @@ from djangobmf.conf import settings
 # which is a feature and not a bug.
 if apps.apps_ready:
     site = apps.get_app_config(settings.APP_LABEL).site
+
+    class register(object):  # noqa
+        def __init__(self, cls=None, **kwargs):
+            self.kwargs = kwargs
+            if cls:
+                self.register_generic(cls)
+
+        def __call__(self, cls):
+            self.register_generic(cls)
+
+        def register_generic(self, cls):
+            pass
+            # print(site, cls, self.kwargs)

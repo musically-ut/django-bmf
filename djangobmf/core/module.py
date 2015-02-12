@@ -3,10 +3,11 @@
 
 from __future__ import unicode_literals
 
-# from django.conf.urls import include
+from django.core.exceptions import ImproperlyConfigured
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.utils import six
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.text import slugify
 
 from djangobmf.core.serializer import Serializer
@@ -25,7 +26,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Module(object):
+class ModuleMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        super_new = super(ModuleMetaclass, cls).__new__
+        parents = [
+            b for b in bases if
+            isinstance(b, ModuleMetaclass)
+            and not (b.__name__ == 'NewBase' and b.__mro__ == (b, object))
+        ]
+        if not parents:
+            return super_new(cls, name, bases, attrs)
+
+        # Create the class.
+        new_cls = super_new(cls, name, bases, attrs)
+
+        # validation
+        if not hasattr(new_cls, 'model'):
+            raise ImproperlyConfigured('No model defined in %s.' % new_cls)
+
+        return new_cls
+
+
+@python_2_unicode_compatible
+class Module(six.with_metaclass(ModuleMetaclass, object)):
     """
     Object internally used to register modules
     """

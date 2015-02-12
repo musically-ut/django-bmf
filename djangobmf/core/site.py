@@ -30,10 +30,6 @@ class Site(object):
         self.app_name = app_name or "djangobmf"
         self.clear()
 
-    # TODO add some generic register function, which functions as a decorator and can be used on different objects
-    def register(self, *args, **kwargs):  # pragma: no cover
-        pass
-
     def clear(self):
         # true if the site is active, ie loaded
         self.is_active = False

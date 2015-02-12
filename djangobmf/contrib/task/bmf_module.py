@@ -8,11 +8,13 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import ProjectManagement
+from djangobmf.sites import Module
 from djangobmf.sites import site
+from djangobmf.sites import register
 from djangobmf.models import Serializer
 
-from djangobmf.contrib.project.categories import ProjectCategory
-from djangobmf.contrib.project.models import Project
+# from djangobmf.contrib.project.categories import ProjectCategory
+# from djangobmf.contrib.project.models import Project
 
 from .categories import GoalCategory
 from .categories import TaskCategory
@@ -59,6 +61,22 @@ class TaskSerializer(Serializer):
         return l
 
 
+@register(dashboard=ProjectManagement)
+class TaskModule(Module):
+    model = Task
+    get = TaskGetView
+    serializer = TaskSerializer
+
+
+@register(dashboard=ProjectManagement)
+class GoalModule(Module):
+    model = Goal
+    get = GoalGetView
+    clone = GoalCloneView
+    detail = GoalDetailView
+    serializer = GoalSerializer
+
+
 site.register_module(Task, **{
     'get': TaskGetView,
     'serializer': TaskSerializer,
@@ -75,15 +93,15 @@ site.register_module(Goal, **{
 
 site.register_dashboards(
     ProjectManagement(
-        ProjectCategory(
-            ViewFactory(
-                model=Project,
-                name=_("Open Projects"),
-                slug="open",
-                manager='open',
-                queryset=(Project.objects.filter(goal__pk__gt=0) | Project.objects.filter(task__pk__gt=0)).distinct(),
-            ),
-        ),
+        # ProjectCategory(
+        #     ViewFactory(
+        #         model=Project,
+        #         name=_("Open Projects"),
+        #         slug="open",
+        #         manager='open',
+        #         queryset=(Project.objects.filter(goal__pk__gt=0) | Project.objects.filter(task__pk__gt=0)).distinct(),
+        #     ),
+        # ),
         GoalCategory(
             ViewFactory(
                 model=Goal,
