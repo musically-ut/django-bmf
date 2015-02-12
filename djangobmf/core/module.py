@@ -7,7 +7,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.utils import six
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.text import slugify
 
 from djangobmf.core.serializer import Serializer
@@ -47,7 +46,6 @@ class ModuleMetaclass(type):
         return new_cls
 
 
-@python_2_unicode_compatible
 class Module(six.with_metaclass(ModuleMetaclass, object)):
     """
     Object internally used to register modules
