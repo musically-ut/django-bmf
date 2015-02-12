@@ -136,10 +136,15 @@ class ModuleListView(
             return self.model._meta.verbose_name_plural
 
     def get_data_url(self):
-        url = reverse(
-            '%s:get' % self.model._bmfmeta.namespace_api,
-            kwargs={'manager': getattr(self, 'manager', None)}
-        )
+        kwargs = {}
+
+        if self.manager:
+            kwargs.update({
+                'manager': self.manager
+            })
+
+        url = reverse('%s:get' % self.model._bmfmeta.namespace_api, kwargs=kwargs)
+
         args = {}
 
         page = self.request.GET.get('page')

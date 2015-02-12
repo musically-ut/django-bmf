@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 # from django.utils.text import slugify
 
+from djangobmf.sites import site
 from djangobmf.views import ModuleListView
 
 # import logging
@@ -23,5 +24,7 @@ class View(object):
         self.dashboard = None  # auto
         self.key = slug
         self.view = view or ModuleListView
-        self.manager = kwargs.get('manager', None)
         self.kwargs = kwargs
+
+        if 'manager' in kwargs and 'queryset' in kwargs:
+            site.get_module(self.model).manager[kwargs['manager']] = kwargs['queryset']

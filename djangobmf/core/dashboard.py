@@ -24,13 +24,14 @@ class Dashboard(object):
     def __init__(self, *args):
         self.data = OrderedDict()
         self.modules = []
-        for category in args:
-            self.add_category(category)
 
         # we add a key to add a unique identifier
         # the key is equal to the slug (for now) but this
         # gives us the opportunity to add i18n urls later
         self.key = self.slug
+
+        for category in args:
+            self.add_category(category)
 
     def __bool__(self):
         return bool(self.data)

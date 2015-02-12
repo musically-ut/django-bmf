@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django.db.models.query import QuerySet
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -99,14 +100,11 @@ class BaseMixin(object):
         and add the functionality to this function.
         """
 
+        # add the site object to every request
+        setattr(self.request, 'djangobmf_site', apps.get_app_config(bmfsettings.APP_LABEL).site)
+
         if not self.check_permissions() or not self.request.user.has_perms(self.get_permissions([])):
             return permission_denied(self.request)
-
-        # === DJANGO BMF SITE OBJECT ======================================
-
-        self.request.djangobmf_site = apps.get_app_config(bmfsettings.APP_LABEL).site
-
-        # === EMPLOYEE AND TEAMS ==========================================
 
         # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
         user_add_bmf(self.request.user)
@@ -119,8 +117,6 @@ class BaseMixin(object):
                 return redirect('djangobmf:wizard', permanent=False)
             else:
                 return permission_denied(self.request)
-
-        # =================================================================
 
         response = super(BaseMixin, self).dispatch(*args, **kwargs)
 
@@ -427,8 +423,23 @@ class ModuleBaseMixin(object):
         Return the list of items for this view.
         `QuerySet` in which case `QuerySet` specific behavior will be enabled.
         """
-        if self.model and manager and manager != "all" and hasattr(self.model._default_manager, manager):
-            qs = getattr(self.model._default_manager, manager)(self.request)
+        module = self.request.djangobmf_site.get_module(self.model)
+
+        if self.model and manager:
+            if module.manager.get(manager, None):
+                qs = module.manager[manager]
+                if isinstance(qs, QuerySet):
+                    qs = qs.all()
+            elif hasattr(self.model._default_manager, manager):
+                qs = getattr(self.model._default_manager, manager)(self.request)
+            else:
+                raise ImproperlyConfigured(
+                    "%(manager)s is not defined in %(cls)s.model" % {
+                        'manager': manager,
+                        'cls': self.__class__.__name__
+                    }
+                )
+
         elif self.model is not None:
             qs = self.model._default_manager.all()
         else:

@@ -6,17 +6,19 @@ from __future__ import unicode_literals
 from django.utils.formats import date_format
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.categories import BaseCategory
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import ProjectManagement
 from djangobmf.sites import site
 from djangobmf.models import Serializer
 
+from djangobmf.contrib.project.categories import ProjectCategory
+from djangobmf.contrib.project.models import Project
+
+from .categories import GoalCategory
+from .categories import TaskCategory
 from .models import Task
 from .models import Goal
-
 from .views import TaskGetView
-
 from .views import GoalCloneView
 from .views import GoalDetailView
 from .views import GoalGetView
@@ -71,18 +73,17 @@ site.register_module(Goal, **{
 })
 
 
-class GoalCategory(BaseCategory):
-    name = _('Goals')
-    slug = "goals"
-
-
-class TaskCategory(BaseCategory):
-    name = _('Tasks')
-    slug = "tasks"
-
-
 site.register_dashboards(
     ProjectManagement(
+        ProjectCategory(
+            ViewFactory(
+                model=Project,
+                name=_("Open Projects"),
+                slug="open",
+                manager='open',
+                queryset=(Project.objects.filter(goal__pk__gt=0) | Project.objects.filter(task__pk__gt=0)).distinct(),
+            ),
+        ),
         GoalCategory(
             ViewFactory(
                 model=Goal,
