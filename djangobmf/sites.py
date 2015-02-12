@@ -6,17 +6,20 @@ from __future__ import unicode_literals
 from django.apps import apps
 
 from djangobmf.conf import settings
+
 from djangobmf.core.category import Category
 from djangobmf.core.dashboard import Dashboard
 from djangobmf.core.module import Module
+from djangobmf.core.serializer import Serializer
+from djangobmf.core.view import View
 
 
 __all__ = [
     'Category',
     'Dashboard',
     'Module',
-    'register',
-    'site',
+    'Serializer',
+    'View',
 ]
 
 
@@ -39,5 +42,18 @@ if apps.apps_ready:
             self.register_generic(cls)
 
         def register_generic(self, cls):
-            pass
+            if "dashboard" in self.kwargs:
+                pass
+                # if self.kwargs["dashboard"] not in site.dashboards:
+                #     # initialize dashboard and append to site
+                #     site.dashboards.append(self.kwargs["dashboard"]())
+
+            if issubclass(cls, Module):
+                pass
+
             # print(site, cls, self.kwargs)
+
+    __all__ += [
+        'register',
+        'site',
+    ]
