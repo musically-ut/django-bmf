@@ -8,10 +8,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.settings import CONTRIB_PROJECT
-from djangobmf.settings import CONTRIB_TASK
 
 from .workflows import TimesheetWorkflow
 
@@ -43,16 +41,16 @@ class AbstractTimesheet(BMFModel):
     valid = models.BooleanField(default=False, editable=False)
 
     employee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+"
     )
 
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
     )
 
     task = models.ForeignKey(  # TODO: make optional
-        CONTRIB_TASK, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_TASK, null=True, blank=True, on_delete=models.SET_NULL,
     )
 
     objects = TimesheetManager()

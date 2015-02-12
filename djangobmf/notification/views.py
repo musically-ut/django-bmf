@@ -17,18 +17,11 @@ from django.views.generic import CreateView
 from django.views.generic import ListView
 from django.views.generic import UpdateView
 
+from djangobmf.conf import settings
 from djangobmf.models import Activity
 from djangobmf.models import Notification
-
 from djangobmf.views.mixins import ViewMixin
 from djangobmf.views.mixins import AjaxMixin
-
-from djangobmf.settings import ACTIVITY_WORKFLOW
-from djangobmf.settings import ACTIVITY_COMMENT
-from djangobmf.settings import ACTIVITY_UPDATED
-from djangobmf.settings import ACTIVITY_FILE
-from djangobmf.settings import ACTIVITY_CREATED
-
 from djangobmf.signals import activity_comment
 
 from .forms import HistoryCommentForm
@@ -87,11 +80,11 @@ class NotificationView(ViewMixin, ListView):
             'selected_ct': selected_ct_id,
             'datafilter': self.kwargs.get('filter', None),
             'symbols': {
-                'workflow': ACTIVITY_WORKFLOW,
-                'comment': ACTIVITY_COMMENT,
-                'updated': ACTIVITY_UPDATED,
-                'file': ACTIVITY_FILE,
-                'created': ACTIVITY_CREATED,
+                'workflow': settings.ACTIVITY_WORKFLOW,
+                'comment': settings.ACTIVITY_COMMENT,
+                'updated': settings.ACTIVITY_UPDATED,
+                'file': settings.ACTIVITY_FILE,
+                'created': settings.ACTIVITY_CREATED,
             }
         })
 

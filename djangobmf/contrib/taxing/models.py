@@ -7,9 +7,9 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings
 from djangobmf.contrib.accounting.models import ACCOUNTING_LIABILITY
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_ACCOUNT
 
 from decimal import Decimal
 
@@ -20,7 +20,7 @@ class AbstractTax(BMFModel):
     # invoice_name_long = models.CharField( max_length=255, null=False, blank=False, )
     # invoice_name_short = models.CharField( max_length=255, null=False, blank=False, )
     account = models.ForeignKey(
-        CONTRIB_ACCOUNT, null=False, blank=False, related_name="tax_liability",
+        settings.CONTRIB_ACCOUNT, null=False, blank=False, related_name="tax_liability",
         limit_choices_to={'type': ACCOUNTING_LIABILITY, 'read_only': False},
         on_delete=models.PROTECT,
     )

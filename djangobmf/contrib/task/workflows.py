@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.workflow import Workflow, State, Transition
-from djangobmf.settings import CONTRIB_TIMESHEET
+from djangobmf.conf import settings
 from djangobmf.utils.model_from_name import model_from_name
+from djangobmf.workflow import Workflow, State, Transition
 
 
 def cancel_condition(object, user):
@@ -130,7 +130,7 @@ class TaskWorkflow(Workflow):
         else:
             project = None
 
-        timesheet = model_from_name(CONTRIB_TIMESHEET)
+        timesheet = model_from_name(settings.CONTRIB_TIMESHEET)
         if timesheet is not None:
             obj = timesheet(
                 task=self.instance,
@@ -150,7 +150,7 @@ class TaskWorkflow(Workflow):
         if not self.instance.in_charge and self.instance.employee:
             self.instance.in_charge = self.instance.employee
 
-        timesheet = model_from_name(CONTRIB_TIMESHEET)
+        timesheet = model_from_name(settings.CONTRIB_TIMESHEET)
         if timesheet is not None:
             for obj in timesheet.objects.filter(
                 task=self.instance,

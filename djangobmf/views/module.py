@@ -35,6 +35,8 @@ from django.template import TemplateDoesNotExist
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.html import format_html
+from django.utils.timezone import make_aware
+from django.utils.timezone import get_current_timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -57,7 +59,7 @@ from .mixins import ModuleFilesMixin
 from .mixins import ModuleFormMixin
 
 import copy
-# import datetime
+import datetime
 import logging
 import operator
 import re
@@ -382,6 +384,13 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
 
     # Limit Queryset length and activate pagination
     limit = 100
+    date_field = None
+
+    def get_date_field(self):
+        """
+        Get the name of the date field to be used to filter by.
+        """
+        return self.date_field or 'modified'
 
     def get_item_data(self, data):
         """
@@ -398,10 +407,32 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
         # activate pagination
         pagination = not bool(self.request.GET.get('pagination', False))
 
+        period = self.request.GET.get('period', None)
+        since = self.request.GET.get('since', None)
+        until = self.request.GET.get('until', None)
+        if since and until:
+            since = make_aware(datetime.datetime(*map(int, since.split('-', 3)[:3])), get_current_timezone())
+            until = make_aware(datetime.datetime(*map(int, until.split('-', 3)[:3])), get_current_timezone())
+        else:
+            until = None
+            since = None
+
         search = self.request.GET.get('search', None)
         page = self.request.GET.get('page', 1)
 
         queryset = self.get_queryset(manager)
+
+        if period in ["year", "month", "week", "day"] and not (since and until):
+            pass
+        else:
+            period = None
+
+        if since and until:
+            date_field = self.get_date_field()
+            queryset = queryset.filter(**{
+                '%s__gte' % date_field: since,
+                '%s__lt' % date_field: until,
+            })
 
         # select only models connected to a related model
         # defined by the models contenttype and pk
@@ -454,6 +485,11 @@ class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixi
             'model': str(self.model),
             'count': count,
             'pk': pk,
+            'time': {
+                'period': period,
+                'since': since.strftime('%Y-%m-%d'),
+                'until': until.strftime('%Y-%m-%d'),
+            } if period or since and until else None,
             'pagination': {
                 'enabled': pagination,
                 'page': page,

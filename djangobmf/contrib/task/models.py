@@ -9,11 +9,8 @@ from django.utils.timezone import now
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_PROJECT
-from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.settings import CONTRIB_TEAM
-from djangobmf.settings import CONTRIB_GOAL
 
 from .workflows import GoalWorkflow
 from .workflows import TaskWorkflow
@@ -48,18 +45,18 @@ class AbstractGoal(BMFModel):
     description = models.TextField(_("Description"), null=True, blank=True, )
 
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
+        settings.CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
     )
 
     referee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+"
     )
     team = models.ForeignKey(
-        CONTRIB_TEAM, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_TEAM, null=True, blank=True, on_delete=models.SET_NULL,
     )
     employees = models.ManyToManyField(
-        CONTRIB_EMPLOYEE, blank=True,
+        settings.CONTRIB_EMPLOYEE, blank=True,
         related_name="employees"
     )
 
@@ -205,17 +202,17 @@ class AbstractTask(BMFModel):
     due_date = models.DateField(_('Due date'), null=True, blank=True)
 
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
+        settings.CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
     )
     employee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
     )
     in_charge = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+", editable=False,
     )
 
-    goal = models.ForeignKey(CONTRIB_GOAL, null=True, blank=True, on_delete=models.CASCADE)
+    goal = models.ForeignKey(settings.CONTRIB_GOAL, null=True, blank=True, on_delete=models.CASCADE)
 
     completed = models.BooleanField(_("Completed"), default=False, editable=False)
 
