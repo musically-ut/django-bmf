@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 # from django.utils.text import slugify
 
-from djangobmf.sites import site
 from djangobmf.views import ModuleListView
 
 # import logging
