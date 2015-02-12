@@ -26,5 +26,5 @@ class View(object):
         self.view = view or ModuleListView
         self.kwargs = kwargs
 
-        if 'manager' in kwargs and 'queryset' in kwargs:
-            site.get_module(self.model).manager[kwargs['manager']] = kwargs['queryset']
+#       if 'manager' in kwargs and 'queryset' in kwargs:
+#           site.get_module(self.model).manager[kwargs['manager']] = kwargs['queryset']
