@@ -143,18 +143,23 @@ def bmffield(field, only_text):
                     # FIXME FAILS IF QUERYSET IS INVALID
                     text = field.field.choices.queryset.get(pk=field.value())
                 else:
-                    text = ""
-                data = '<div class="input-group" data-bmf-autocomplete="1">'
-                data += field.as_text(attrs={
-                    'class': 'form-control',
-                    'id': '%s-value' % field.auto_id,
-                    'placeholder': text,
-                    'autocomplete': 'off',
-                    'name': '',
-                })
-                data += '</div>'
-                data += field.as_hidden(attrs={'autocomplete': 'off'})
-                return data
+                    text = None
+                if field.field.widget.attrs.get('readonly', False):
+                    data = '<p class="form-control-static">%s</p>' % (text or '<i>%s</i>' % _('empty'))
+                    data += field.as_hidden(attrs={'autocomplete': 'off'})
+                    return data
+                else:
+                    data = '<div class="input-group" data-bmf-autocomplete="1">'
+                    data += field.as_text(attrs={
+                        'class': 'form-control',
+                        'id': '%s-value' % field.auto_id,
+                        'placeholder': text or "",
+                        'autocomplete': 'off',
+                        'name': '',
+                    })
+                    data += '</div>'
+                    data += field.as_hidden(attrs={'autocomplete': 'off'})
+                    return data
             else:
                 # TODO: this manages relationsships to non-django models. it makes propably
                 # sense to implement a search-function for django models like user
