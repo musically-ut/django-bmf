@@ -77,6 +77,60 @@ class GoalModule(Module):
     serializer = GoalSerializer
 
 
+@register(dashboard=ProjectManagement)
+class GoalCategoryCLS(GoalCategory):
+    my = ViewFactory(
+        model=Goal,
+        slug="my",
+        name=_("My goals"),
+        manager="mygoals",
+    )
+    active = ViewFactory(
+        model=Goal,
+        slug="active",
+        name=_("Active goals"),
+        manager="active",
+    )
+    archive = ViewFactory(
+        model=Goal,
+        slug="archive",
+        name=_("Archive"),
+    )
+
+
+@register(dashboard=ProjectManagement)
+class TaskCategoryCLS(TaskCategory):
+    my = ViewFactory(
+        model=Task,
+        slug="my",
+        name=_("My tasks"),
+        manager="mytasks",
+    )
+    todo = ViewFactory(
+        model=Task,
+        slug="todo",
+        name=_("Todolist"),
+        manager="todo",
+    )
+    available = ViewFactory(
+        model=Task,
+        slug="available",
+        name=_("Availalbe tasks"),
+        manager="available",
+    )
+    open = ViewFactory(
+        model=Task,
+        slug="open",
+        name=_("Open tasks"),
+        manager="active",
+    )
+    archive = ViewFactory(
+        model=Task,
+        slug="archive",
+        name=_("Archive"),
+    )
+
+
 site.register_module(Task, **{
     'get': TaskGetView,
     'serializer': TaskSerializer,

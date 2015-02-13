@@ -3,32 +3,56 @@
 
 from __future__ import unicode_literals
 
-# from django.conf.urls import patterns
-
-# from djangobmf.sites import site
+from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
+from django.utils.text import slugify
 
 from collections import OrderedDict
 
 from .category import Category
 
+import re
 
-# TODO add validation for name and slug
-class Dashboard(object):
-    # Names are passed through to the views they are also translated
-    name = None
 
-    # The slug is the unique identifier of the dashboard. Dashboards with
-    # the same slug are merged
-    slug = None
+class DashboardMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        super_new = super(DashboardMetaclass, cls).__new__
+        parents = [
+            b for b in bases if
+            isinstance(b, DashboardMetaclass)
+            and not (b.__name__ == 'NewBase' and b.__mro__ == (b, object))
+        ]
+        if not parents:
+            return super_new(cls, name, bases, attrs)
 
-    def __init__(self, *args):
-        self.data = OrderedDict()
-        self.modules = []
+        # Create the class.
+        new_cls = super_new(cls, name, bases, attrs)
+
+        # validation
+        if not getattr(new_cls, 'name', None):
+            raise ImproperlyConfigured('No name attribute defined in %s.' % new_cls)
+
+        if not getattr(new_cls, 'slug', None):
+            raise ImproperlyConfigured('No slug attribute defined in %s.' % new_cls)
 
         # we add a key to add a unique identifier
         # the key is equal to the slug (for now) but this
         # gives us the opportunity to add i18n urls later
-        self.key = self.slug
+        key = getattr(new_cls, 'key', new_cls.slug)
+        if re.match(key, r'^[\w-]%'):
+            new_cls.key = key
+        else:
+            new_cls.key = slugify(key)
+
+        return new_cls
+
+
+# TODO add validation for name and slug
+class Dashboard(six.with_metaclass(DashboardMetaclass, object)):
+
+    def __init__(self, *args):
+        self.data = OrderedDict()
+        self.modules = []
 
         for category in args:
             self.add_category(category)

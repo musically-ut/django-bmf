@@ -40,7 +40,7 @@ class ModuleMetaclass(type):
         new_cls = super_new(cls, name, bases, attrs)
 
         # validation
-        if not hasattr(new_cls, 'model'):
+        if not getattr(new_cls, 'model', None):
             raise ImproperlyConfigured('No model defined in %s.' % new_cls)
 
         return new_cls

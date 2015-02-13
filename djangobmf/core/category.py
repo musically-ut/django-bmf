@@ -3,19 +3,39 @@
 
 from __future__ import unicode_literals
 
+from django.utils import six
+
 from collections import OrderedDict
 
 from .view import View
 
 
-# TODO add validation for name and slug
-class Category(object):
-    # Names are passed through to the views they are also translated
-    name = None
+class CategoryMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        super_new = super(CategoryMetaclass, cls).__new__
+        parents = [
+            b for b in bases if
+            isinstance(b, CategoryMetaclass)
+            and not (b.__name__ == 'NewBase' and b.__mro__ == (b, object))
+        ]
+        if not parents:
+            return super_new(cls, name, bases, attrs)
 
-    # The slug is the unique identifier of the category. Categories with
-    # the same slug are merged
-    slug = None
+        # Create the class.
+        new_cls = super_new(cls, name, bases, attrs)
+
+        # validation
+        # TODO add validation for name and slug
+
+        # TODO remove me (old syntax)
+        if hasattr(new_cls, 'Meta'):
+            new_cls.name = getattr(new_cls.Meta, 'name', None)
+            new_cls.slug = getattr(new_cls.Meta, 'slug', None)
+
+        return new_cls
+
+
+class Category(six.with_metaclass(CategoryMetaclass, object)):
 
     def __init__(self, *args):
         self.data = OrderedDict()
@@ -31,6 +51,10 @@ class Category(object):
         # the key is equal to the slug (for now) but this
         # gives us the opportunity to add i18n urls later
         self.key = self.slug
+
+    @classmethod
+    def views(cls, *views):
+        return cls, views
 
     def __bool__(self):
         return bool(self.data)

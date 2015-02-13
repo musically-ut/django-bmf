@@ -13,6 +13,9 @@ from djangobmf.core.module import Module
 from djangobmf.core.serializer import Serializer
 from djangobmf.core.view import View
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 __all__ = [
     'Category',
@@ -43,15 +46,16 @@ if apps.apps_ready:
 
         def register_generic(self, cls):
             if "dashboard" in self.kwargs:
-                pass
+                logger.debug('Register Dashboard "%s"' % self.kwargs["dashboard"])
                 # if self.kwargs["dashboard"] not in site.dashboards:
                 #     # initialize dashboard and append to site
                 #     site.dashboards.append(self.kwargs["dashboard"]())
 
-            if issubclass(cls, Module):
-                pass
+            if issubclass(cls, Category) and 'dashboard' in self.kwargs:
+                logger.debug('Register Category "%s"' % cls.__name__)
 
-            # print(site, cls, self.kwargs)
+            if issubclass(cls, Module) and 'dashboard' in self.kwargs:
+                logger.debug('Register Module "%s"' % cls.__name__)
 
     __all__ += [
         'register',
