@@ -592,7 +592,7 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
         self.readonly_fields = []
 
         for key in self.request.GET.keys():
-            match = re.match(r'^set-(\w-+)$|^data\[(\w+)\]$', key)
+            match = re.match(r'^set-(\w+)$|^data\[(\w+)\]$', key)
             if match:
                 field = match.group(1) or match.group(2)
                 initial.update({field: self.request.GET.get(key)})
