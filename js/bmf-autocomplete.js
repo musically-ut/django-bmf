@@ -142,7 +142,7 @@
       };
 
       $.ajax({
-        url: base.form.attr('action')+"form/?search",
+        url: base.form.attr('action').split('?')[0]+"form/?search",
         dataType: 'json',
         type: 'post',
         data: data,

@@ -4,15 +4,15 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import AppRegistryNotReady
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.db.models import signals
 from django.db.models.base import ModelBase
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ImproperlyConfigured
-from django.contrib.contenttypes.fields import GenericRelation
 
 from djangobmf.conf import settings as bmfsettings
 from djangobmf.fields import WorkflowField

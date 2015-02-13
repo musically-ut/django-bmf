@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth import get_permission_codename
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage
@@ -587,16 +588,37 @@ class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxM
     template_name_suffix = '_bmfcreate'
 
     def get_initial(self):
+        initial = super(ModuleCreateView, self).get_initial()
+        self.readonly_fields = []
+
         for key in self.request.GET.keys():
-            match = 'data\[(\w+)\]'
-            if re.match(match, key):
-                field = re.match(match, key).groups()[0]
-                self.initial.update({field: self.request.GET.get(key)})
-        return super(ModuleCreateView, self).get_initial()
+            match = re.match(r'^set-(\w-+)$|^data\[(\w+)\]$', key)
+            if match:
+                field = match.group(1) or match.group(2)
+                initial.update({field: self.request.GET.get(key)})
+                self.readonly_fields.append(field)
+
+        return initial
 
     def get_template_names(self):
         return super(ModuleCreateView, self).get_template_names() \
             + ["djangobmf/module_create_default.html"]
+
+    def get_form(self, *args, **kwargs):
+        form = super(ModuleCreateView, self).get_form(*args, **kwargs)
+
+        for field in self.readonly_fields:
+            if field in form.fields:
+                form.fields[field].widget.attrs['readonly'] = True
+            else:
+                raise ImproperlyConfigured(
+                    "Form %s in view %s has no field named %s" % (
+                        self.form.__class__.__name__,
+                        self.__class__.__name__,
+                        field
+                    )
+                )
+        return form
 
     def form_object_save(self, form):
         self.object = form.save()
