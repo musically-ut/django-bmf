@@ -36,6 +36,9 @@ class ConfigurationManager(models.Manager):
         if not value:
             from djangobmf.sites import site
 
+            if not site.is_active:
+                return None
+
             # check if the field exists
             field = site.get_setting_field(app, name)
 

@@ -16,6 +16,7 @@ from djangobmf.core.module import Module
 from djangobmf.models import Configuration
 from djangobmf.models import NumberCycle
 
+import sys
 import logging
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,8 @@ class Site(object):
     def clear(self):
         # true if the site is active, ie loaded
         self.is_active = False
+
+        self.is_migrated = False
 
         # combine all registered modules here
         self.modules = {}
@@ -231,21 +234,14 @@ class Site(object):
             ct = ContentType.objects.get_for_model(Configuration)
             self.activate()
         except RuntimeError:
-            # During the first migrate command, contenttypes are not ready
-            # and raise a Runtime error. We ignore that error and dont
-            # activate the bmf modules
-            pass
+            # During the migrate command, contenttypes are not ready
+            # and raise a Runtime error. We ignore that error and return an empty
+            # pattern - the urls are not needed during migrations.
+            return patterns('')
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
-
-            try:
-                ct = ContentType.objects.get_for_model(module)
-            except RuntimeError:
-                # During the first migrate command, contenttypes are not ready
-                # and raise a Runtime error. We ignore that error and return
-                # an empty pattern - the urls are not needed during migrations.
-                return patterns('')
+            ct = ContentType.objects.get_for_model(module)
 
             # set the apis
             urlpatterns += patterns(
