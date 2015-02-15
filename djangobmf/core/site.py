@@ -16,7 +16,6 @@ from djangobmf.core.module import Module
 from djangobmf.models import Configuration
 from djangobmf.models import NumberCycle
 
-import sys
 import logging
 logger = logging.getLogger(__name__)
 
