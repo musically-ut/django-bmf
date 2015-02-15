@@ -227,7 +227,14 @@ class Site(object):
 
         from djangobmf.urls import urlpatterns
 
-        self.activate()
+        try:
+            ct = ContentType.objects.get_for_model(Configuration)
+            self.activate()
+        except RuntimeError:
+            # During the first migrate command, contenttypes are not ready
+            # and raise a Runtime error. We ignore that error and dont
+            # activate the bmf modules
+            pass
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
