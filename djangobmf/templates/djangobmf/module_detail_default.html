@@ -1,8 +1,8 @@
 {% extends "djangobmf/module_detail.html" %}
 
-{% load djangobmf_forms %}
+{% load i18n %}
 
 {% block base_content %}
-{% bmfview %}
+<p>{% blocktrans with obj=object %}No default template found for the detail view of "{{ obj }}".{% endblocktrans %}</p>
 {{ block.super }}
 {% endblock %}

@@ -28,8 +28,8 @@ import json
 class BaseTestCase(object):
 
     def setUp(self):  # noqa
-        site.activate(test=True)
         activate('en')
+        site.activate(test=True)
         super(BaseTestCase, self).setUp()
 
     def create_user(self, username, is_staff=False, is_superuser=False,
