@@ -62,8 +62,7 @@ class BaseProject(BMFModel):
         if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
             return qs
         return qs.filter(
-            Q(employees=getattr(user, 'djangobmf_employee', -1))
-            |
+            Q(employees=getattr(user, 'djangobmf_employee', -1)) |
             Q(team__in=getattr(user, 'djangobmf_teams', []))
         )
 

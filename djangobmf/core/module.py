@@ -29,9 +29,8 @@ class ModuleMetaclass(type):
     def __new__(cls, name, bases, attrs):
         super_new = super(ModuleMetaclass, cls).__new__
         parents = [
-            b for b in bases if
-            isinstance(b, ModuleMetaclass)
-            and not (b.__name__ == 'NewBase' and b.__mro__ == (b, object))
+            b for b in bases if isinstance(b, ModuleMetaclass) and
+            not (b.__name__ == 'NewBase' and b.__mro__ == (b, object))
         ]
         if not parents:
             return super_new(cls, name, bases, attrs)
