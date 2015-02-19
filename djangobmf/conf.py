@@ -102,7 +102,7 @@ class Settings(object):
 
     @property
     def REPORTING_SERVER(self):  # noqa
-        return getattr(djsettings, 'BMF_REPORTING_SERVER', "127.0.0.1:8080")
+        return getattr(djsettings, 'BMF_REPORTING_SERVER', "http://127.0.0.1:8080")
 
 
 settings = Settings()

@@ -49,22 +49,18 @@ class Report(models.Model):
 
     def get_generator(self):
         from djangobmf.sites import site
-        print(site.reports)
         return site.reports[self.reporttype](self.options)
 
     # response with generated file
-    def render(self, request, context):
+    def render(self, filename, request, context):
         generator = self.get_generator()
 
-        # TODO depends on the instance of this model
-        mimetype = "application/pdf"
-        # FIXME: make filename from context, if context contains a object ... otherwise use report.{ext}
-        filename = "report.pdf"
+        extension, mimetype, data = generator.render(request, context)
 
-        file = generator.render(request, context)
-
-        response = HttpResponse(content_type=mimetype)  # TODO depends on multiple options
-        if filename:
-            response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-        response.write(file)
+        response = HttpResponse(content_type=mimetype)
+        # response['Content-Disposition'] = 'attachment; filename="%s.%s"' % (
+        #     filename,
+        #     extension
+        # )
+        response.write(data)
         return response

@@ -16,4 +16,7 @@ class Report(object):
         raise NotImplementedError('You need to implement a get_output_formats function')
 
     def render(self, request, context):
+        """
+        returns extension, mime_type, data or file_object
+        """
         raise NotImplementedError('You need to implement a render function')
