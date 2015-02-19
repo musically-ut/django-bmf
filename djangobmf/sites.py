@@ -10,6 +10,7 @@ from djangobmf.conf import settings
 from djangobmf.core.category import Category
 from djangobmf.core.dashboard import Dashboard
 from djangobmf.core.module import Module
+from djangobmf.core.report import Report
 from djangobmf.core.serializer import Serializer
 from djangobmf.core.view import View
 
@@ -21,6 +22,7 @@ __all__ = [
     'Category',
     'Dashboard',
     'Module',
+    'Report',
     'Serializer',
     'View',
 ]
@@ -32,7 +34,7 @@ __all__ = [
 # apps are loaded (cause the site does some database
 # queries). Importing this to early leads to an exception
 # which is a feature and not a bug.
-if apps.apps_ready:
+if apps.apps_ready:  # pragma: no branch
     site = apps.get_app_config(settings.APP_LABEL).site
 
     class register(object):  # noqa

@@ -53,7 +53,6 @@ from .mixins import ModuleUpdatePermissionMixin
 from .mixins import ModuleSearchMixin
 from .mixins import ModuleViewPermissionMixin
 from .mixins import ModuleAjaxMixin
-from .mixins import ModuleBaseMixin
 from .mixins import ModuleViewMixin
 from .mixins import ModuleActivityMixin
 from .mixins import ModuleFilesMixin
@@ -355,7 +354,7 @@ class ModuleDetailView(
             + ["djangobmf/module_detail_default.html"]
 
 
-class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
+class ModuleReportView(ModuleViewPermissionMixin, ModuleViewMixin, DetailView):
     """
     render a report
     """
@@ -370,15 +369,13 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
         ct = ContentType.objects.get_for_model(self.get_object())
         try:
             report = Report.objects.get(contenttype=ct)
-            return report.render(self.request, self.get_context_data())
+            return report.render(self.get_filename(), self.request, self.get_context_data())
         except Report.DoesNotExist:
             # return "no view configured" page
             return response
 
-    def get_context_data(self, **kwargs):
-        context = super(ModuleReportView, self).get_context_data(**kwargs)
-        context['request'] = self.request
-        return context
+    def get_filename(self):
+        return "report"
 
 
 class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):

@@ -126,6 +126,7 @@ TEST_PROJECT_APPS = (
     'djangobmf.contrib.timesheet',
     'djangobmf.currency.EUR',
     'djangobmf.currency.USD',
+    'djangobmf.report.xhtml2pdf',
     'tests.appapis',
 )
 

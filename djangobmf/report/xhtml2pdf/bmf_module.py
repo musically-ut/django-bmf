@@ -3,28 +3,33 @@
 
 from __future__ import unicode_literals
 
-'''
-
-from django.template.loader import select_template
 from django.template import Context
+from django.template.loader import select_template
+from django.utils import six
 
+from djangobmf.conf import settings
 from djangobmf.sites import site
+from djangobmf.sites import Report
 from djangobmf.models import Document
-from djangobmf.report.models import BaseReport
 
-from io import BytesIO
-from xhtml2pdf import pisa
-from ConfigParser import RawConfigParser
+import codecs
+import requests
 
 
-class Xhtml2PdfReport(BaseReport):
+if six.PY3:
+    from configparser import RawConfigParser
+else:
+    from ConfigParser import RawConfigParser
 
-    def __init__(self, options):
-        self.options = RawConfigParser(allow_no_value=True)
-        self.options.readfp(BytesIO(options.encode("UTF-8")))
+try:
+    from xhtml2pdf import pisa
+    from io import BytesIO
+    XHTML2PDF = True
+except ImportError:
+    XHTML2PDF = False
 
-    def get_default_options(self):
-        return """
+
+DEFAULT_OPTS = """
 [layout]
 size = A4
 form = A
@@ -45,13 +50,19 @@ margin_top = 20mm
 footer_right = 10mm
 footer_height = 10mm
 pdf_background_pk = None
-  """
+"""
 
-    def get_output_formats(self):
-        return ('pdf',)
+
+class Xhtml2PdfReport(Report):
+
+    def __init__(self, options):
+        self.options = RawConfigParser(allow_no_value=True)
+        self.options.read_string(options)
+
+    def get_default_options(self):
+        return DEFAULT_OPTS
 
     def render(self, request, context):
-        buffer = BytesIO()
         model = context['bmfmodule']['model']._meta
         template_name = '%s/%s_htmlreport.html' % (model.app_label, model.model_name)
 
@@ -63,7 +74,7 @@ pdf_background_pk = None
                 bg_pk = self.options.getint('pages', 'pdf_background_pk')
                 try:
                     file = Document.objects.get(pk=bg_pk)
-                    pages_file = ''.join(file.file.read().encode('base64').splitlines())
+                    pages_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
                 except Document.DoesNotExist:
                     pass
 
@@ -72,7 +83,7 @@ pdf_background_pk = None
                 bg_pk = self.options.getint('letter_page', 'pdf_background_pk')
                 try:
                     file = Document.objects.get(pk=bg_pk)
-                    letter_file = ''.join(file.file.read().encode('base64').splitlines())
+                    letter_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
                 except Document.DoesNotExist:
                     pass
 
@@ -96,13 +107,24 @@ pdf_background_pk = None
         context['options'] = options
 
         template = select_template([template_name, 'djangobmf/report_html_base.html'])
-        html = template.render(Context(context))
-        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), buffer)  # pdf won't be UTF-8
-        pdf = buffer.getvalue()
-        buffer.close()
-        return pdf
+
+        # pdf won't be in UTF-8
+        html = template.render(Context(context)).encode("ISO-8859-1")
+
+        if settings.REPORTING_SERVER:
+            response = requests.post(
+                settings.REPORTING_SERVER,
+                data=html,
+                timeout=5.0,
+            )
+            return 'pdf', 'application/pdf', response.content, True
+        else:
+            buffer = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(html, buffer))
+            pdf = buffer.getvalue()
+            buffer.close()
+            return 'pdf', 'application/pdf', pdf, True
 
 
-site.register_report('xhtml2pdf', Xhtml2PdfReport)
-
-'''
+if XHTML2PDF or settings.REPORTING_SERVER:
+    site.register_report('xhtml2pdf', Xhtml2PdfReport)

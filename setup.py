@@ -44,6 +44,7 @@ setup(
     install_requires=[
         'django',
         'pytz',
+        'requests',
         'django-sekizai',
         'django-mptt',
         # 'django-haystack',

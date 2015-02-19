@@ -118,8 +118,11 @@ class BMFOptions(object):
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
 
-        # is filles with keys if multiple create views are definied for this model (see sites.py)
+        # is filled with create views (see core/module.py)
         self.create_views = []
+
+        # is filled with report views (see core/module.py)
+        self.report_views = []
 
         if options:
             options = inspect.getmembers(cls.BMFMeta)

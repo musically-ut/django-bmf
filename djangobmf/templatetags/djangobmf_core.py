@@ -28,7 +28,9 @@ def get_bmf_url(obj, view="detail", key="default", **kwargs):
 
         if view in ["detail", "update", "delete", "workflow", "report", "clone"]:
             kwargs.update({'pk': obj.pk})
+
         if view in ["create", "report"]:
             kwargs.update({'key': key})
+
         return reverse('%s:%s' % (namespace, view), kwargs=kwargs)
     return '#'
