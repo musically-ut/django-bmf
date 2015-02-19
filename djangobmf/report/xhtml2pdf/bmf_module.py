@@ -51,6 +51,7 @@ footer_height = 10mm
 pdf_background_pk = None
 """
 
+
 class Xhtml2PdfReport(Report):
 
     def __init__(self, options):
@@ -118,13 +119,13 @@ class Xhtml2PdfReport(Report):
                 data=html,
                 timeout=5.0,
             )
-            return 'pdf', 'application/pdf', response.content
+            return 'pdf', 'application/pdf', response.content, True
         else:
             buffer = BytesIO()
             pdf = pisa.pisaDocument(BytesIO(html, buffer))
             pdf = buffer.getvalue()
             buffer.close()
-            return 'pdf', 'application/pdf', pdf
+            return 'pdf', 'application/pdf', pdf, True
 
 
 if XHTML2PDF or settings.REPORTING_SERVER:

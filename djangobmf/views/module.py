@@ -53,7 +53,6 @@ from .mixins import ModuleUpdatePermissionMixin
 from .mixins import ModuleSearchMixin
 from .mixins import ModuleViewPermissionMixin
 from .mixins import ModuleAjaxMixin
-from .mixins import ModuleBaseMixin
 from .mixins import ModuleViewMixin
 from .mixins import ModuleActivityMixin
 from .mixins import ModuleFilesMixin
@@ -377,11 +376,6 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleViewMixin, DetailView):
 
     def get_filename(self):
         return "report"
-
-#   def get_context_data(self, **kwargs):
-#       context = super(ModuleReportView, self).get_context_data(**kwargs)
-#       context['request'] = self.request
-#       return context
 
 
 class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):

@@ -8,6 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 
+from djangobmf.core.report import Report as BaseReport
+
 
 class Report(models.Model):
     """
@@ -49,18 +51,25 @@ class Report(models.Model):
 
     def get_generator(self):
         from djangobmf.sites import site
-        return site.reports[self.reporttype](self.options)
+        try:
+            return site.reports[self.reporttype](self.options)
+        except KeyError:
+            return BaseReport()
 
     # response with generated file
     def render(self, filename, request, context):
         generator = self.get_generator()
 
-        extension, mimetype, data = generator.render(request, context)
+        extension, mimetype, data, attachment = generator.render(request, context)
 
         response = HttpResponse(content_type=mimetype)
-        # response['Content-Disposition'] = 'attachment; filename="%s.%s"' % (
-        #     filename,
-        #     extension
-        # )
+
+        if attachment:
+            response['Content-Disposition'] = 'attachment; filename="%s.%s"' % (
+                filename,
+                extension
+            )
+
         response.write(data)
+
         return response
