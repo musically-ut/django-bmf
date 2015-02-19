@@ -13,10 +13,7 @@ class Report(object):
         self.options = options
 
     def get_default_options(self):
-        raise NotImplementedError('You need to implement a get_default_options function')
-
-    def get_output_formats(self):
-        raise NotImplementedError('You need to implement a get_output_formats function')
+        return ''
 
     def render(self, request, context):
         """

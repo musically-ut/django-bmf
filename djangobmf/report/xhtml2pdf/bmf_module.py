@@ -61,9 +61,6 @@ class Xhtml2PdfReport(Report):
     def get_default_options(self):
         return DEFAULT_OPTS
 
-    def get_output_formats(self):
-        return ('pdf',)
-
     def render(self, request, context):
         model = context['bmfmodule']['model']._meta
         template_name = '%s/%s_htmlreport.html' % (model.app_label, model.model_name)
