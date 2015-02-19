@@ -10,6 +10,7 @@ from djangobmf.conf import settings
 from djangobmf.core.category import Category
 from djangobmf.core.dashboard import Dashboard
 from djangobmf.core.module import Module
+from djangobmf.core.report import Report
 from djangobmf.core.serializer import Serializer
 from djangobmf.core.view import View
 
@@ -21,6 +22,7 @@ __all__ = [
     'Category',
     'Dashboard',
     'Module',
+    'Report',
     'Serializer',
     'View',
 ]

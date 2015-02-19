@@ -3,28 +3,25 @@
 
 from __future__ import unicode_literals
 
-'''
-
-from django.template.loader import select_template
 from django.template import Context
+from django.template.loader import select_template
 
+from djangobmf.conf import settings
 from djangobmf.sites import site
+from djangobmf.sites import Report
 from djangobmf.models import Document
-from djangobmf.report.models import BaseReport
 
 from io import BytesIO
-from xhtml2pdf import pisa
 from ConfigParser import RawConfigParser
 
+try:
+    from xhtml2pdf import pisa
+    XHTML2PDF = True
+except ImportError:
+    XHTML2PDF = False
 
-class Xhtml2PdfReport(BaseReport):
 
-    def __init__(self, options):
-        self.options = RawConfigParser(allow_no_value=True)
-        self.options.readfp(BytesIO(options.encode("UTF-8")))
-
-    def get_default_options(self):
-        return """
+DEFAULT_OPTS = """
 [layout]
 size = A4
 form = A
@@ -45,7 +42,16 @@ margin_top = 20mm
 footer_right = 10mm
 footer_height = 10mm
 pdf_background_pk = None
-  """
+"""
+
+class Xhtml2PdfReport(Report):
+
+    def __init__(self, options):
+        self.options = RawConfigParser(allow_no_value=True)
+        self.options.readfp(BytesIO(options.encode("UTF-8")))
+
+    def get_default_options(self):
+        return DEFAULT_OPTS
 
     def get_output_formats(self):
         return ('pdf',)
@@ -97,12 +103,15 @@ pdf_background_pk = None
 
         template = select_template([template_name, 'djangobmf/report_html_base.html'])
         html = template.render(Context(context))
-        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), buffer)  # pdf won't be UTF-8
-        pdf = buffer.getvalue()
-        buffer.close()
+
+        if settings.REPORTING_SERVER:
+            return None
+        else:
+            pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), buffer)  # pdf won't be UTF-8
+            pdf = buffer.getvalue()
+            buffer.close()
         return pdf
 
 
-site.register_report('xhtml2pdf', Xhtml2PdfReport)
-
-'''
+if XHTML2PDF or settings.REPORTING_SERVER:
+    site.register_report('xhtml2pdf', Xhtml2PdfReport)

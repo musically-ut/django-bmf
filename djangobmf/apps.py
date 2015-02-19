@@ -89,6 +89,10 @@ class CurrencyTemplate(ModuleTemplate):
     verbose_name = "Django BMF Currency"
 
 
+class ReportTemplate(ModuleTemplate):
+    verbose_name = "Django BMF Report"
+
+
 # Checks
 @register()
 def checks(app_configs, **kwargs):  # noqa

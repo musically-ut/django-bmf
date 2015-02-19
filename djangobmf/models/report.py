@@ -9,27 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 
 
-MIME_TYPES = {
-    'pdf': 'application/pdf',
-    'html': 'text/html',
-}
-
-
-class BaseReport(object):
-
-    def __init__(self, options):
-        self.options = options
-
-    def get_default_options(self):
-        raise NotImplementedError('You need to implement a get_default_options function')
-
-    def get_output_formats(self):
-        raise NotImplementedError('You need to implement a get_output_formats function')
-
-    def render(self, request, context):
-        raise NotImplementedError('You need to implement a render function')
-
-
 class Report(models.Model):
     """
     Model to store informations to generate a report
@@ -70,6 +49,7 @@ class Report(models.Model):
 
     def get_generator(self):
         from djangobmf.sites import site
+        print(site.reports)
         return site.reports[self.reporttype](self.options)
 
     # response with generated file
