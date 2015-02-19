@@ -100,4 +100,9 @@ class Settings(object):
     def CONTRIB_TRANSACTIONITEM(self):  # noqa
         return getattr(djsettings, 'BMF_CONTRIB_TRANSACTIONITEM', 'djangobmf_accounting.TransactionItem')
 
+    @property
+    def REPORTING_SERVER(self):  # noqa
+        return getattr(djsettings, 'BMF_REPORTING_SERVER', "127.0.0.1:8080")
+
+
 settings = Settings()

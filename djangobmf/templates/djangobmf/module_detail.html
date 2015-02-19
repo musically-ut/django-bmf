@@ -49,12 +49,17 @@
         {% endif %}
     {% endif %}
 
-    {% if bmfmodule.has_report %}
-     <div class="btn-group">
-     <a class="btn btn-bmfreport" href="{% get_bmf_url object "report" %}">
-       <span class="glyphicon glyphicon-print"></span> {% trans "Print" %} 
-     </a>
-     </div>
+    {% if bmfmodule.report_views %}
+    <div class="btn-group">
+        <button type="button" class="btn btn-bmfreport dropdown-toggle" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-print"></span> {% trans "Report" %}
+        </button>
+        <ul class="dropdown-menu" role="menu">
+        {% for key, label in bmfmodule.create_views %}
+            <li><a class="bmf-edit" href="{% get_bmf_url object "report" key %}">{{ label }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
     {% endif %}
 
     {% if bmfworkflow and bmfworkflow.object.update or not bmfworkflow %}

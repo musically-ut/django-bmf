@@ -355,7 +355,7 @@ class ModuleDetailView(
             + ["djangobmf/module_detail_default.html"]
 
 
-class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
+class ModuleReportView(ModuleViewPermissionMixin, ModuleViewMixin, DetailView):
     """
     render a report
     """
@@ -364,21 +364,21 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
     def get_template_names(self):
         return ["djangobmf/module_report.html"]
 
-    def get(self, request, *args, **kwargs):
-        response = super(ModuleReportView, self).get(request, *args, **kwargs)
+#   def get(self, request, *args, **kwargs):
+#       response = super(ModuleReportView, self).get(request, *args, **kwargs)
 
-        ct = ContentType.objects.get_for_model(self.get_object())
-        try:
-            report = Report.objects.get(contenttype=ct)
-            return report.render(self.request, self.get_context_data())
-        except Report.DoesNotExist:
-            # return "no view configured" page
-            return response
+#       ct = ContentType.objects.get_for_model(self.get_object())
+#       try:
+#           report = Report.objects.get(contenttype=ct)
+#           return report.render(self.request, self.get_context_data())
+#       except Report.DoesNotExist:
+#           # return "no view configured" page
+#           return response
 
-    def get_context_data(self, **kwargs):
-        context = super(ModuleReportView, self).get_context_data(**kwargs)
-        context['request'] = self.request
-        return context
+#   def get_context_data(self, **kwargs):
+#       context = super(ModuleReportView, self).get_context_data(**kwargs)
+#       context['request'] = self.request
+#       return context
 
 
 class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):

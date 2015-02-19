@@ -77,12 +77,18 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                     # overwrite the label, and correct the view
                     label = slugify(view[0])
                     view = view[1]
-            self.listed_reports.append((key, label, view))
+
+                if issubclass(view, ModuleReportView):
+                    self.listed_reports.append((key, label, view))
 
         elif isinstance(self.report, bool):
             self.listed_reports.append(('default', 'default', ModuleReportView))
+
         elif self.report and issubclass(self.report, ModuleReportView):
             self.listed_reports.append(('default', 'default', self.report))
+
+        # update model with all report views
+        self.model._bmfmeta.report_views = self.listed_reports
 
         return self.listed_reports
 
@@ -213,7 +219,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^report/(?P<key>%s)/$' % key,
+                    r'^report/(?P<pk>[0-9]+)/(?P<key>%s)/$' % key,
                     view.as_view(model=self.model),
                     name='report',
                 ),
