@@ -12,6 +12,7 @@ from djangobmf.sites import site
 from djangobmf.sites import Report
 from djangobmf.models import Document
 
+import codecs
 import requests
 
 
@@ -73,7 +74,7 @@ class Xhtml2PdfReport(Report):
                 bg_pk = self.options.getint('pages', 'pdf_background_pk')
                 try:
                     file = Document.objects.get(pk=bg_pk)
-                    pages_file = ''.join(file.file.read().encode('base64').splitlines())
+                    pages_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
                 except Document.DoesNotExist:
                     pass
 
@@ -82,7 +83,7 @@ class Xhtml2PdfReport(Report):
                 bg_pk = self.options.getint('letter_page', 'pdf_background_pk')
                 try:
                     file = Document.objects.get(pk=bg_pk)
-                    letter_file = ''.join(file.file.read().encode('base64').splitlines())
+                    letter_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
                 except Document.DoesNotExist:
                     pass
 
