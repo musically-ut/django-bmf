@@ -121,7 +121,7 @@ class MoneyProxy(object):
         else:
             precision = 0
 
-        if not isinstance(value, BaseCurrency):
+        if currency and not isinstance(value, BaseCurrency):
             value = currency.__class__(value, precision=precision)
 
         obj.__dict__[self.field.name] = value
@@ -146,6 +146,10 @@ class CurrencyField(with_metaclass(models.SubfieldBase, models.CharField)):
     def to_python(self, value):
         if isinstance(value, BaseCurrency):
             return value
+
+        elif not value:
+            return None
+
         # The string case.
         from .sites import site
         return site.currencies['%s' % value]()
