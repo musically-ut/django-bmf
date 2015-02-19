@@ -9,8 +9,8 @@
         size: {{ options.size }};
         margin-top: 105mm;
         margin-left: 25mm;
-        margin-right: 10mm;
-        margin-bottom: 10mm;
+        margin-right: {{ letter_margin_right }};
+        margin-bottom: {{ letter_margin_bottom }};
         {% if options.template_letter %}background-image: url('data:application/pdf;base64,{{ options.template_letter }}');{% endif %}
 
         @frame address {
@@ -22,8 +22,8 @@
         }
 
         @frame extra {
-          top: 35mm;
-          right: 10mm;
+          top: {{ letter_extra_top }};
+          right: {{ letter_extra_right }};
           width: 75mm;
           -pdf-frame-content: extraContent;
         }
@@ -40,10 +40,10 @@
       @page laterPages {
 {% endif %}
         size: {{ options.size }};
-        margin-top: 10mm;
+        margin-top: {{ page_margin_top }};
         margin-left: 25mm;
-        margin-right: 10mm;
-        margin-bottom: 10mm;
+        margin-right: {{ page_margin_right }};
+        margin-bottom: {{ page_margin_bottom }};
         {% if options.template_pages %}background-image: url('data:application/pdf;base64,{{ options.template_pages }}');{% endif %}
 
         @frame footer {

@@ -36,8 +36,8 @@ form = A
 letter = True
 
 [letter_page]
-margin_left = 10mm
-margin_bottom = 15mm
+margin_right = 10mm
+margin_bottom = 40mm
 extra = true
 extra_right = 10mm
 extra_top = 40mm
@@ -97,12 +97,15 @@ class Xhtml2PdfReport(Report):
             'template_letter': letter_file,
             'template_pages': pages_file,
 
-            #  'margin_left': self.cfg.getboolean('letter_page', 'margin_left'),
-            #  'margin_bottom': self.cfg.getboolean('letter_page', 'margin_bottom'),
-            'extra': self.options.getboolean('letter_page', 'extra'),
-            #  'extra_right': self.cfg.getboolean('letter_page', 'extra_right'),
-            #  'extra_top': self.cfg.getboolean('letter_page', 'extra_top'),
+            'letter_margin_right': self.cfg.get('letter_page', 'margin_right'),
+            'letter_margin_bottom': self.cfg.get('letter_page', 'margin_bottom'),
+            'letter_extra': self.options.getboolean('letter_page', 'extra'),
+            'letter_extra_right': self.options.get('letter_page', 'extra_right'),
+            'letter_extra_top': self.options.get('letter_page', 'extra_bottom'),
 
+            'page_margin_top': self.cfg.get('pages', 'margin_top'),
+            'page_margin_right': self.cfg.get('pages', 'margin_right'),
+            'page_margin_bottom': self.cfg.get('pages', 'margin_bottom'),
         }
         context['options'] = options
 
