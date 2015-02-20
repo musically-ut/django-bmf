@@ -85,6 +85,13 @@ class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
             return value.key
         return value
 
+    def value_to_string(self, obj):
+        """
+        serialization
+        """
+        value = self._get_val_from_obj(obj)
+        return self.get_prep_value(value)
+
     def clean(self, value, *args, **kwargs):
         if (isinstance(value, WorkflowContainer) and isinstance(value.obj, self.workflow)) \
                 or value in self.workflow._states:
