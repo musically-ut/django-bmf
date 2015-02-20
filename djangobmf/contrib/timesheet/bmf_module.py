@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+from django.utils.formats import date_format
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.sites import site
@@ -22,6 +23,7 @@ class TimesheetSerializer(Serializer):
         l = []
         for obj in self.data:
             l.append({
+                'date': date_format(obj.start, "SHORT_DATE_FORMAT"),
                 'summary': obj.summary,
                 'start': obj.start,
                 'end': obj.end,

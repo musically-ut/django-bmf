@@ -12,10 +12,8 @@
     {% verbatim %}
     <tbody>
         <tr ng-repeat="obj in data.items">
-            <td>DATE</td>
-            <td>
-                {{ obj.summary }}
-            </td>
+            <td>{{ obj.date }}</td>
+            <td>{{ obj.summary }}</td>
             <td>{{ obj.employee }}</td>
             <td>
             </td>
@@ -28,9 +26,6 @@
     </tbody>
     {% endverbatim %}
     {% comment %}
-    <tbody>
-        <tr ng-repeat="obj in data.items">
-            <td>{{ obj.start|date:"SHORT_DATE_FORMAT" }}</td>
             <td>{% if not obj.end %}<span class="label label-warning">{% trans "Active" %}</span>{% endif %}
                 {{ obj.summary }}
                 {% if obj.project or obj.task %}<br /><small class="text-muted">
@@ -38,7 +33,7 @@
                 </small>
                 {% endif %}
             </td>
-            <td>{{ obj.employee }}</td>
+
             <td>
                 {% if obj.end %}
                 {{ obj.start|timesince:obj.end }}
@@ -46,12 +41,5 @@
                 {{ obj.start|timesince }}
                 {% endif %}
             </td>
-            <td class="text-right">
-              <a class="btn btn-xs btn-primary" href="{{ obj.bmfmodule_detail }}">
-                <span class="glyphicon glyphicon-list"></span>
-              </a>
-            </td>
-        </tr>
-    </tbody>
     {% endcomment %}
 </table>
