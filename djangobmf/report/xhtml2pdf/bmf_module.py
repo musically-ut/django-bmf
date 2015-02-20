@@ -12,6 +12,8 @@ from djangobmf.sites import site
 from djangobmf.sites import Report
 from djangobmf.models import Document
 
+from io import BytesIO
+
 import codecs
 import requests
 
@@ -23,7 +25,6 @@ else:
 
 try:
     from xhtml2pdf import pisa
-    from io import BytesIO
     XHTML2PDF = True
 except ImportError:
     XHTML2PDF = False
@@ -59,7 +60,10 @@ class Xhtml2PdfReport(Report):
 
     def __init__(self, options):
         self.options = RawConfigParser(allow_no_value=True)
-        self.options.read_string(options)
+        try:
+            self.options.read_string(options)
+        except AttributeError:
+            self.options.readfp(BytesIO(options.encode("UTF-8")))
 
     def get_default_options(self):
         return DEFAULT_OPTS
