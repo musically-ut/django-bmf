@@ -340,6 +340,38 @@ class NextMixin(object):
         return self.request.path_info
 
 
+class ReadOnlyMixin(object):
+
+    def get_initial(self):
+        initial = super(ReadOnlyMixin, self).get_initial()
+        self.readonly_fields = []
+
+        for key in self.request.GET.keys():
+            match = re.match(r'^set-(\w+)$|^data\[(\w+)\]$', key)
+            if match:
+                field = match.group(1) or match.group(2)
+                initial.update({field: self.request.GET.get(key)})
+                self.readonly_fields.append(field)
+
+        return initial
+
+    def get_form(self, *args, **kwargs):
+        form = super(ReadOnlyMixin, self).get_form(*args, **kwargs)
+
+        for field in self.readonly_fields:
+            if field in form.fields:
+                form.fields[field].widget.attrs['readonly'] = True
+            else:
+                raise ImproperlyConfigured(
+                    "Form %s in view %s has no field named %s" % (
+                        self.form.__class__.__name__,
+                        self.__class__.__name__,
+                        field
+                    )
+                )
+        return form
+
+
 # PERMISSIONS
 
 class ModuleViewPermissionMixin(object):
@@ -517,7 +549,7 @@ class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
         return ctx
 
     def render_valid_form(self, context):
-        if 'redirect' not in context:
+        if 'redirect' not in context and not self.model._bmfmeta.only_related:
             context.update({
                 'redirect': self.get_success_url(),
             })

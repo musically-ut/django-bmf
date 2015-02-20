@@ -164,9 +164,10 @@ class ModuleTestFactory(SuperuserMixin, BaseTestCase):
 
     def test_module_detail(self):
         for model in self.models:
-            for obj in model.objects.all():
-                response = self.client.get(obj.bmfmodule_detail())
-                self.assertEqual(response.status_code, 200)
+            if hasattr(model, '_bmfmeta') and not model._bmfmeta.only_related:
+                for obj in model.objects.all():
+                    response = self.client.get(obj.bmfmodule_detail())
+                    self.assertEqual(response.status_code, 200)
 
     def test_module_lists_and_gets(self):
         views = []

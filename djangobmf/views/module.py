@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth import get_permission_codename
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage
@@ -57,12 +56,12 @@ from .mixins import ModuleViewMixin
 from .mixins import ModuleActivityMixin
 from .mixins import ModuleFilesMixin
 from .mixins import ModuleFormMixin
+from .mixins import ReadOnlyMixin
 
 import copy
 import datetime
 import logging
 import operator
-import re
 import types
 import urllib
 # import warnings
@@ -550,7 +549,7 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
         })
 
 
-class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxMixin, UpdateView):
+class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxMixin, ReadOnlyMixin, UpdateView):
     """
     """
     context_object_name = 'object'
@@ -570,52 +569,30 @@ class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxM
         # TODO: generate change signal
         # return dict([(field, getattr(self, field)) for field in self._bmfmeta.observed_fields])
         activity_update.send(sender=self.object.__class__, instance=self.object)
-        return self.render_valid_form({
-            'object_pk': self.object.pk,
-            'redirect': self.object.bmfmodule_detail(),
-            'message': True,
-        })
+        if self.model._bmfmeta.only_related:
+            return self.render_valid_form({
+                'object_pk': self.object.pk,
+                'message': True,
+                'reload': True,
+            })
+        else:
+            return self.render_valid_form({
+                'object_pk': self.object.pk,
+                'redirect': self.object.bmfmodule_detail(),
+                'message': True,
+            })
 
 
-class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxMixin, CreateView):
+class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxMixin, ReadOnlyMixin, CreateView):
     """
     create a new instance
     """
     context_object_name = 'object'
     template_name_suffix = '_bmfcreate'
 
-    def get_initial(self):
-        initial = super(ModuleCreateView, self).get_initial()
-        self.readonly_fields = []
-
-        for key in self.request.GET.keys():
-            match = re.match(r'^set-(\w+)$|^data\[(\w+)\]$', key)
-            if match:
-                field = match.group(1) or match.group(2)
-                initial.update({field: self.request.GET.get(key)})
-                self.readonly_fields.append(field)
-
-        return initial
-
     def get_template_names(self):
         return super(ModuleCreateView, self).get_template_names() \
             + ["djangobmf/module_create_default.html"]
-
-    def get_form(self, *args, **kwargs):
-        form = super(ModuleCreateView, self).get_form(*args, **kwargs)
-
-        for field in self.readonly_fields:
-            if field in form.fields:
-                form.fields[field].widget.attrs['readonly'] = True
-            else:
-                raise ImproperlyConfigured(
-                    "Form %s in view %s has no field named %s" % (
-                        self.form.__class__.__name__,
-                        self.__class__.__name__,
-                        field
-                    )
-                )
-        return form
 
     def form_object_save(self, form):
         self.object = form.save()
@@ -665,12 +642,19 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
             if not registered:
                 return None
 
-            return format_html(
-                '{0}: <a href="{1}">{2}</a>',
-                obj._meta.verbose_name,
-                obj.bmfmodule_detail(),
-                obj
-            )
+            if hasattr(obj, '_bmfmeta') and obj._bmfmeta.only_related:
+                return format_html(
+                    '{0}: {1}',
+                    obj._meta.verbose_name,
+                    obj
+                )
+            else:
+                return format_html(
+                    '{0}: <a href="{1}">{2}</a>',
+                    obj._meta.verbose_name,
+                    obj.bmfmodule_detail(),
+                    obj
+                )
 
         def format_protected_callback(obj):
 
@@ -706,10 +690,16 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         self.object = self.get_object()
         success_url = self.get_success_url()
         self.object.delete()
-        return self.render_valid_form({
-            'message': ugettext('Object deleted'),
-            'redirect': self.request.GET.get('redirect', success_url),
-        })
+        if self.model._bmfmeta.only_related:
+            return self.render_valid_form({
+                'message': ugettext('Object deleted'),
+                'reload': True,
+            })
+        else:
+            return self.render_valid_form({
+                'redirect': self.request.GET.get('redirect', success_url),
+                'message': ugettext('Object deleted'),
+            })
 
     def clean_list(self, lst):
         if not isinstance(lst, (list, tuple)):

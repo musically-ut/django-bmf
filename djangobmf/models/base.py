@@ -69,7 +69,11 @@ class BMFOptions(object):
         self.has_comments = False
         self.has_files = False
         self.can_clone = False
-        self.only_related = False
+
+        # mark this model as only related, which means that it
+        # won't get a detail view
+        self.only_related = getattr(options, 'only_related', False)
+
         self.clean = False
         self.observed_fields = []
         self.search_fields = []
@@ -136,7 +140,6 @@ class BMFOptions(object):
                 'has_logging',
                 'has_comments',
                 'has_files',
-                'only_related',
                 'search_fields',
                 'number_cycle',
                 'clean',

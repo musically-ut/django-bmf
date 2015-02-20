@@ -118,6 +118,9 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
     def get_detail_urls(self):
         reports = self.list_reports()
 
+        if self.model._bmfmeta.only_related:
+            return patterns('')
+
         urlpatterns = patterns(
             '',
             url(
