@@ -44,12 +44,14 @@ extra_top = 40mm
 pdf_background_pk = None
 
 [pages]
-margin_left = 10mm
+margin_right = 10mm
 margin_bottom = 15mm
 margin_top = 20mm
-footer_right = 10mm
-footer_height = 10mm
 pdf_background_pk = None
+
+[footer]
+right = 10mm
+height = 10mm
 """
 
 
@@ -67,25 +69,20 @@ class Xhtml2PdfReport(Report):
         template_name = '%s/%s_htmlreport.html' % (model.app_label, model.model_name)
 
         pages_file = None
+        try:
+            bg_pk = self.options.getint('pages', 'pdf_background_pk')
+            file = Document.objects.get(pk=bg_pk)
+            pages_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
+        except (Document.DoesNotExist, ValueError):
+            pass
+
         letter_file = None
-
-        if self.options.has_option('pages', 'pdf_background_pk'):
-            if self.options.getint('pages', 'pdf_background_pk'):
-                bg_pk = self.options.getint('pages', 'pdf_background_pk')
-                try:
-                    file = Document.objects.get(pk=bg_pk)
-                    pages_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
-                except Document.DoesNotExist:
-                    pass
-
-        if self.options.has_option('letter_page', 'pdf_background_pk'):
-            if self.options.getint('letter_page', 'pdf_background_pk'):
-                bg_pk = self.options.getint('letter_page', 'pdf_background_pk')
-                try:
-                    file = Document.objects.get(pk=bg_pk)
-                    letter_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
-                except Document.DoesNotExist:
-                    pass
+        try:
+            bg_pk = self.options.getint('letter_page', 'pdf_background_pk')
+            file = Document.objects.get(pk=bg_pk)
+            letter_file = codecs.encode(file.file.read(), 'base64').decode().replace('\n', '')
+        except (Document.DoesNotExist, ValueError):
+            pass
 
         options = {
             'template_name': template_name,
@@ -97,15 +94,18 @@ class Xhtml2PdfReport(Report):
             'template_letter': letter_file,
             'template_pages': pages_file,
 
-            'letter_margin_right': self.cfg.get('letter_page', 'margin_right'),
-            'letter_margin_bottom': self.cfg.get('letter_page', 'margin_bottom'),
+            'letter_margin_right': self.options.get('letter_page', 'margin_right'),
+            'letter_margin_bottom': self.options.get('letter_page', 'margin_bottom'),
             'letter_extra': self.options.getboolean('letter_page', 'extra'),
             'letter_extra_right': self.options.get('letter_page', 'extra_right'),
-            'letter_extra_top': self.options.get('letter_page', 'extra_bottom'),
+            'letter_extra_top': self.options.get('letter_page', 'extra_top'),
 
-            'page_margin_top': self.cfg.get('pages', 'margin_top'),
-            'page_margin_right': self.cfg.get('pages', 'margin_right'),
-            'page_margin_bottom': self.cfg.get('pages', 'margin_bottom'),
+            'page_margin_top': self.options.get('pages', 'margin_top'),
+            'page_margin_right': self.options.get('pages', 'margin_right'),
+            'page_margin_bottom': self.options.get('pages', 'margin_bottom'),
+
+            'footer_height': self.options.get('footer', 'height'),
+            'footer_right': self.options.get('footer', 'right'),
         }
         context['options'] = options
 
@@ -121,13 +121,14 @@ class Xhtml2PdfReport(Report):
                 timeout=5.0,
             )
             return 'pdf', 'application/pdf', response.content, True
-        else:
+        elif XHTML2PDF:
             buffer = BytesIO()
             pdf = pisa.pisaDocument(BytesIO(html, buffer))
             pdf = buffer.getvalue()
             buffer.close()
             return 'pdf', 'application/pdf', pdf, True
+        else:
+            return 'html', 'text/html', html, False
 
 
-if XHTML2PDF or settings.REPORTING_SERVER:
-    site.register_report('xhtml2pdf', Xhtml2PdfReport)
+site.register_report('xhtml2pdf', Xhtml2PdfReport)

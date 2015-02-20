@@ -203,32 +203,32 @@
 },
 
 {
- "pk": 1, 
- "model": "djangobmf.report", 
  "fields": {
   "contenttype": [
-   "djangobmf_quotation", 
+   "djangobmf_quotation",
    "quotation"
-  ], 
-  "mimetype": "pdf", 
-  "reporttype": "xhtml2pdf", 
-  "options": "[layout]\nsize = A4\nform = A\nletter = true\n\n[letter_page]\nmargin_left = 10mm\nmargin_bottom = 15mm\nextra = true\nextra_right = 10mm\nextra_top = 40mm\nbackground = None\n\n[pages]\nmargin_left = 10mm\nmargin_bottom = 15mm\nmargin_top = 20mm\nfooter_right = 10mm\nfooter_height = 10mm\nbackground = None", 
-  "modified": "2014-01-18T23:10:21.491Z"
- }
+  ],
+  "reporttype": "xhtml2pdf",
+  "mimetype": "pdf",
+  "options": "[layout]\r\nsize = A4\r\nform = A\r\nletter = True\r\n\r\n[letter_page]\r\nmargin_right = 10mm\r\nmargin_bottom = 40mm\r\nextra = true\r\nextra_right = 10mm\r\nextra_top = 40mm\r\npdf_background_pk = None\r\n\r\n[pages]\r\nmargin_right = 10mm\r\nmargin_bottom = 15mm\r\nmargin_top = 20mm\r\npdf_background_pk = None\r\n\r\n[footer]\r\nright = 10mm\r\nheight = 10mm",
+  "modified": "2015-02-20T03:40:14.200Z"
+ },
+ "model": "djangobmf.report",
+ "pk": 1
 },
 {
- "pk": 2, 
- "model": "djangobmf.report", 
  "fields": {
   "contenttype": [
-   "djangobmf_invoice", 
+   "djangobmf_invoice",
    "invoice"
-  ], 
-  "mimetype": "pdf", 
-  "reporttype": "xhtml2pdf", 
-  "options": "[layout]\nsize = A4\nform = A\nletter = true\n\n[letter_page]\nmargin_left = 10mm\nmargin_bottom = 15mm\nextra = true\nextra_right = 10mm\nextra_top = 40mm\nbackground = None\n\n[pages]\nmargin_left = 10mm\nmargin_bottom = 15mm\nmargin_top = 20mm\nfooter_right = 10mm\nfooter_height = 10mm\nbackground = None", 
-  "modified": "2014-01-18T23:10:34.381Z"
- }
+  ],
+  "reporttype": "xhtml2pdf",
+  "mimetype": "pdf",
+  "options": "[layout]\r\nsize = A4\r\nform = A\r\nletter = True\r\n\r\n[letter_page]\r\nmargin_right = 10mm\r\nmargin_bottom = 40mm\r\nextra = true\r\nextra_right = 10mm\r\nextra_top = 40mm\r\npdf_background_pk = None\r\n\r\n[pages]\r\nmargin_right = 10mm\r\nmargin_bottom = 15mm\r\nmargin_top = 20mm\r\npdf_background_pk = None\r\n\r\n[footer]\r\nright = 10mm\r\nheight = 10mm",
+  "modified": "2015-02-20T03:40:07.347Z"
+ },
+ "model": "djangobmf.report",
+ "pk": 2
 },
 
 {

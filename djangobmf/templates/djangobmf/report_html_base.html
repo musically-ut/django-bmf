@@ -9,8 +9,8 @@
         size: {{ options.size }};
         margin-top: 105mm;
         margin-left: 25mm;
-        margin-right: {{ letter_margin_right }};
-        margin-bottom: {{ letter_margin_bottom }};
+        margin-right: {{ options.letter_margin_right }};
+        margin-bottom: {{ options.letter_margin_bottom }};
         {% if options.template_letter %}background-image: url('data:application/pdf;base64,{{ options.template_letter }}');{% endif %}
 
         @frame address {
@@ -22,16 +22,16 @@
         }
 
         @frame extra {
-          top: {{ letter_extra_top }};
-          right: {{ letter_extra_right }};
+          top: {{ options.letter_extra_top }};
+          right: {{ options.letter_extra_right }};
           width: 75mm;
           -pdf-frame-content: extraContent;
         }
         
         @frame footer {
-          right: 10mm;
+          right: {{ options.footer_right }};
           bottom: 0;
-          height: 10mm;
+          height: {{ options.footer_height }};
           width: 50mm;
           -pdf-frame-content: footerContent;
           text-align: right;
@@ -40,16 +40,16 @@
       @page laterPages {
 {% endif %}
         size: {{ options.size }};
-        margin-top: {{ page_margin_top }};
+        margin-top: {{ options.page_margin_top }};
         margin-left: 25mm;
-        margin-right: {{ page_margin_right }};
-        margin-bottom: {{ page_margin_bottom }};
+        margin-right: {{ options.page_margin_right }};
+        margin-bottom: {{ options.page_margin_bottom }};
         {% if options.template_pages %}background-image: url('data:application/pdf;base64,{{ options.template_pages }}');{% endif %}
 
         @frame footer {
-          right: 10mm;
+          right: {{ options.footer_right }};
+          height: {{ options.footer_height }};
           bottom: 0;
-          height: 10mm;
           width: 50mm;
           -pdf-frame-content: footerContent;
         }

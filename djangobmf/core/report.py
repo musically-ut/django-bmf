@@ -21,7 +21,5 @@ class Report(object):
 
         returns extension, mime_type, data or file_object, attachment-boolean
         """
-        model = context['bmfmodule']['model']._meta
-        template_name = '%s/%s_htmlreport.html' % (model.app_label, model.model_name)
-        template = select_template([template_name, 'djangobmf/report_html_base.html'])
+        template = select_template(['djangobmf/report_missing.html'])
         return 'html', 'text/html', template.render(Context()), False
