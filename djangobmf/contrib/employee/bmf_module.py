@@ -11,9 +11,11 @@ from djangobmf.categories import HumanResources
 from djangobmf.sites import site
 
 from .models import Employee
+from .views import EmployeeCreateView
 
 
 site.register_module(Employee, **{
+    'create': EmployeeCreateView,
 })
 
 

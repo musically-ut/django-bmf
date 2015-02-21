@@ -113,14 +113,19 @@ def bmffield(field):
     elif isinstance(field.field, forms.models.ModelChoiceField):
         model = field.field.choices.queryset.model
         if hasattr(model, "_bmfmeta"):
-            if field.value():
-                # FIXME FAILS IF QUERYSET IS INVALID
-                text = field.field.choices.queryset.get(pk=field.value())
+            value = field.value()
+            if value:
+                try:
+                    text = field.field.choices.queryset.get(pk=field.value())
+                except field.field.choices.queryset.model.DoesNotExist:
+                    text = None
+                    value = None
             else:
                 text = None
+
             if field.field.widget.attrs.get('readonly', False):
                 data = '<p class="form-control-static">%s</p>' % (text or '<i>%s</i>' % _('empty'))
-                data += field.as_hidden(attrs={'autocomplete': 'off'})
+                data += field.as_hidden(attrs={'autocomplete': 'off', 'value': value})
                 return data
             else:
                 data = '<div class="input-group" data-bmf-autocomplete="1">'

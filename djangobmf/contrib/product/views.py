@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+from djangobmf.models import Configuration
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleUpdateView
@@ -13,6 +14,13 @@ from .forms import ProductCreateForm
 
 class ProductCreateView(ModuleCreateView):
     form_class = ProductCreateForm
+
+    def get_initial(self):
+        self.initial.update({
+            'income_account': Configuration.get_setting('bmfcontrib_accounting', 'income'),
+            'expense_account': Configuration.get_setting('bmfcontrib_accounting', 'expense'),
+        })
+        return super(ProductCreateView, self).get_initial()
 
 
 class ProductUpdateView(ModuleUpdateView):

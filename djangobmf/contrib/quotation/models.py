@@ -105,6 +105,16 @@ class AbstractQuotation(BMFModel):
             return self.project
         return None
 
+    def get_project_queryset(self, qs):
+        if self.customer:
+            return qs.filter(customer=self.customer)
+        return qs
+
+    def get_customer_queryset(self, qs):
+        if self.project:
+            return qs.filter(pk=self.project.customer_id)
+        return qs
+
     def clean(self):
         if self.project and not self.customer_id:
             self.customer = self.project.customer
