@@ -127,7 +127,7 @@ class Xhtml2PdfReport(Report):
             return 'pdf', 'application/pdf', response.content, True
         elif XHTML2PDF:
             buffer = BytesIO()
-            pdf = pisa.pisaDocument(BytesIO(html, buffer))
+            pdf = pisa.pisaDocument(BytesIO(html), buffer)
             pdf = buffer.getvalue()
             buffer.close()
             return 'pdf', 'application/pdf', pdf, True
