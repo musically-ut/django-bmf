@@ -658,7 +658,7 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
 
         def format_protected_callback(obj):
 
-            if obj.__class__ in self.request.djangobmf_site.modules:
+            if obj.__class__ in self.request.djangobmf_site.modules and not obj._bmfmeta.only_related:
                 return format_html(
                     '{0}: <a href="{1}">{2}</a>',
                     obj._meta.verbose_name,

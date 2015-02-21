@@ -19,7 +19,7 @@ class ModuleOverviewView(ViewMixin, TemplateView):
         for ct, model in site.models.items():
             info = model._meta.app_label, model._meta.model_name
             perm = '%s.view_%s' % info
-            if self.request.user.has_perms([perm]):  # pragma: no branch
+            if not model._bmfmeta.only_related and self.request.user.has_perms([perm]):  # pragma: no branch
                 modules.append({
                     'model': model,
                     'url': reverse('%s:list' % model._bmfmeta.namespace_api),

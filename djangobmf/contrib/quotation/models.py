@@ -198,6 +198,9 @@ class QuotationProduct(BMFModel):
     # unit = models.CharField() # TODO add units
     description = models.TextField(_("Description"), null=True, blank=True)
 
+    class BMFMeta:
+        only_related = True
+
     def calc_all(self):
         if hasattr(self, '_calcs'):
             return self._calcs

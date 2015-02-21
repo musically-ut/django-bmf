@@ -51,8 +51,7 @@ class TeamMember(BMFModel):
         unique_together = ("team", "employee")
 
     class BMFMeta:
-        search_fields = ['name']
-        has_logging = False
+        only_related = True
 
 
 class Team(AbstractTeam):

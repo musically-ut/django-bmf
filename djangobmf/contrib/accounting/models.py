@@ -266,7 +266,7 @@ class BaseTransactionItem(BMFModel):
         swappable = "BMF_CONTRIB_TRANSACTIONITEM"
 
     class BMFMeta:
-        has_logging = False
+        only_related = True
 
 # def set_debit(self, amount):
 #   if self.get_type in [ACCOUNTING_ASSET, ACCOUNTING_EXPENSE]:
