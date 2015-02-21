@@ -25,10 +25,6 @@ class AbstractTax(BMFModel):
         on_delete=models.PROTECT,
     )
     rate = models.DecimalField(max_digits=8, decimal_places=5)
-    passive = models.BooleanField(
-        _('Tax is allways included in the product price and never visible to the customer'),
-        null=False, blank=False, default=False,
-    )
     is_active = models.BooleanField(_("Is active"), null=False, blank=False, default=True)
 
     def get_rate(self):
