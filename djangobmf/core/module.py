@@ -20,6 +20,7 @@ from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleReportView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleWorkflowView
+from djangobmf.views.api import ModuleListAPIView
 
 import logging
 logger = logging.getLogger(__name__)
@@ -59,11 +60,16 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
         self.get = options.get('get', ModuleGetView)
-        self.serializer = options.get('serializer', Serializer)
+        self.serializer_old = options.get('serializer', Serializer)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
         self.manager = {}
+
+        if issubclass(self.serializer_old, Serializer):
+            self.serializer = self.serializer_old
+        else:
+            self.serializer = Serializer
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -151,7 +157,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 r'^get/$',
                 self.get.as_view(
                     model=self.model,
-                    serializer=self.serializer,
+                    serializer=self.serializer_old,
                 ),
                 name='get',
             ),
@@ -159,7 +165,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 r'^get/(?P<manager>\w+)/$',
                 self.get.as_view(
                     model=self.model,
-                    serializer=self.serializer,
+                    serializer=self.serializer_old,
                 ),
                 name='get',
             ),
@@ -182,6 +188,20 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 name='delete',
             ),
         )
+        if self.serializer != self.serializer_old:
+            urlpatterns += patterns(
+                '',
+                url(
+                    r'^rest/$',
+                    ModuleListAPIView.as_view(
+                        model=self.model,
+                        module=self,
+                        serializer=self.serializer,
+                    ),
+                    name='rest',
+                ),
+            )
+
         if self.model._bmfmeta.can_clone:
             urlpatterns += patterns(
                 '',
