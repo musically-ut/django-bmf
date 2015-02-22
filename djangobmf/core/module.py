@@ -10,6 +10,7 @@ from django.utils import six
 from django.utils.text import slugify
 
 from djangobmf.core.serializer import Serializer
+from djangobmf.permissions import ModulePermission
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDeleteView
@@ -60,6 +61,8 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
         self.get = options.get('get', ModuleGetView)
+        self.permissions = options.get('permissions', ModulePermission)
+        self.serializer = options.get('serializer', None)
         self.serializer_old = options.get('serializer', Serializer)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
@@ -67,9 +70,9 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.manager = {}
 
         if issubclass(self.serializer_old, Serializer):
-            self.serializer = self.serializer_old
+            self.serializer = None
         else:
-            self.serializer = Serializer
+            self.serializer_old = Serializer
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -188,7 +191,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 name='delete',
             ),
         )
-        if self.serializer != self.serializer_old:
+        if self.serializer:
             urlpatterns += patterns(
                 '',
                 url(
@@ -196,6 +199,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                     ModuleListAPIView.as_view(
                         model=self.model,
                         module=self,
+                        permissions=self.permissions,
                         serializer=self.serializer,
                     ),
                     name='rest',

@@ -17,14 +17,13 @@ class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
     model = None
     module = None
     serializer = None
+    permissions = None
 
-    def get_queryset(self):
-        print("GET QUERYSET")
-        return self.model.objects.all()
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-    def get_serializer_class(self):
-        print("GET SERIALIZER")
-        return self.serializer
+#   def post(self, request, *args, **kwargs):
+#       return self.create(request, *args, **kwargs)
 
 
 class ModuleDetailAPIView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericAPIView):
@@ -32,7 +31,20 @@ class ModuleDetailAPIView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixi
     """
     model = None
     module = None
-    serializer_class = None
+    serializer = None
+    permissions = None
+
+#   def get(self, request, *args, **kwargs):
+#       return self.retrieve(request, *args, **kwargs)
+
+#   def put(self, request, *args, **kwargs):
+#       return self.update(request, *args, **kwargs)
+
+#   def patch(self, request, *args, **kwargs):
+#       return self.partial_update(request, *args, **kwargs)
+
+#   def delete(self, request, *args, **kwargs):
+#       return self.destroy(request, *args, **kwargs)
 
     def get_queryset(self):
         return self.model.objects.all()

@@ -8,7 +8,11 @@ from rest_framework import serializers
 from .models import Employee
 
 
-class EmployeeSerializer(serializers.HyperlinkedModelSerializer):
+class EmployeeSerializer(serializers.ModelSerializer):
+    days_since_joined = serializers.SerializerMethodField()
+
     class Meta:
         model = Employee
-        exclude = []
+
+    def get_days_since_joined(self, obj):
+        return "Test %s" % obj
