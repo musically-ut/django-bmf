@@ -16,6 +16,8 @@ from djangobmf.core.module import Module
 from djangobmf.models import Configuration
 from djangobmf.models import NumberCycle
 
+from rest_framework import routers
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,7 @@ class Site(object):
     def __init__(self, namespace=None, app_name=None):
         self.namespace = namespace or "djangobmf"
         self.app_name = app_name or "djangobmf"
+        self.router = routers.DefaultRouter()
         self.clear()
 
     def clear(self):
@@ -238,9 +241,23 @@ class Site(object):
             # pattern - the urls are not needed during migrations.
             return patterns('')
 
+        # TODO REMOVE ME
+        from ..models import Document
+        # TODO REMOVE ME
+        from ..serializers import DocumentSerializer
+        # TODO REMOVE ME
+        from rest_framework import viewsets
+
+        class Test(viewsets.ModelViewSet):
+            queryset = Document.objects.all()
+            serializer_class = DocumentSerializer
+
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
             ct = ContentType.objects.get_for_model(module)
+
+            # set the rest api
+            self.router.register(r'module/%s/%s' % info, Test, 'module_rest_%s_%s' % info)
 
             # set the apis
             urlpatterns += patterns(
@@ -260,5 +277,11 @@ class Site(object):
                         include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
                     ),
                 )
+
+        # REST API
+        urlpatterns += patterns(
+            '',
+            url(r'^rest/', include(self.router.urls)),
+        )
 
         return urlpatterns
