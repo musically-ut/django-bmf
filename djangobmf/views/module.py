@@ -24,11 +24,9 @@ from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
-from django.views.generic import View
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
 from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.list import MultipleObjectMixin
-from django.views.generic.list import MultipleObjectTemplateResponseMixin
 from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
@@ -76,8 +74,7 @@ logger = logging.getLogger(__name__)
 
 
 class ModuleListView(
-        ModuleViewPermissionMixin, ModuleViewMixin,
-        MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
+        ModuleViewPermissionMixin, ModuleViewMixin, TemplateView):
     """
     """
     # set by views.dashboard
@@ -186,10 +183,6 @@ class ModuleListView(
         })
         return super(ModuleListView, self).get_context_data(**kwargs)
 
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data(object_list=self.object_list)
-        return self.render_to_response(context)
 
 '''
 class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
