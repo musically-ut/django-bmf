@@ -15,6 +15,7 @@ from .models import Timesheet
 
 class TimesheetSerializer(ModuleSerializer):
     date = serializers.SerializerMethodField()
+    time = serializers.SerializerMethodField()
 
     class Meta:
         model = Timesheet
