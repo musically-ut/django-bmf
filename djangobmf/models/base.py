@@ -354,7 +354,7 @@ class BMFModelBase(ModelBase):
         def bmfmodule_list(cls, manager="all"):
             """
             """
-            return ('%s:rest' % cls._bmfmeta.namespace_api, (), {"manager": manager})
+            return ('%s:get' % cls._bmfmeta.namespace_api, (), {"manager": manager})
 
         setattr(cls, 'bmfmodule_list', classmethod(models.permalink(bmfmodule_list)))
 

@@ -141,6 +141,10 @@ class ModuleListView(
             kwargs.update({
                 'manager': self.manager
             })
+        else:
+            kwargs.update({
+                'manager': 'all'
+            })
 
         url = reverse('%s:get' % self.model._bmfmeta.namespace_api, kwargs=kwargs)
 

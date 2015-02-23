@@ -9,7 +9,6 @@ from django.conf.urls import url
 from django.utils import six
 from django.utils.text import slugify
 
-from djangobmf.core.serializer import Serializer
 from djangobmf.permissions import ModulePermission
 from djangobmf.serializers import ModuleSerializer
 from djangobmf.views import ModuleCloneView
@@ -64,16 +63,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.get = options.get('get', ModuleGetView)
         self.permissions = options.get('permissions', ModulePermission)
         self.serializer = options.get('serializer', None)
-        self.serializer_old = options.get('serializer', Serializer)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
         self.manager = {}
-
-        if issubclass(self.serializer_old, Serializer):
-            self.serializer = None
-        else:
-            self.serializer_old = Serializer
 
         # create a default serializer
         if not self.serializer:
@@ -167,18 +160,12 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 name='list',
             ),
             url(
-                r'^get/$',
-                self.get.as_view(
-                    model=self.model,
-                    serializer=self.serializer_old,
-                ),
-                name='get',
-            ),
-            url(
                 r'^get/(?P<manager>\w+)/$',
-                self.get.as_view(
+                ModuleListAPIView.as_view(
                     model=self.model,
-                    serializer=self.serializer_old,
+                    module=self,
+                    permissions=self.permissions,
+                    serializer=self.serializer,
                 ),
                 name='get',
             ),
@@ -201,20 +188,6 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 name='delete',
             ),
         )
-        if self.serializer:
-            urlpatterns += patterns(
-                '',
-                url(
-                    r'^rest/(?P<manager>\w+)/$',
-                    ModuleListAPIView.as_view(
-                        model=self.model,
-                        module=self,
-                        permissions=self.permissions,
-                        serializer=self.serializer,
-                    ),
-                    name='rest',
-                ),
-            )
 
         if self.model._bmfmeta.can_clone:
             urlpatterns += patterns(
