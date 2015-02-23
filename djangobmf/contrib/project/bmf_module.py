@@ -13,12 +13,10 @@ from .categories import ProjectCategory
 from .models import Project
 from .permissions import ProjectPermission
 from .serializers import ProjectSerializer
-from .views import ProjectGetView
 from .views import ProjectUpdateView
 
 
 site.register_module(Project, **{
-    'get': ProjectGetView,
     'update': ProjectUpdateView,
     'permissions': ProjectPermission,
     'serializers': ProjectSerializer,

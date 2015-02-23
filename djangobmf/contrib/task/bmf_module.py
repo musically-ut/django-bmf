@@ -18,10 +18,8 @@ from .categories import GoalCategory
 from .categories import TaskCategory
 from .models import Task
 from .models import Goal
-from .views import TaskGetView
 from .views import GoalCloneView
 from .views import GoalDetailView
-from .views import GoalGetView
 
 
 # ass GoalSerializer(Serializer):
@@ -62,13 +60,11 @@ from .views import GoalGetView
 @register(dashboard=ProjectManagement)
 class TaskModule(Module):
     model = Task
-    get = TaskGetView
 
 
 @register(dashboard=ProjectManagement)
 class GoalModule(Module):
     model = Goal
-    get = GoalGetView
     clone = GoalCloneView
     detail = GoalDetailView
 
@@ -128,12 +124,10 @@ class TaskCategoryCLS(TaskCategory):
 
 
 site.register_module(Task, **{
-    'get': TaskGetView,
 })
 
 
 site.register_module(Goal, **{
-    'get': GoalGetView,
     'clone': GoalCloneView,
     'detail': GoalDetailView,
 })

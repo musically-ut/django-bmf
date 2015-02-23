@@ -5,17 +5,8 @@ from __future__ import unicode_literals
 
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleDetailView
-from djangobmf.views import ModuleGetView
 
 from .forms import GoalCloneForm
-
-
-class GoalGetView(ModuleGetView):
-    pass
-
-
-class TaskGetView(ModuleGetView):
-    pass
 
 
 class GoalCloneView(ModuleCloneView):

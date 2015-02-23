@@ -16,7 +16,6 @@ from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDeleteView
 from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleFormAPI
-from djangobmf.views import ModuleGetView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleReportView
 from djangobmf.views import ModuleUpdateView
@@ -60,7 +59,6 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.update = options.get('update', ModuleUpdateView)
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
-        self.get = options.get('get', ModuleGetView)
         self.permissions = options.get('permissions', ModulePermission)
         self.serializer = options.get('serializer', None)
         self.report = options.get('report', None)
