@@ -3,9 +3,9 @@ from rest_framework import serializers
 
 
 class ModuleSerializer(serializers.ModelSerializer):
-    bmfdetail = serializers.SerializerMethodField()
+    bmfmodule_detail = serializers.SerializerMethodField()
 
-    def bmfdetail(self, obj):
+    def get_bmfmodule_detail(self, obj):
         return obj.bmfmodule_detail()
 
 
