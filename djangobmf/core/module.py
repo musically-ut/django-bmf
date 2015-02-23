@@ -77,12 +77,12 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
 
         # create a default serializer
         if not self.serializer:
-            class MySerializer(ModuleSerializer):
+            class AutoSerializer(ModuleSerializer):
                 class Meta:
                     pass
-            MySerializer.Meta.model = model
+            AutoSerializer.Meta.model = model
             logger.info('Creating a serializer for module %s' % model.__name__)
-            self.serializer = MySerializer
+            self.serializer = AutoSerializer
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -205,7 +205,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^rest/$',
+                    r'^rest/(?P<manager>\w+)/$',
                     ModuleListAPIView.as_view(
                         model=self.model,
                         module=self,

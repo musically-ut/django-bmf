@@ -29,6 +29,9 @@ class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
         return self.serializer
 
     def get_queryset(self):
+        manager = self.kwargs.get('manager', 'all')
+        if manager == 'all':
+            return self.model.objects.all()
         return self.model.objects.all()
 
 
