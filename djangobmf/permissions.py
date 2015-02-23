@@ -53,7 +53,7 @@ class ModulePermission(BasePermission):
         # Has permissions to view object
         return True
 
-    def update_queryset(self, qs, user, model_cls):
+    def filter_queryset(self, qs, user, model_cls):
         return qs
 
     def get_permissions(self, method, model_cls):

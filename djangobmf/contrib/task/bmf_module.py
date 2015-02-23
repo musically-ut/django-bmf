@@ -18,6 +18,8 @@ from .categories import GoalCategory
 from .categories import TaskCategory
 from .models import Task
 from .models import Goal
+from .permissions import GoalPermission
+from .permissions import TaskPermission
 from .views import GoalCloneView
 from .views import GoalDetailView
 
@@ -124,12 +126,14 @@ class TaskCategoryCLS(TaskCategory):
 
 
 site.register_module(Task, **{
+    'permissions': TaskPermission,
 })
 
 
 site.register_module(Goal, **{
     'clone': GoalCloneView,
     'detail': GoalDetailView,
+    'permissions': GoalPermission,
 })
 
 

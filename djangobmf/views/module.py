@@ -378,8 +378,6 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleViewMixin, DetailView):
 #   """
 #   Provides an API to get object data
 #   """
-#   model = None  # set by views
-#   serializer = None  # set by views
 
 #   # Limit Queryset length and activate pagination
 #   limit = 100

@@ -10,7 +10,7 @@ from djangobmf.permissions import ModulePermission
 
 class ProjectPermission(ModulePermission):
 
-    def update_queryset(self, qs, user, model_cls):
+    def filter_queryset(self, qs, user, model_cls):
         if user.has_perm('%s.can_manage' % model_cls._meta.app_label, model_cls):
             return qs
         return qs.filter(

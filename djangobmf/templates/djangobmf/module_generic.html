@@ -24,6 +24,9 @@
 --></script>{% endaddtoblock %}{% endblock %}
 
 {% block infobar %}
+{% if debug %}
+<p>API: <a href="{{ get_data_url }}">{{ get_data_url }}</a></p>
+{% endif %}
 <div class="input-group">
     <div class="input-group-btn">
         <button class="btn btn-default disabled" type="button">

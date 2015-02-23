@@ -160,10 +160,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             url(
                 r'^get/(?P<manager>\w+)/$',
                 ModuleListAPIView.as_view(
-                    model=self.model,
                     module=self,
+                    model=self.model,
                     permissions=self.permissions,
-                    serializer=self.serializer,
+                    serializer_class=self.serializer,
                 ),
                 name='get',
             ),
