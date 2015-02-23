@@ -11,6 +11,7 @@ from django.utils.text import slugify
 
 from djangobmf.core.serializer import Serializer
 from djangobmf.permissions import ModulePermission
+from djangobmf.serializers import ModuleSerializer
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDeleteView
@@ -73,6 +74,15 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             self.serializer = None
         else:
             self.serializer_old = Serializer
+
+        # create a default serializer
+        if not self.serializer:
+            class MySerializer(ModuleSerializer):
+                class Meta:
+                    pass
+            MySerializer.Meta.model = model
+            logger.info('Creating a serializer for module %s' % model.__name__)
+            self.serializer = MySerializer
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):

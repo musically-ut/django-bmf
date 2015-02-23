@@ -3,16 +3,11 @@
 
 from __future__ import unicode_literals
 
-from rest_framework import serializers
+from djangobmf.serializers import ModuleSerializer
 
 from .models import Employee
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
-    days_since_joined = serializers.SerializerMethodField()
-
+class EmployeeSerializer(ModuleSerializer):
     class Meta:
         model = Employee
-
-    def get_days_since_joined(self, obj):
-        return "Test %s" % obj

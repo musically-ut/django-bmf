@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 
-from rest_framework import serializers
+from djangobmf.serializers import ModuleSerializer
 
 from .models import Project
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectSerializer(ModuleSerializer):
     class Meta:
         model = Project

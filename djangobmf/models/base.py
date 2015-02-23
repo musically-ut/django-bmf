@@ -350,6 +350,14 @@ class BMFModelBase(ModelBase):
 
         setattr(cls, 'get_absolute_url', get_absolute_url)
 
+        # classmethod: has_permissions
+        def bmfmodule_list(cls, manager="all"):
+            """
+            """
+            return ('%s:list' % cls._bmfmeta.namespace_api, (), {"manager": manager})
+
+        setattr(cls, 'bmfmodule_list', classmethod(models.permalink(bmfmodule_list)))
+
         if cls._bmfmeta.clean:
             if not hasattr(cls, 'bmf_clean') and not cls._meta.abstract:
                 raise ImproperlyConfigured('%s has not a bmf_clean method' % (cls.__name__))
