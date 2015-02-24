@@ -121,23 +121,23 @@ class Site(object):
 
     # --- modules -------------------------------------------------------------
 
-    def register_module(self, module, **options):
-        if not hasattr(module, '_bmfmeta'):
+    def register_module(self, model, **options):
+        if not hasattr(model, '_bmfmeta'):
             raise ImproperlyConfigured(
                 'The module %s needs to be an BMF-Model in order to be'
-                'registered with django BMF.' % module.__name__
+                'registered with django BMF.' % model.__name__
             )
-        if module in self.modules:
-            raise AlreadyRegistered('The module %s is already registered' % module.__name__)
-        self.modules[module] = Module(module, **options)
+        if model in self.modules:
+            raise AlreadyRegistered('The module %s is already registered' % model.__name__)
+        self.modules[model] = Module(model, **options)
 
     def unregister_module(self, module):
         if module not in self.modules:
             raise NotRegistered('The model %s is not registered' % module.__name__)
         del self.modules[module]
 
-    def get_module(self, module):
-        return self.modules[module]
+    def get_module(self, model):
+        return self.modules[model]
 
     # --- currencies ----------------------------------------------------------
 

@@ -31,6 +31,9 @@ class Employee(object):
         self._evalteam = False
         self._team = []
 
+        # append this class to the user class
+        user.djangobmf = self
+
     @property
     def employee(self):
         if not self.has_employee or self._employee:
@@ -46,5 +49,9 @@ class Employee(object):
         self._evalteam = True
         return self._team
 
-#   def has_perms(self, perms, module, obj=None):
-#       return True
+    def has_object_perms(self, module, obj):
+        return module.permissions().filter_queryset(
+            obj._default_manager.objects.get(pk=obj.pk),
+            self.user,
+            obj.__class__
+        ).exists()
