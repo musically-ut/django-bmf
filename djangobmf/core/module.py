@@ -154,7 +154,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             '',
             url(
                 r'^$',
-                ModuleListView.as_view(model=self.model),
+                ModuleListView.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='list',
             ),
             url(
@@ -169,12 +172,16 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             ),
             url(
                 r'^update/(?P<pk>[0-9]+)/$',
-                self.update.as_view(model=self.model),
+                self.update.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='update',
             ),
             url(
                 r'^update/(?P<pk>[0-9]+)/form/$',
                 ModuleFormAPI.as_view(
+                    module=self,
                     model=self.model,
                     form_view=self.update,
                 ),
@@ -182,7 +189,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             ),
             url(
                 r'^delete/(?P<pk>[0-9]+)/$',
-                self.delete.as_view(model=self.model),
+                self.delete.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='delete',
             ),
         )
@@ -192,12 +202,16 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^clone/(?P<pk>[0-9]+)/$',
-                    self.clone.as_view(model=self.model),
+                    self.clone.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='clone',
                 ),
                 url(
                     r'^clone/(?P<pk>[0-9]+)/form/$',
                     ModuleFormAPI.as_view(
+                        module=self,
                         model=self.model,
                         form_view=self.clone,
                     ),
@@ -210,12 +224,16 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^create/(?P<key>%s)/$' % key,
-                    view.as_view(model=self.model),
+                    view.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='create',
                 ),
                 url(
                     r'^create/(?P<key>%s)/form/$' % key,
                     ModuleFormAPI.as_view(
+                        module=self,
                         model=self.model,
                         form_view=view,
                     ),
@@ -228,7 +246,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^report/(?P<pk>[0-9]+)/(?P<key>%s)/$' % key,
-                    view.as_view(model=self.model),
+                    view.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='report',
                 ),
             )
@@ -239,7 +260,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^workflow/(?P<pk>[0-9]+)/(?P<transition>\w+)/$',
-                    ModuleWorkflowView.as_view(model=self.model),
+                    ModuleWorkflowView.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='workflow',
                 ),
             )

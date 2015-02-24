@@ -94,12 +94,6 @@ class AbstractTimesheet(BMFModel):
     def __str__(self):
         return '%s' % (self.start)
 
-    @classmethod
-    def has_permissions(cls, qs, user):
-        if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
-            return qs
-        return qs.filter(employee=getattr(user, 'djangobmf_employee', -1))
-
     class BMFMeta:
         has_logging = True
         workflow = TimesheetWorkflow

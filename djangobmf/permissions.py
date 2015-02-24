@@ -26,7 +26,6 @@ class ModulePermission(BasePermission):
     def has_permission(self, request, view):
         model_cls = getattr(view, 'model', None)
         perms = self.get_permissions(request.method, model_cls)
-
         return request.user.has_perms(perms)
 
     def has_object_permission(self, request, view, obj):

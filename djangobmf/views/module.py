@@ -863,6 +863,7 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
                 raise Http404
             qs = field.field.queryset
 
+            # TODO use permissions from module
             if hasattr(field.field.queryset.model, 'has_permissions'):
                 qs = field.field.queryset.model.has_permissions(qs, self.request.user)
 

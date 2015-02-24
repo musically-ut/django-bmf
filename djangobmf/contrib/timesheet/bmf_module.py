@@ -12,6 +12,7 @@ from djangobmf.categories import TimeAndAttendance
 
 from .models import Timesheet
 from .serializers import TimesheetSerializer
+from .permissions import TimesheetPermission
 from .views import CreateView
 from .views import UpdateView
 
@@ -20,6 +21,7 @@ site.register_module(Timesheet, **{
     'create': CreateView,
     'update': UpdateView,
     'serializer': TimesheetSerializer,
+    'permissions': TimesheetPermission,
 })
 
 

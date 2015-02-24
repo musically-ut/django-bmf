@@ -449,6 +449,7 @@ class ModuleDeletePermissionMixin(object):
 
 class ModuleBaseMixin(object):
     model = None
+    module = None
 
     def get_queryset(self, manager=None):
         """
@@ -485,6 +486,8 @@ class ModuleBaseMixin(object):
         # load employee and team data into user
         user_add_bmf(self.request.user)
 
+        # TODO check permissions from module
+        self.module.permissions().filter_queryset()
         return self.model.has_permissions(qs, self.request.user)
 
     def get_object(self):
