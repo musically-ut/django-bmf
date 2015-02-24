@@ -23,8 +23,6 @@ def djangobmf_user_watch(pk):
     from djangobmf.models import ACTION_WORKFLOW
     from djangobmf.models import ACTION_FILE
 
-    from djangobmf.sites import site
-
     object = Activity.objects.get(pk=pk)
 
     if object.action == ACTION_CREATED:
@@ -38,8 +36,6 @@ def djangobmf_user_watch(pk):
 
             # ACL / Permissions lookups
             employee = Employee(notification.user)
-            module = sites.get_module(object.parent_object.__class__)
-
             if employee.has_object_perms(object.parent_object):
                 notification.pk = None
                 if notification.user == object.user:
@@ -76,9 +72,7 @@ def djangobmf_user_watch(pk):
         # ACL
         for notification in qs.select_related('user'):
 
-            notification.user.djangobmf = Employee(notification.user)
-            module = sites.get_module(object.parent_object.__class__)
-
+            employee = Employee(notification.user)
             if employee.has_object_perms(object.parent_object):
                 if notification.user != object.user:
                     notification.triggered = True

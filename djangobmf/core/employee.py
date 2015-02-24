@@ -49,9 +49,13 @@ class Employee(object):
         self._evalteam = True
         return self._team
 
-    def has_object_perms(self, module, obj):
+    def has_object_perms(self, obj):
+
+        from djangobmf.sites import site
+        module = site.get_module(obj.__class__)
+
         return module.permissions().filter_queryset(
-            obj._default_manager.objects.get(pk=obj.pk),
+            obj._default_manager.filter(pk=obj.pk),
             self.user,
             obj.__class__
         ).exists()
