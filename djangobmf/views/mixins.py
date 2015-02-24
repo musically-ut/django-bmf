@@ -20,6 +20,7 @@ from django.views.decorators.cache import never_cache
 
 from djangobmf import get_version
 from djangobmf.conf import settings as bmfsettings
+from djangobmf.core.employee import Employee
 from djangobmf.decorators import login_required
 from djangobmf.document.forms import UploadDocument
 from djangobmf.notification.forms import HistoryCommentForm
@@ -108,6 +109,8 @@ class BaseMixin(object):
 
         # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
         user_add_bmf(self.request.user)
+
+        self.request.user.djangobmf = Employee(self.request.user)
 
         # check if bmf has a employee model and if so do a validation of the
         # employee instance (users, who are not employees are not allowed to access)
