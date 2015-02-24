@@ -11,9 +11,12 @@ from djangobmf.categories import Accounting
 from djangobmf.sites import site
 
 from .models import Tax
+from .serializers import TaxSerializer
 
 
-site.register_module(Tax)
+site.register_module(Tax, **{
+    'serializer': TaxSerializer,
+})
 
 
 class TaxCategory(BaseCategory):

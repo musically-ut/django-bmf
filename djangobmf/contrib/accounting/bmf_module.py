@@ -18,21 +18,28 @@ from .models import ACCOUNTING_LIABILITY
 from .models import Account
 from .models import Transaction
 from .models import TransactionItem
-
+from .serializers import AccountSerializer
+from .serializers import TransactionSerializer
+from .serializers import TransactionItemSerializer
 from .views import TransactionCreateView
 from .views import TransactionUpdateView
 
 
-site.register_module(Account)
+site.register_module(Account, **{
+    'serializer': AccountSerializer,
+})
 
 
 site.register_module(Transaction, **{
     'create': TransactionCreateView,
     'update': TransactionUpdateView,
+    'serializer': TransactionSerializer,
 })
 
 
-site.register_module(TransactionItem)
+site.register_module(TransactionItem, **{
+    'serializer': TransactionItemSerializer,
+})
 
 
 site.register_settings('bmfcontrib_accounting', {

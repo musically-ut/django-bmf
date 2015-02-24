@@ -12,7 +12,7 @@ from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Position
-
+from .serializers import PositionSerializer
 from .views import PositionUpdateView
 from .views import PositionCreateView
 from .views import PositionAPI
@@ -21,6 +21,7 @@ from .views import PositionAPI
 site.register_module(Position, **{
     'create': PositionCreateView,
     'update': PositionUpdateView,
+    'serializer': PositionSerializer,
     'api_urlpatterns': patterns(
         '',
         url(r'^api/$', PositionAPI.as_view(), name="api"),

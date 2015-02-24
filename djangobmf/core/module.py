@@ -67,7 +67,7 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.manager = {}
 
         # create a default serializer
-        if not self.serializer:
+        if not self.serializer and not model._bmfmeta.only_related:
             class AutoSerializer(ModuleSerializer):
                 class Meta:
                     pass

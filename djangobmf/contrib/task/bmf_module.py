@@ -20,6 +20,8 @@ from .models import Task
 from .models import Goal
 from .permissions import GoalPermission
 from .permissions import TaskPermission
+from .serializers import GoalSerializer
+from .serializers import TaskSerializer
 from .views import GoalCloneView
 from .views import GoalDetailView
 
@@ -127,6 +129,7 @@ class TaskCategoryCLS(TaskCategory):
 
 site.register_module(Task, **{
     'permissions': TaskPermission,
+    'serializer': TaskSerializer,
 })
 
 
@@ -134,6 +137,7 @@ site.register_module(Goal, **{
     'clone': GoalCloneView,
     'detail': GoalDetailView,
     'permissions': GoalPermission,
+    'serializer': GoalSerializer,
 })
 
 

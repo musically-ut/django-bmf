@@ -19,7 +19,7 @@ from .views import ProjectUpdateView
 site.register_module(Project, **{
     'update': ProjectUpdateView,
     'permissions': ProjectPermission,
-    'serializers': ProjectSerializer,
+    'serializer': ProjectSerializer,
 })
 
 
