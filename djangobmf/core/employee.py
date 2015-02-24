@@ -46,5 +46,5 @@ class Employee(object):
         self._evalteam = True
         return self._team
 
-    def has_perms(self, perms, module, obj=None):
-        return True
+#   def has_perms(self, perms, module, obj=None):
+#       return True

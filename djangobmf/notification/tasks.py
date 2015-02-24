@@ -33,10 +33,12 @@ def djangobmf_user_watch(pk):
         for notification in Notification.objects \
                 .filter(watch_ct=object.parent_ct, watch_id__isnull=True) \
                 .select_related('user'):
+
             # ACL / Permissions lookups
-            base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
+            # base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
             notification.user.djangobmf = Employee(notification.user)
-            validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
+            # validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
+            validated = False
 
             if validated:
                 notification.pk = None
@@ -73,9 +75,10 @@ def djangobmf_user_watch(pk):
 
         # ACL
         for notification in qs.select_related('user'):
-            base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
+            # base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
             notification.user.djangobmf = Employee(notification.user)
-            validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
+            # validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
+            validated = False
 
             if validated:
                 if notification.user != object.user:

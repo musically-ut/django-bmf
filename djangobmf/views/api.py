@@ -50,7 +50,7 @@ class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
             # TODO
             qs = self.model.objects.all()
 
-        self.request.user.employee = Employee(self.request.user)
+        self.request.user.djangobmf = Employee(self.request.user)
 
         return self.permissions().filter_queryset(
             qs,
