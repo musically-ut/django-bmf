@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 
 from django.utils.timezone import now
 
+from djangobmf.core.employee import Employee
 from djangobmf.decorators import optional_celery
-from djangobmf.utils.user import user_add_bmf
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def djangobmf_user_watch(pk):
                 .select_related('user'):
             # ACL / Permissions lookups
             base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
-            user_add_bmf(notification.user)
+            notification.user.djangobmf = Employee(notification.user)
             validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
 
             if validated:
@@ -74,7 +74,7 @@ def djangobmf_user_watch(pk):
         # ACL
         for notification in qs.select_related('user'):
             base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
-            user_add_bmf(notification.user)
+            notification.user.djangobmf = Employee(notification.user)
             validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
 
             if validated:

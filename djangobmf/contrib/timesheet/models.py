@@ -25,7 +25,7 @@ class TimesheetManager(models.Manager):
 
     def mytimesheets(self, request):
         return self.get_queryset().filter(
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee or -1,
         )
 
 

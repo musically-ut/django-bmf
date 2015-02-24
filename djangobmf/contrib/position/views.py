@@ -24,13 +24,11 @@ class PositionCreateView(ModuleCreateView):
     form_class = PositionForm
 
     def get_initial(self):
-        self.initial.update({'date': datetime.datetime.now()})
-        if "employee" in self.initial:
-            self.initial.update({'employee': self.request.user.djangobmf_employee.pk})
+        self.initial.update({
+            'date': datetime.datetime.now(),
+            'employee': self.request.user.djangobmf.employee,
+        })
         return super(PositionCreateView, self).get_initial()
-
-    def post(self, request, *args, **kwargs):
-        return super(PositionCreateView, self).post(request, *args, **kwargs)
 
 
 class PositionUpdateView(ModuleUpdateView):

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from djangobmf.utils.user import user_add_bmf
+from djangobmf.core.employee import Employee
 
 from rest_framework import pagination
 from rest_framework import serializers
@@ -50,7 +50,7 @@ class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
             # TODO
             qs = self.model.objects.all()
 
-        user_add_bmf(self.request.user)
+        self.request.user.employee = Employee(self.request.user)
 
         return self.permissions().filter_queryset(
             qs,

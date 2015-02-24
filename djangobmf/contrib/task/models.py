@@ -32,7 +32,7 @@ class GoalManager(models.Manager):
     def mygoals(self, request):
         return self.get_queryset().filter(
             completed=False,
-            referee=getattr(request.user, 'djangobmf_employee', -1),
+            referee=request.user.djangobmf.employee,
         )
 
 
@@ -162,14 +162,14 @@ class TaskManager(models.Manager):
     def mytasks(self, request):
         return self.get_queryset().filter(
             completed=False,
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee,
         )
 
     def todo(self, request):
         return self.get_queryset().filter(
             completed=False,
             state__in=["todo", "started", "review"],
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee,
         )
 
 

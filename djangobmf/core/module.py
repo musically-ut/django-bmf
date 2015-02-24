@@ -135,7 +135,11 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             '',
             url(
                 r'^$',
-                self.detail.as_view(model=self.model, reports=reports),
+                self.detail.as_view(
+                    module=self,
+                    model=self.model,
+                    reports=reports
+                ),
                 name='detail',
             ),
         )

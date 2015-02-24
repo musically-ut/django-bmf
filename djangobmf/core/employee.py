@@ -10,21 +10,22 @@ from djangobmf.conf import settings
 
 class Employee(object):
 
-    try:
-        employee_cls = apps.get_model(settings.CONTRIB_EMPLOYEE)
-        has_employee = True
-    except LookupError:
-        employee_cls = None
-        has_employee = False
-
-    try:
-        team_cls = apps.get_model(settings.CONTRIB_TEAM)
-        has_team = True
-    except LookupError:
-        team_cls = None
-        has_team = False
-
     def __init__(self, user):
+
+        try:
+            self.employee_cls = apps.get_model(settings.CONTRIB_EMPLOYEE)
+            self.has_employee = True
+        except LookupError:
+            self.employee_cls = None
+            self.has_employee = False
+
+        try:
+            self.team_cls = apps.get_model(settings.CONTRIB_TEAM)
+            self.has_team = True
+        except LookupError:
+            self.team_cls = None
+            self.has_team = False
+
         self.user = user
         self._employee = None
         self._evalteam = False
@@ -34,14 +35,14 @@ class Employee(object):
     def employee(self):
         if not self.has_employee or self._employee:
             return self._employee
-        self._employee = employee_cls.objects.get(user=self.user)
+        self._employee = self.employee_cls.objects.get(user=self.user)
         return self._employee
 
     @property
     def team(self):
-        if not self.has_team or not self.employee or self._evalteam:
+        if not self.has_employee or not self.has_team or not self.employee or self._evalteam:
             return self._team
-        self._team = team_cls.objects.filter(members=self.employee).values_list("id", flat=True)
+        self._team = self.team_cls.objects.filter(members=self.employee).values_list("id", flat=True)
         self._evalteam = True
         return self._team
 
