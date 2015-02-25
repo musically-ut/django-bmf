@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 from django.utils.formats import date_format
+from django.utils.timesince import timesince
 from django.utils.timezone import now
 
 from djangobmf.serializers import ModuleSerializer
@@ -16,15 +17,40 @@ from .models import Timesheet
 class TimesheetSerializer(ModuleSerializer):
     date = serializers.SerializerMethodField()
     time = serializers.SerializerMethodField()
+    timesince = serializers.SerializerMethodField()
+    employee_name = serializers.ReadOnlyField(source='employee.name')
+    project_name = serializers.ReadOnlyField(source='project.name')
+    task_name = serializers.ReadOnlyField(source='task.name')
 
     class Meta:
         model = Timesheet
+        fields = (
+            'date',
+            'time',
+            'timesince',
+            'summary',
+            'start',
+            'end',
+            'billable',
+            'valid',
+            'employee',
+            'employee_name',
+            'project',
+            'project_name',
+            'task',
+            'task_name',
+            'bmfdetail',
+        )
 
-    def date(self, obj):
-        return date_format(obj.start, "SHORT_DATE_FORMAT"),
+    def get_date(self, obj):
+        return date_format(obj.start, "SHORT_DATE_FORMAT")
 
-    def time(self, obj):
+    def get_time(self, obj):
         if obj.end:
-            return obj.end - obj.start,
+            delta = obj.end - obj.start
         else:
-            return now() - obj.start,
+            delta = now() - obj.start
+        return delta.total_seconds()
+
+    def get_timesince(self, obj):
+        return timesince(obj.start, obj.end)
