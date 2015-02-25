@@ -3,25 +3,37 @@
 Version 0.3
 ====================================
 
-Accounting, Quotations and Invoices finished
+Reporting finished
 
 
 Version 0.4
 ====================================
 
-Timesheets finished
+Accounting, Quotations and Invoices finished
 
 
 Version 0.5
 ====================================
 
-Document-Management-System finished
+Positions and Timesheets finished
 
 
 Version 0.6
 ====================================
 
-CRM or Products finished
+Document-Management-System finished
+
+
+Version 0.7
+====================================
+
+CRM finished
+
+
+Version 0.8
+====================================
+
+Products finished
 
 
 Version 0.9
