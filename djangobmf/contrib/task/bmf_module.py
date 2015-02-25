@@ -26,21 +26,6 @@ from .views import GoalCloneView
 from .views import GoalDetailView
 
 
-# ass GoalSerializer(Serializer):
-#   def serialize(self):
-#       l = []
-#       for d in self.data:
-#           l.append({
-#               'name': str(d),
-#               'completed': d.completed,
-#               'referee': str(d.referee),
-#               'project': str(d.project),
-#               'url': d.bmfmodule_detail(),
-#               'states': d.get_states(),
-#           })
-#       return l
-
-
 # ass TaskSerializer(Serializer):
 #   def serialize(self):
 #       l = []

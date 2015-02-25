@@ -13,11 +13,12 @@
             <td>
                 <span ng-if="obj.completed == false" class="glyphicon glyphicon-unchecked"></span>
                 <span ng-if="obj.completed == true" class="glyphicon glyphicon-check"></span>
-                <a href="{{ obj.url }}">{{ obj.name }}</a>
+                <a href="{{ obj.bmfdetail }}">{{ obj.summary }}</a>
             </td>
-            <td>{{ obj.referee }}
+            <td>
+                {{ obj.referee_name || "---" }}
                 <div ng-if="obj.project != 'None'">
-                    <small><!--a href="#"--!>{{ obj.project }}<!--/a--></small>
+                    <small><!--a href="#"--!>{{ obj.project_name }}<!--/a--></small>
                 </div>
             </td>
             <td class="text-center">
