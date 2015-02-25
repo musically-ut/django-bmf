@@ -14,7 +14,7 @@ from djangobmf.categories import Sales
 from .models import Product
 from .models import ProductTax
 from .models import PRODUCT_SERVICE
-
+from .serializers import ProductSerializer
 from .views import ProductCreateView
 from .views import ProductDetailView
 from .views import ProductUpdateView
@@ -24,6 +24,7 @@ site.register_module(Product, **{
     'create': ProductCreateView,
     'detail': ProductDetailView,
     'update': ProductUpdateView,
+    'serializer': ProductSerializer,
 })
 
 

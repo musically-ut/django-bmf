@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -33,7 +32,7 @@ class GoalManager(models.Manager):
     def mygoals(self, request):
         return self.get_queryset().filter(
             completed=False,
-            referee=getattr(request.user, 'djangobmf_employee', -1),
+            referee=request.user.djangobmf.employee,
         )
 
 
@@ -88,24 +87,6 @@ class AbstractGoal(BMFModel):
 
     def __str__(self):
         return '%s' % (self.summary)
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
-            return qs
-
-        qs_filter = Q(referee=getattr(user, 'djangobmf_employee', -1))
-        qs_filter |= Q(employees=getattr(user, 'djangobmf_employee', -1))
-        qs_filter |= Q(team__in=getattr(user, 'djangobmf_teams', []))
-
-        if hasattr(cls, "project"):
-            project = cls._meta.get_field_by_name("project")[0].model
-            if user.has_perm('%s.can_manage' % project._meta.app_label, project):
-                qs_filter |= Q(project__isnull=False)
-            else:
-                qs_filter |= Q(project__isnull=False, project__employees=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(project__isnull=False, project__team__in=getattr(user, 'djangobmf_teams', []))
-        return qs.filter(qs_filter)
 
     def get_states(self):
         active_states = 0
@@ -181,14 +162,14 @@ class TaskManager(models.Manager):
     def mytasks(self, request):
         return self.get_queryset().filter(
             completed=False,
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee,
         )
 
     def todo(self, request):
         return self.get_queryset().filter(
             completed=False,
             state__in=["todo", "started", "review"],
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee,
         )
 
 
@@ -227,31 +208,6 @@ class AbstractTask(BMFModel):
 
     def __str__(self):
         return '#%s: %s' % (self.pk, self.summary)
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        qs_filter = Q(project__isnull=True, goal__isnull=True)
-        qs_filter |= Q(employee=getattr(user, 'djangobmf_employee', -1))
-        qs_filter |= Q(in_charge=getattr(user, 'djangobmf_employee', -1))
-
-        if hasattr(cls, "goal"):
-            goal = cls._meta.get_field_by_name("goal")[0].model
-            if user.has_perm('%s.can_manage' % goal._meta.app_label, goal):
-                qs_filter |= Q(goal__isnull=False)
-            else:
-                qs_filter |= Q(goal__isnull=False, goal__referee=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(goal__isnull=False, goal__employees=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(goal__isnull=False, goal__team__in=getattr(user, 'djangobmf_teams', []))
-
-        if hasattr(cls, "project"):
-            project = cls._meta.get_field_by_name("project")[0].model
-            if user.has_perm('%s.can_manage' % project._meta.app_label, project):
-                qs_filter |= Q(project__isnull=False)
-            else:
-                qs_filter |= Q(project__isnull=False, project__employees=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(project__isnull=False, project__team__in=getattr(user, 'djangobmf_teams', []))
-
-        return qs.filter(qs_filter)
 
     def clean(self):
         # overwrite the project with the goals project

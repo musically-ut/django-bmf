@@ -12,7 +12,7 @@ from djangobmf.categories import HumanResources
 
 from .models import Team
 from .models import TeamMember
-
+from .serializers import TeamSerializer
 from .views import TeamCreateView
 from .views import TeamUpdateView
 
@@ -20,6 +20,7 @@ from .views import TeamUpdateView
 site.register_module(Team, **{
     'create': TeamCreateView,
     'update': TeamUpdateView,
+    'serializer': TeamSerializer,
 })
 
 site.register_module(TeamMember, **{

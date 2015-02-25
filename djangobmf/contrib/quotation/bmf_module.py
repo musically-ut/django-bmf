@@ -12,6 +12,7 @@ from djangobmf.sites import site
 
 from .models import Quotation
 from .models import QuotationProduct
+from .serializers import QuotationSerializer
 from .views import QuotationCreateView
 from .views import QuotationUpdateView
 
@@ -19,6 +20,7 @@ from .views import QuotationUpdateView
 site.register_module(Quotation, **{
     'create': QuotationCreateView,
     'update': QuotationUpdateView,
+    'serializer': QuotationSerializer,
     'report': True,
 })
 

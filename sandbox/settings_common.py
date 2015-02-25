@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'mptt',
     'sekizai',
+    'rest_framework',
     # 'haystack',
 )
 

@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-from django.utils.formats import date_format
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.categories import ViewFactory
@@ -11,7 +10,6 @@ from djangobmf.categories import ProjectManagement
 from djangobmf.sites import Module
 from djangobmf.sites import site
 from djangobmf.sites import register
-from djangobmf.models import Serializer
 
 # from djangobmf.contrib.project.categories import ProjectCategory
 # from djangobmf.contrib.project.models import Project
@@ -20,61 +18,44 @@ from .categories import GoalCategory
 from .categories import TaskCategory
 from .models import Task
 from .models import Goal
-from .views import TaskGetView
+from .permissions import GoalPermission
+from .permissions import TaskPermission
+from .serializers import GoalSerializer
+from .serializers import TaskSerializer
 from .views import GoalCloneView
 from .views import GoalDetailView
-from .views import GoalGetView
 
 
-class GoalSerializer(Serializer):
-    def serialize(self):
-        l = []
-        for d in self.data:
-            l.append({
-                'name': str(d),
-                'completed': d.completed,
-                'referee': str(d.referee),
-                'project': str(d.project),
-                'url': d.bmfmodule_detail(),
-                'states': d.get_states(),
-            })
-        return l
-
-
-class TaskSerializer(Serializer):
-    def serialize(self):
-        l = []
-        for d in self.data:
-            l.append({
-                # TODO validate summary with regex (at model level)
-                'summary': d.summary if d.summary.strip() else '---',
-                'completed': d.completed,
-                'employee': str(d.employee) if d.employee else None,
-                'state': d.state.key,
-                'state_name': str(d.state),
-                # TODO: not the ideal solution ... better: use angular to format the date at the client
-                'modified': date_format(d.modified, "SHORT_DATE_FORMAT"),
-                'goal': str(d.goal) if d.goal else None,
-                'project': str(d.project) if d.project else None,
-                'url': d.bmfmodule_detail(),
-            })
-        return l
+# ass TaskSerializer(Serializer):
+#   def serialize(self):
+#       l = []
+#       for d in self.data:
+#           l.append({
+#               # TODO validate summary with regex (at model level)
+#               'summary': d.summary if d.summary.strip() else '---',
+#               'completed': d.completed,
+#               'employee': str(d.employee) if d.employee else None,
+#               'state': d.state.key,
+#               'state_name': str(d.state),
+#               # TODO: not the ideal solution ... better: use angular to format the date at the client
+#               'modified': date_format(d.modified, "SHORT_DATE_FORMAT"),
+#               'goal': str(d.goal) if d.goal else None,
+#               'project': str(d.project) if d.project else None,
+#               'url': d.bmfmodule_detail(),
+#           })
+#       return l
 
 
 @register(dashboard=ProjectManagement)
 class TaskModule(Module):
     model = Task
-    get = TaskGetView
-    serializer = TaskSerializer
 
 
 @register(dashboard=ProjectManagement)
 class GoalModule(Module):
     model = Goal
-    get = GoalGetView
     clone = GoalCloneView
     detail = GoalDetailView
-    serializer = GoalSerializer
 
 
 @register(dashboard=ProjectManagement)
@@ -132,15 +113,15 @@ class TaskCategoryCLS(TaskCategory):
 
 
 site.register_module(Task, **{
-    'get': TaskGetView,
+    'permissions': TaskPermission,
     'serializer': TaskSerializer,
 })
 
 
 site.register_module(Goal, **{
-    'get': GoalGetView,
     'clone': GoalCloneView,
     'detail': GoalDetailView,
+    'permissions': GoalPermission,
     'serializer': GoalSerializer,
 })
 

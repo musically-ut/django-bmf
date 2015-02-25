@@ -9,7 +9,6 @@ from django.db.models import signals
 from django.dispatch import receiver
 
 from djangobmf.conf import settings
-from djangobmf.core.serializer import Serializer
 from djangobmf.signals import activity_create
 from djangobmf.signals import activity_update
 from djangobmf.signals import activity_addfile
@@ -51,7 +50,6 @@ __all__ = (
     'Notification',
     'NumberCycle',
     'Report',
-    'Serializer',
 )
 
 

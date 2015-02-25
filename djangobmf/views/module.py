@@ -8,9 +8,9 @@ from django.contrib.auth import get_permission_codename
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
-from django.core.paginator import EmptyPage
-from django.core.paginator import PageNotAnInteger
-from django.core.paginator import Paginator
+# from django.core.paginator import EmptyPage
+# from django.core.paginator import PageNotAnInteger
+# from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db import router
 from django.db.models import Q
@@ -24,19 +24,17 @@ from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
-from django.views.generic import View
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
 from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.list import MultipleObjectMixin
-from django.views.generic.list import MultipleObjectTemplateResponseMixin
 from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.html import format_html
-from django.utils.timezone import make_aware
-from django.utils.timezone import get_current_timezone
+# from django.utils.timezone import make_aware
+# from django.utils.timezone import get_current_timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -59,7 +57,7 @@ from .mixins import ModuleFormMixin
 from .mixins import ReadOnlyMixin
 
 import copy
-import datetime
+# import datetime
 import logging
 import operator
 import types
@@ -76,8 +74,7 @@ logger = logging.getLogger(__name__)
 
 
 class ModuleListView(
-        ModuleViewPermissionMixin, ModuleViewMixin,
-        MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
+        ModuleViewPermissionMixin, ModuleViewMixin, TemplateView):
     """
     """
     # set by views.dashboard
@@ -141,6 +138,10 @@ class ModuleListView(
             kwargs.update({
                 'manager': self.manager
             })
+        else:
+            kwargs.update({
+                'manager': 'all'
+            })
 
         url = reverse('%s:get' % self.model._bmfmeta.namespace_api, kwargs=kwargs)
 
@@ -182,10 +183,6 @@ class ModuleListView(
         })
         return super(ModuleListView, self).get_context_data(**kwargs)
 
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data(object_list=self.object_list)
-        return self.render_to_response(context)
 
 '''
 class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
@@ -377,132 +374,130 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleViewMixin, DetailView):
         return "report"
 
 
-class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
-    """
-    Provides an API to get object data
-    """
-    model = None  # set by views
-    serializer = None  # set by views
+# ass ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
+#   """
+#   Provides an API to get object data
+#   """
 
-    # Limit Queryset length and activate pagination
-    limit = 100
-    date_field = None
+#   # Limit Queryset length and activate pagination
+#   limit = 100
+#   date_field = None
 
-    def get_date_field(self):
-        """
-        Get the name of the date field to be used to filter by.
-        """
-        return self.date_field or 'modified'
+#   def get_date_field(self):
+#       """
+#       Get the name of the date field to be used to filter by.
+#       """
+#       return self.date_field or 'modified'
 
-    def get_item_data(self, data):
-        """
-        this method calls the serializer, you can overwrite if, if you like
-        but it's recommended to create a serializer for your object
+#   def get_item_data(self, data):
+#       """
+#       this method calls the serializer, you can overwrite if, if you like
+#       but it's recommended to create a serializer for your object
 
-        it returns a (serialized) list with all objects in the queryset
-        """
-        return self.serializer(self.model, data).serialize()
+#       it returns a (serialized) list with all objects in the queryset
+#       """
+#       return self.serializer(self.model, data).serialize()
 
-    def get(self, request, manager=None):
-        pk = int(self.request.GET.get('pk', 0))
+#   def get(self, request, manager=None):
+#       pk = int(self.request.GET.get('pk', 0))
 
-        # activate pagination
-        pagination = not bool(self.request.GET.get('pagination', False))
+#       # activate pagination
+#       pagination = not bool(self.request.GET.get('pagination', False))
 
-        period = self.request.GET.get('period', None)
-        since = self.request.GET.get('since', None)
-        until = self.request.GET.get('until', None)
-        if since and until:
-            since = make_aware(datetime.datetime(*map(int, since.split('-', 3)[:3])), get_current_timezone())
-            until = make_aware(datetime.datetime(*map(int, until.split('-', 3)[:3])), get_current_timezone())
-        else:
-            until = None
-            since = None
+#       period = self.request.GET.get('period', None)
+#       since = self.request.GET.get('since', None)
+#       until = self.request.GET.get('until', None)
+#       if since and until:
+#           since = make_aware(datetime.datetime(*map(int, since.split('-', 3)[:3])), get_current_timezone())
+#           until = make_aware(datetime.datetime(*map(int, until.split('-', 3)[:3])), get_current_timezone())
+#       else:
+#           until = None
+#           since = None
 
-        search = self.request.GET.get('search', None)
-        page = self.request.GET.get('page', 1)
+#       search = self.request.GET.get('search', None)
+#       page = self.request.GET.get('page', 1)
 
-        queryset = self.get_queryset(manager)
+#       queryset = self.get_queryset(manager)
 
-        if period in ["year", "month", "week", "day"] and not (since and until):
-            pass
-        else:
-            period = None
+#       if period in ["year", "month", "week", "day"] and not (since and until):
+#           pass
+#       else:
+#           period = None
 
-        if since and until:
-            date_field = self.get_date_field()
-            queryset = queryset.filter(**{
-                '%s__gte' % date_field: since,
-                '%s__lt' % date_field: until,
-            })
+#       if since and until:
+#           date_field = self.get_date_field()
+#           queryset = queryset.filter(**{
+#               '%s__gte' % date_field: since,
+#               '%s__lt' % date_field: until,
+#           })
 
-        # select only models connected to a related model
-        # defined by the models contenttype and pk
-        # the contentype pk and the objects id
-        # and the related fields name
-        related_field = self.request.GET.get('rel', None)
-        # related_ct = self.request.GET.get('relct', 0)
-        related_pk = self.request.GET.get('relpk', 0)
-        # related_model = None
+#       # select only models connected to a related model
+#       # defined by the models contenttype and pk
+#       # the contentype pk and the objects id
+#       # and the related fields name
+#       related_field = self.request.GET.get('rel', None)
+#       # related_ct = self.request.GET.get('relct', 0)
+#       related_pk = self.request.GET.get('relpk', 0)
+#       # related_model = None
 
-        if related_field and related_pk:
-            if hasattr(self.model, related_field):
-                queryset = queryset.filter(**{related_field: related_pk})
+#       if related_field and related_pk:
+#           if hasattr(self.model, related_field):
+#               queryset = queryset.filter(**{related_field: related_pk})
 
-        # search
-        if search:
-            if self.model._bmfmeta.search_fields:
-                for bit in self.normalize_query(search):
-                    lookups = [self.construct_search(str(f)) for f in self.model._bmfmeta.search_fields]
-                    queries = [Q(**{l: bit}) for l in lookups]
-                    queryset = queryset.filter(reduce(operator.or_, queries))
-            else:
-                queryset = []
+#       # search
+#       if search:
+#           if self.model._bmfmeta.search_fields:
+#               for bit in self.normalize_query(search):
+#                   lookups = [self.construct_search(str(f)) for f in self.model._bmfmeta.search_fields]
+#                   queries = [Q(**{l: bit}) for l in lookups]
+#                   queryset = queryset.filter(reduce(operator.or_, queries))
+#           else:
+#               queryset = []
 
-        if pagination and self.limit:
-            # pagination
-            paginator = Paginator(queryset, self.limit)
-            count = paginator.count
-            num_pages = paginator.num_pages
-            pages = paginator.page_range  # TODO move me to angular
+#       if pagination and self.limit:
+#           # pagination
+#           paginator = Paginator(queryset, self.limit)
+#           count = paginator.count
+#           num_pages = paginator.num_pages
+#           pages = paginator.page_range  # TODO move me to angular
 
-            try:
-                qs_data = paginator.page(self.request.GET.get('page', 1))
-            except PageNotAnInteger:
-                qs_data = paginator.page(1)
-            except EmptyPage:
-                qs_data = paginator.page(num_pages)
+#           try:
+#               qs_data = paginator.page(self.request.GET.get('page', 1))
+#           except PageNotAnInteger:
+#               qs_data = paginator.page(1)
+#           except EmptyPage:
+#               qs_data = paginator.page(num_pages)
 
-            page = qs_data.number
+#           page = qs_data.number
 
-        else:
-            # no pagination
-            count = queryset.count()
-            num_pages = 1
-            qs_data = queryset
-            page = 1
-            pages = [1]  # TODO: move me to angular
+#       else:
+#           # no pagination
+#           count = queryset.count()
+#           num_pages = 1
+#           qs_data = queryset
+#           page = 1
+#           pages = [1]  # TODO: move me to angular
 
-        return self.render_to_json_response({
-            'model': str(self.model),
-            'count': count,
-            'pk': pk,
-            'time': {
-                'period': period,
-                'since': since.strftime('%Y-%m-%d'),
-                'until': until.strftime('%Y-%m-%d'),
-            } if period or since and until else None,
-            'pagination': {
-                'enabled': pagination,
-                'page': page,
-                'pages': pages,  # TODO: move me to angular
-                'num_pages': num_pages,
-                'next': None,  # TODO: unused
-                'previous': None,  # TODO: unused
-            },
-            'search': search,
-            'items': self.get_item_data(qs_data),
-        })
+#       return self.render_to_json_response({
+#           'model': str(self.model),
+#           'count': count,
+#           'pk': pk,
+#           'time': {
+#               'period': period,
+#               'since': since.strftime('%Y-%m-%d'),
+#               'until': until.strftime('%Y-%m-%d'),
+#           } if period or since and until else None,
+#           'pagination': {
+#               'enabled': pagination,
+#               'page': page,
+#               'pages': pages,  # TODO: move me to angular
+#               'num_pages': num_pages,
+#               'next': None,  # TODO: unused
+#               'previous': None,  # TODO: unused
+#           },
+#           'search': search,
+#           'items': self.get_item_data(qs_data),
+#       })
 
 
 class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMixin, UpdateView):
@@ -868,6 +863,7 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
                 raise Http404
             qs = field.field.queryset
 
+            # TODO use permissions from module
             if hasattr(field.field.queryset.model, 'has_permissions'):
                 qs = field.field.queryset.model.has_permissions(qs, self.request.user)
 

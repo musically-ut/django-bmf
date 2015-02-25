@@ -9,17 +9,18 @@ from django.conf.urls import url
 from django.utils import six
 from django.utils.text import slugify
 
-from djangobmf.core.serializer import Serializer
+from djangobmf.permissions import ModulePermission
+from djangobmf.serializers import ModuleSerializer
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDeleteView
 from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleFormAPI
-from djangobmf.views import ModuleGetView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleReportView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleWorkflowView
+from djangobmf.views.api import ModuleListAPIView
 
 import logging
 logger = logging.getLogger(__name__)
@@ -58,12 +59,21 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
         self.update = options.get('update', ModuleUpdateView)
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
-        self.get = options.get('get', ModuleGetView)
-        self.serializer = options.get('serializer', Serializer)
+        self.permissions = options.get('permissions', ModulePermission)
+        self.serializer = options.get('serializer', None)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
         self.manager = {}
+
+        # create a default serializer
+        if not self.serializer and not model._bmfmeta.only_related:
+            class AutoSerializer(ModuleSerializer):
+                class Meta:
+                    pass
+            AutoSerializer.Meta.model = model
+            logger.info('Creating a serializer for module %s' % model.__name__)
+            self.serializer = AutoSerializer
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -125,7 +135,11 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             '',
             url(
                 r'^$',
-                self.detail.as_view(model=self.model, reports=reports),
+                self.detail.as_view(
+                    module=self,
+                    model=self.model,
+                    reports=reports
+                ),
                 name='detail',
             ),
         )
@@ -144,33 +158,34 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             '',
             url(
                 r'^$',
-                ModuleListView.as_view(model=self.model),
+                ModuleListView.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='list',
             ),
             url(
-                r'^get/$',
-                self.get.as_view(
-                    model=self.model,
-                    serializer=self.serializer,
-                ),
-                name='get',
-            ),
-            url(
                 r'^get/(?P<manager>\w+)/$',
-                self.get.as_view(
+                ModuleListAPIView.as_view(
+                    module=self,
                     model=self.model,
-                    serializer=self.serializer,
+                    permissions=self.permissions,
+                    serializer_class=self.serializer,
                 ),
                 name='get',
             ),
             url(
                 r'^update/(?P<pk>[0-9]+)/$',
-                self.update.as_view(model=self.model),
+                self.update.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='update',
             ),
             url(
                 r'^update/(?P<pk>[0-9]+)/form/$',
                 ModuleFormAPI.as_view(
+                    module=self,
                     model=self.model,
                     form_view=self.update,
                 ),
@@ -178,21 +193,29 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
             ),
             url(
                 r'^delete/(?P<pk>[0-9]+)/$',
-                self.delete.as_view(model=self.model),
+                self.delete.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='delete',
             ),
         )
+
         if self.model._bmfmeta.can_clone:
             urlpatterns += patterns(
                 '',
                 url(
                     r'^clone/(?P<pk>[0-9]+)/$',
-                    self.clone.as_view(model=self.model),
+                    self.clone.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='clone',
                 ),
                 url(
                     r'^clone/(?P<pk>[0-9]+)/form/$',
                     ModuleFormAPI.as_view(
+                        module=self,
                         model=self.model,
                         form_view=self.clone,
                     ),
@@ -205,12 +228,16 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^create/(?P<key>%s)/$' % key,
-                    view.as_view(model=self.model),
+                    view.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='create',
                 ),
                 url(
                     r'^create/(?P<key>%s)/form/$' % key,
                     ModuleFormAPI.as_view(
+                        module=self,
                         model=self.model,
                         form_view=view,
                     ),
@@ -223,7 +250,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^report/(?P<pk>[0-9]+)/(?P<key>%s)/$' % key,
-                    view.as_view(model=self.model),
+                    view.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='report',
                 ),
             )
@@ -234,7 +264,10 @@ class Module(six.with_metaclass(ModuleMetaclass, object)):
                 '',
                 url(
                     r'^workflow/(?P<pk>[0-9]+)/(?P<transition>\w+)/$',
-                    ModuleWorkflowView.as_view(model=self.model),
+                    ModuleWorkflowView.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='workflow',
                 ),
             )

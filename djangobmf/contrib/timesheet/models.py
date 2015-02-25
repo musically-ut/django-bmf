@@ -25,7 +25,7 @@ class TimesheetManager(models.Manager):
 
     def mytimesheets(self, request):
         return self.get_queryset().filter(
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee or -1,
         )
 
 
@@ -93,12 +93,6 @@ class AbstractTimesheet(BMFModel):
 
     def __str__(self):
         return '%s' % (self.start)
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
-            return qs
-        return qs.filter(employee=getattr(user, 'djangobmf_employee', -1))
 
     class BMFMeta:
         has_logging = True

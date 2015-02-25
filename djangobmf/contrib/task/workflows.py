@@ -120,8 +120,8 @@ class TaskWorkflow(Workflow):
         )
 
     def start(self):
-        self.instance.in_charge = self.user.djangobmf_employee
-        self.instance.employee = self.user.djangobmf_employee
+        self.instance.in_charge = self.user.djangobmf.employee
+        self.instance.employee = self.user.djangobmf.employee
 
         if self.instance.project:
             project = self.instance.project
@@ -134,7 +134,7 @@ class TaskWorkflow(Workflow):
         if timesheet is not None:
             obj = timesheet(
                 task=self.instance,
-                employee=self.user.djangobmf_employee,
+                employee=self.user.djangobmf.employee,
                 auto=True,
                 project=project,
                 summary=self.instance.summary
@@ -142,8 +142,8 @@ class TaskWorkflow(Workflow):
             obj.save()
 
     def todo(self):
-        self.instance.in_charge = self.user.djangobmf_employee
-        self.instance.employee = self.user.djangobmf_employee
+        self.instance.in_charge = self.user.djangobmf.employee
+        self.instance.employee = self.user.djangobmf.employee
         self.stop()
 
     def stop(self):
@@ -154,7 +154,7 @@ class TaskWorkflow(Workflow):
         if timesheet is not None:
             for obj in timesheet.objects.filter(
                 task=self.instance,
-                employee__in=[self.instance.in_charge, self.user.djangobmf_employee],
+                employee__in=[self.instance.in_charge, self.user.djangobmf.employee],
                 end=None,
                 auto=True,
             ):

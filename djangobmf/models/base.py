@@ -299,18 +299,6 @@ class BMFModelBase(ModelBase):
             )
             field.contribute_to_class(cls, 'djangobmf_notification')
 
-        # classmethod: has_permissions
-        def has_permissions(cls, qs, user):
-            """
-            Overwrite this function to enable object bases permissions. It must return
-            a queryset.
-
-            Default: queryset
-            """
-            return qs
-
-        setattr(cls, 'has_permissions', classmethod(has_permissions))
-
         # instancemethod: bmfget_project
         def bmfget_project(self):
             """
@@ -349,6 +337,14 @@ class BMFModelBase(ModelBase):
             return self.bmfmodule_detail()
 
         setattr(cls, 'get_absolute_url', get_absolute_url)
+
+        # classmethod: bmfmodule_list
+        def bmfmodule_list(cls, manager="all"):
+            """
+            """
+            return ('%s:get' % cls._bmfmeta.namespace_api, (), {"manager": manager})
+
+        setattr(cls, 'bmfmodule_list', classmethod(models.permalink(bmfmodule_list)))
 
         if cls._bmfmeta.clean:
             if not hasattr(cls, 'bmf_clean') and not cls._meta.abstract:

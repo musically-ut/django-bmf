@@ -20,6 +20,7 @@ from django.views.decorators.cache import never_cache
 
 from djangobmf import get_version
 from djangobmf.conf import settings as bmfsettings
+from djangobmf.core.employee import Employee
 from djangobmf.decorators import login_required
 from djangobmf.document.forms import UploadDocument
 from djangobmf.notification.forms import HistoryCommentForm
@@ -27,7 +28,6 @@ from djangobmf.models import Activity
 from djangobmf.models import Document
 from djangobmf.models import Notification
 from djangobmf.utils.serializers import DjangoBMFEncoder
-from djangobmf.utils.user import user_add_bmf
 from djangobmf.views.defaults import bad_request
 from djangobmf.views.defaults import permission_denied
 from djangobmf.views.defaults import page_not_found
@@ -107,11 +107,11 @@ class BaseMixin(object):
             return permission_denied(self.request)
 
         # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
-        user_add_bmf(self.request.user)
+        self.request.user.djangobmf = Employee(self.request.user)
 
         # check if bmf has a employee model and if so do a validation of the
         # employee instance (users, who are not employees are not allowed to access)
-        if self.request.user.djangobmf_has_employee and not self.request.user.djangobmf_employee:
+        if self.request.user.djangobmf.has_employee and not self.request.user.djangobmf.employee:
             logger.debug("User %s does not have permission to access djangobmf" % self.request.user)
             if self.request.user.is_superuser:
                 return redirect('djangobmf:wizard', permanent=False)
@@ -449,6 +449,7 @@ class ModuleDeletePermissionMixin(object):
 
 class ModuleBaseMixin(object):
     model = None
+    module = None
 
     def get_queryset(self, manager=None):
         """
@@ -483,9 +484,9 @@ class ModuleBaseMixin(object):
             )
 
         # load employee and team data into user
-        user_add_bmf(self.request.user)
+        self.request.user.djangobmf = Employee(self.request.user)
 
-        return self.model.has_permissions(qs, self.request.user)
+        return self.module.permissions().filter_queryset(qs, self.request.user, self.model)
 
     def get_object(self):
         if hasattr(self, 'object'):

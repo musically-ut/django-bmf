@@ -15,7 +15,7 @@ class CreateView(ModuleCreateView):
 
     def get_initial(self):
         self.initial.update({
-            'employee': getattr(self.request.user, 'djangobmf_employee', None),
+            'employee': self.request.user.djangobmf.employee,
         })
         return super(CreateView, self).get_initial()
 
