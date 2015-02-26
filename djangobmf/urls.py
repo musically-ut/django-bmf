@@ -70,12 +70,53 @@ urlpatterns = patterns(
 
     # --- Document
     url(
-        r'^document/add/(?P<ct>[0-9]+)/(?P<pk>[0-9]+)/$',
+        r'^documents/$',
+        DocumentListView.as_view(),
+        name="documents",
+    ),
+    url(
+        r'^documents/static/$',
+        DocumentDownloadView.as_view(),
+        name="document",
+        kwargs={'static': True},
+    ),
+    url(
+        r'^documents/static/(?P<ct>[0-9]+)/$',
+        DocumentDownloadView.as_view(),
+        name="document",
+        kwargs={'static': True},
+    ),
+    url(
+        r'^documents/customer/(?P<pk>[0-9]+)/$',
+        DocumentDownloadView.as_view(),
+        name="document",
+        kwargs={'customer': True},
+    ),
+    url(
+        r'^documents/customer/(?P<pk>[0-9]+)/(?P<ct>[0-9]+)/$',
+        DocumentDownloadView.as_view(),
+        name="document",
+        kwargs={'customer': True},
+    ),
+    url(
+        r'^documents/project/(?P<pk>[0-9]+)/$',
+        DocumentDownloadView.as_view(),
+        name="document",
+        kwargs={'project': True},
+    ),
+    url(
+        r'^documents/project/(?P<pk>[0-9]+)/(?P<ct>[0-9]+)/$',
+        DocumentDownloadView.as_view(),
+        name="document",
+        kwargs={'project': True},
+    ),
+    url(
+        r'^documents/add/(?P<ct>[0-9]+)/(?P<pk>[0-9]+)/$',
         DocumentCreateView.as_view(),
         name="document-add",
     ),
     url(
-        r'^document/get/(?P<pk>[0-9]+)/$',
+        r'^documents/get/(?P<pk>[0-9]+)/$',
         DocumentDownloadView.as_view(),
         name="document-get",
     ),

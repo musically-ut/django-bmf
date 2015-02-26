@@ -53,6 +53,9 @@ def sendfile(request, fileobject, allowed=True):
 
 class DocumentListView(BaseMixin, ListView):
     model = Document
+    static = False
+    project = False
+    customer = False
 
 
 class DocumentDownloadView(BaseMixin, DetailView):

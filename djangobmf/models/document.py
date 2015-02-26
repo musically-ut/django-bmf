@@ -10,6 +10,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings as bmfsettings
 from djangobmf.document.storage import BMFStorage
 
 from djangobmf.utils.generate_filename import generate_filename
@@ -20,13 +21,26 @@ class Document(models.Model):
     name = models.CharField(_('Name'), max_length=120, null=True, blank=True, editable=False)
     file = models.FileField(_('File'), upload_to=generate_filename, storage=BMFStorage())
     size = models.PositiveIntegerField(null=True, blank=True, editable=False)
+    mimetype = models.CharField(_('Mimetype'), max_length=50, editable=False, null=True)
+    # sha1 = models.CharField(_('Mimetype'), max_length=40, editable=False, null=True)
 
     is_static = models.BooleanField(default=False)
 
-    # this fields are added due to a soft dependency to customer and projects
-    # because djangobmf can't relay on those models to be present!
-    customer_pk = models.PositiveIntegerField(null=True, blank=True, editable=False, db_index=True)
-    project_pk = models.PositiveIntegerField(null=True, blank=True, editable=False, db_index=True)
+    customer = models.ForeignKey(
+        bmfsettings.CONTRIB_CUSTOMER,
+        null=True,
+        blank=True,
+        related_name="documents",
+        on_delete=models.SET_NULL,
+    )
+
+    project = models.ForeignKey(
+        bmfsettings.CONTRIB_PROJECT,
+        null=True,
+        blank=True,
+        related_name="documents",
+        on_delete=models.SET_NULL,
+    )
 
     content_type = models.ForeignKey(
         ContentType,
@@ -62,6 +76,18 @@ class Document(models.Model):
     def clean(self):
         if self.file:
             self.size = self.file.size
+            self.mimetype = self.file.content_type
+
+        # import hashlib
+        # f = self.image_file.open('rb')
+        # hash = hashlib.sha1()
+        # if f.multiple_chunks():
+        # for chunk in f.chunks():
+        #     hash.update(chunk)
+        # else:    
+        #     hash.update(f.read())
+        # f.close()
+        # self.sha1 =  hash.hexdigest()
 
         if not self.name:
             self.name = self.file.name.split(r'/')[-1]

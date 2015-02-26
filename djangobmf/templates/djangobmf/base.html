@@ -109,6 +109,9 @@
                                         <li>
                                             <a href="{% url 'djangobmf:modules' %}">{% trans "Module overview" %}</a>
                                         </li>
+                                        <li>
+                                            <a href="{% url 'djangobmf:documents' %}">{% trans "Documents" %}</a>
+                                        </li>
                                         {% if request.user.is_staff %}
                                         <li>
                                             <a href="{% url 'djangobmf:configuration' %}">{% trans "Configuration" %}</a>
