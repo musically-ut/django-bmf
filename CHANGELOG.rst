@@ -4,6 +4,7 @@ Version 0.2.3 (currently in development)
 * Added Configuration Cache
 * Bugfix in create forms, which provide inital data
 * Reenabled Reporting
+* Added serialization via django-rest-framework
 
 Version 0.2.2 (2015-02-08)
 ========================================
