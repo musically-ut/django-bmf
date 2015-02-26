@@ -10,13 +10,14 @@ from django.http import Http404
 from django.utils.timezone import now
 from django.views.generic import CreateView
 from django.views.generic import DetailView
+from django.views.generic import ListView
 from django.views.static import serve
 
 from djangobmf.signals import activity_addfile
 from djangobmf.views.mixins import BaseMixin
 from djangobmf.models import Document
 
-from .forms import UploadDocument
+from djangobmf.document.forms import UploadDocument
 
 '''
 from django.conf import settings
@@ -49,6 +50,9 @@ def sendfile(request, fileobject, allowed=True):
   # serve with django
   return serve(request,fileobject.url[len(settings.BMF_DOCUMENTS_URL):],document_root=settings.BMF_DOCUMENTS_ROOT)
 '''
+
+class DocumentListView(BaseMixin, ListView):
+    model = Document
 
 
 class DocumentDownloadView(BaseMixin, DetailView):

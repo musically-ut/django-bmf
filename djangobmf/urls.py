@@ -20,6 +20,9 @@ from djangobmf.views.configuration import ConfigurationView
 from djangobmf.views.configuration import ConfigurationEdit
 from djangobmf.views.dashboard import DashboardView
 from djangobmf.views.dashboard import dashboard_view_factory
+from djangobmf.views.document import DocumentCreateView
+from djangobmf.views.document import DocumentListView
+from djangobmf.views.document import DocumentDownloadView
 
 
 @cache_page(86400, key_prefix='bmf-js18n-%s' % get_version())
@@ -65,7 +68,18 @@ urlpatterns = patterns(
         name="dashboard_view",
     ),
 
-    url(r'^document/', include('djangobmf.document.urls')),
+    # --- Document
+    url(
+        r'^document/add/(?P<ct>[0-9]+)/(?P<pk>[0-9]+)/$',
+        DocumentCreateView.as_view(),
+        name="document-add",
+    ),
+    url(
+        r'^document/get/(?P<pk>[0-9]+)/$',
+        DocumentDownloadView.as_view(),
+        name="document-get",
+    ),
+
     url(r'^i18n/', i18n_javascript, name="jsi18n"),
     #  url(r'^messages/', include('djangobmf.message.urls')),
     url(r'^modules/$', ModuleOverviewView.as_view(), name="modules"),
