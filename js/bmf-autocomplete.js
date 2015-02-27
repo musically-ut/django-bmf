@@ -105,7 +105,7 @@
       //console.log(data.form);
 
       $.ajax({
-        url: base.form.attr('action').split('?')[0]+"form/?search",
+        url: base.form.attr('action').split('?')[0]+"form/?changed",
         dataType: 'json',
         type: 'post',
         data: data,
