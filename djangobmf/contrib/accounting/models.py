@@ -54,10 +54,8 @@ class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
         abstract = True
 
 # =============================================================================
-
 # TODO: Add Fiscal Year
 # TODO: Add Period
-
 # =============================================================================
 
 

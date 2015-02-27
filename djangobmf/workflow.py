@@ -288,6 +288,13 @@ class WorkflowContainer(object):
         return self.obj._current_state
 
     @property
+    def name(self):
+        """
+        Returns the current states name
+        """
+        return self.__str__()
+
+    @property
     def states(self):
         """
         """

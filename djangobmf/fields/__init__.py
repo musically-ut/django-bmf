@@ -13,6 +13,9 @@ from djangobmf.currency import BaseCurrency
 
 from .workflow import WorkflowField
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 __all__ = [
     'OLDWorkflowField',
@@ -71,7 +74,7 @@ class MoneyProxy(object):
         else:
             precision = 0
 
-        if currency and not isinstance(value, BaseCurrency):
+        if currency is not None and not isinstance(value, BaseCurrency):
             value = currency.__class__(value, precision=precision)
 
         obj.__dict__[self.field.name] = value
@@ -98,11 +101,11 @@ class CurrencyField(with_metaclass(models.SubfieldBase, models.CharField)):
             return value
 
         # The string case.
-        try:
-            from .sites import site
-            return site.currencies['%s' % value or settings.DEFAULT_CURRENCY]()
-        except ImportError:
-            return None
+        from djangobmf.sites import site
+        return site.currencies['%s' % (value or settings.DEFAULT_CURRENCY)]()
+        # except ImportError:
+        #    logger.debug('Sites not available, returning no currency class')
+        #    return None
 
     def get_prep_value(self, obj):
         if hasattr(obj, 'iso'):
@@ -197,9 +200,6 @@ from django.utils.safestring import mark_safe
 from filer.utils.compatibility import truncate_words
 from filer.models import File
 from filer import settings as filer_settings
-
-import logging
-logger = logging.getLogger(__name__)
 
 class AdminFileFormField(forms.ModelChoiceField):
     widget = AdminFileWidget

@@ -11,6 +11,7 @@ from .models import Invoice
 
 
 class InvoiceSerializer(ModuleSerializer):
+    state_name = serializers.ReadOnlyField(source='state.name')
     project_name = serializers.ReadOnlyField(source='project.name')
 
     class Meta:
@@ -18,6 +19,7 @@ class InvoiceSerializer(ModuleSerializer):
         fields = (
             'invoice_number',
             'state',
+            'state_name',
             'project',
             'project_name',
             'bmfdetail',

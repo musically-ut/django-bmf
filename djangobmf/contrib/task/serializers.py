@@ -15,6 +15,7 @@ from .models import Task
 
 class GoalSerializer(ModuleSerializer):
     project_name = serializers.ReadOnlyField(source='project.name')
+    state_name = serializers.ReadOnlyField(source='state.name')
     referee_name = serializers.ReadOnlyField(source='referee.name')
     state_summary = serializers.SerializerMethodField()
 
@@ -28,6 +29,7 @@ class GoalSerializer(ModuleSerializer):
             'project',
             'project_name',
             'state',
+            'state_name',
             'state_summary',
             'bmfdetail',
         )
@@ -37,7 +39,7 @@ class GoalSerializer(ModuleSerializer):
 
 
 class TaskSerializer(ModuleSerializer):
-    state_key = serializers.ReadOnlyField(source='state.key')
+    state_name = serializers.ReadOnlyField(source='state.name')
     project_name = serializers.ReadOnlyField(source='project.name')
     employee_name = serializers.ReadOnlyField(source='employee.name')
     goal_summary = serializers.ReadOnlyField(source='goal.summary')
@@ -47,7 +49,7 @@ class TaskSerializer(ModuleSerializer):
         model = Task
         fields = (
             'state',
-            'state_key',
+            'state_name',
             'summary',
             'completed',
             'project',
