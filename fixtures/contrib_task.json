@@ -233,7 +233,7 @@
   "employee": null,
   "modified": "2014-07-19T15:34:53.908Z",
   "project": 1,
-  "completed": false,
+  "completed": true,
   "state": "finished",
   "created_by": [
    "admin"

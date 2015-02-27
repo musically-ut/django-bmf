@@ -26,10 +26,10 @@
                     {% endverbatim %}{% trans "completed" %}{% verbatim %}
                 </span>
                 <div ng-if="obj.completed == false" class="progress" style="margin:0;">
-                    <div ng-if="obj.states.done > 0" class="progress-bar progress-bar-success" style="width: {{ obj.states.done }}%"></div>
-                    <div ng-if="obj.states.todo > 0" class="progress-bar progress-bar-warning" style="width: {{ obj.states.todo }}%"></div>
-                    <div ng-if="obj.states.review > 0" class="progress-bar progress-bar-info" style="width: {{ obj.states.review }}%"></div>
-                    <div ng-if="obj.states.hold > 0" class="progress-bar progress-bar-danger" style="width: {{ obj.states.hold }}%"></div>
+                    <div ng-if="obj.state_summary.done > 0." class="progress-bar progress-bar-success" style="width: {{ obj.state_summary.done }}%"></div>
+                    <div ng-if="obj.state_summary.todo > 0." class="progress-bar progress-bar-warning" style="width: {{ obj.state_summary.todo }}%"></div>
+                    <div ng-if="obj.state_summary.review > 0." class="progress-bar progress-bar-info" style="width: {{ obj.state_summary.review }}%"></div>
+                    <div ng-if="obj.state_summary.hold > 0." class="progress-bar progress-bar-danger" style="width: {{ obj.state_summary.hold }}%"></div>
                 </div>
             </td>
         </tr>
