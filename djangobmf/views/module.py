@@ -863,9 +863,15 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
                 raise Http404
             qs = field.field.queryset
 
-            # TODO use permissions from module
-            if hasattr(field.field.queryset.model, 'has_permissions'):
-                qs = field.field.queryset.model.has_permissions(qs, self.request.user)
+            # use permissions from module
+            try:
+                module = self.request.djangobmf_site.get_module(qs.model)
+                qs = module.permissions().filter_queryset(
+                    qs,
+                    self.request.user,
+                )
+            except KeyError:
+                pass
 
             func = getattr(form.instance, 'get_%s_queryset' % field.name, None)
             if func:

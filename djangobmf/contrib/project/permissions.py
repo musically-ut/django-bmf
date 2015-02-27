@@ -10,8 +10,8 @@ from djangobmf.permissions import ModulePermission
 
 class ProjectPermission(ModulePermission):
 
-    def filter_queryset(self, qs, user, model_cls):
-        if user.has_perm('%s.can_manage' % model_cls._meta.app_label, model_cls):
+    def filter_queryset(self, qs, user):
+        if user.has_perm('%s.can_manage' % qs.model._meta.app_label, qs.model):
             return qs
         return qs.filter(
             Q(employees=user.djangobmf.employee or -1) |

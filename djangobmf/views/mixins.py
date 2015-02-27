@@ -486,7 +486,7 @@ class ModuleBaseMixin(object):
         # load employee and team data into user
         self.request.user.djangobmf = Employee(self.request.user)
 
-        return self.module.permissions().filter_queryset(qs, self.request.user, self.model)
+        return self.module.permissions().filter_queryset(qs, self.request.user)
 
     def get_object(self):
         if hasattr(self, 'object'):

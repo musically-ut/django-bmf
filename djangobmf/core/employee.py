@@ -57,5 +57,4 @@ class Employee(object):
         return module.permissions().filter_queryset(
             obj._default_manager.filter(pk=obj.pk),
             self.user,
-            obj.__class__
         ).exists()

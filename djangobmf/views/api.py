@@ -55,7 +55,6 @@ class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
         return self.permissions().filter_queryset(
             qs,
             self.request.user,
-            self.model
         )
 
     def get_permissions(self):
