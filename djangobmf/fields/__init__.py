@@ -8,6 +8,7 @@ from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
+from djangobmf.conf import settings
 from djangobmf.currency import BaseCurrency
 
 from .workflow import WorkflowField
@@ -48,8 +49,7 @@ class OLDWorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
 
 
 def get_default_currency():
-    from djangobmf.models import Configuration
-    return Configuration.get_setting('djangobmf', 'currency')
+    return settings.DEFAULT_CURRENCY
 
 
 class MoneyProxy(object):
@@ -97,13 +97,10 @@ class CurrencyField(with_metaclass(models.SubfieldBase, models.CharField)):
         if isinstance(value, BaseCurrency):
             return value
 
-        elif not value:
-            return None
-
         # The string case.
         try:
             from .sites import site
-            return site.currencies['%s' % value]()
+            return site.currencies['%s' % value or settings.DEFAULT_CURRENCY]()
         except ImportError:
             return None
 

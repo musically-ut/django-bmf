@@ -64,11 +64,6 @@ class Site(object):
             'company_email': forms.EmailField(
                 required=True,
             ),
-            # TODO add validation / use dropdown
-            'currency': forms.CharField(
-                max_length=10,
-                required=True,
-            ),
         })
 
     def activate(self, test=False):
@@ -145,10 +140,6 @@ class Site(object):
         if currency.iso in self.currencies:
             raise AlreadyRegistered('The currency %s is already registered' % currency.__name__)
         self.currencies[currency.iso] = currency
-
-        # set the first registered currency as the initial one
-        if len(self.currencies) == 1:
-            self.get_setting_field("djangobmf", "currency").initial = currency.iso
 
     def unregister_currency(self, currency):
         if currency.iso not in self.currencies:

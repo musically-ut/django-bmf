@@ -104,5 +104,13 @@ class Settings(object):
     def REPORTING_SERVER(self):  # noqa
         return getattr(djsettings, 'BMF_REPORTING_SERVER', None)
 
+    @property
+    def DEFAULT_CURRENCY(self):  # noqa
+        return getattr(djsettings, 'BMF_DEFAULT_CURRENCY', 'EUR')
+
+    @property
+    def DEFAULT_RENDERER(self):  # noqa
+        return getattr(djsettings, 'BMF_DEFAULT_RENDERER', 'djangobmf_report.xhtml2pdf')
+
 
 settings = Settings()

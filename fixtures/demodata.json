@@ -1,13 +1,4 @@
 [
-{
- "pk": 1, 
- "model": "djangobmf.configuration", 
- "fields": {
-  "app_label": "djangobmf", 
-  "field_name": "currency", 
-  "value": "\"EUR\""
- }
-},
 
 {
  "pk": 1, 
