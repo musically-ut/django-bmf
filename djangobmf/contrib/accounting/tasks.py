@@ -3,12 +3,11 @@
 
 from __future__ import unicode_literals
 
+from django.apps import apps
 from django.db.models import Sum
 
+from djangobmf.conf import settings
 from djangobmf.decorators import optional_celery
-from djangobmf.settings import CONTRIB_ACCOUNT
-from djangobmf.settings import CONTRIB_TRANSACTIONITEM
-from djangobmf.utils.model_from_name import model_from_name
 
 from decimal import Decimal
 
@@ -17,18 +16,18 @@ logger = logging.getLogger(__name__)
 
 
 def _calc_account_balance(pk):
-    account_mdl = model_from_name(CONTRIB_ACCOUNT)
-    transaction_mdl = model_from_name(CONTRIB_TRANSACTIONITEM)
-    account = account_mdl.objects.get(pk=pk)
+    account_cls = apps.get_model(settings.CONTRIB_ACCOUNT)
+    transaction_cls = apps.get_model(settings.CONTRIB_TRANSACTIONITEM)
+    account = account_cls.objects.get(pk=pk)
     pks = list(account.get_descendants(include_self=True).values_list('pk', flat=True))
 
-    credit = transaction_mdl.objects.filter(
+    credit = transaction_cls.objects.filter(
         account_id__in=pks,
         draft=False,
         credit=True,
     ).aggregate(Sum('amount'))
 
-    debit = transaction_mdl.objects.filter(
+    debit = transaction_cls.objects.filter(
         account_id__in=pks,
         draft=False,
         credit=False,

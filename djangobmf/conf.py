@@ -114,3 +114,4 @@ class Settings(object):
 
 
 settings = Settings()
+bmf = settings
