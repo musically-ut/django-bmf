@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-08 04:15+0100\n"
+"POT-Creation-Date: 2015-03-10 09:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bmf_module.py:31 models.py:74
+#: bmf_module.py:33 models.py:74
 msgid "Invoices"
 msgstr ""
 
-#: bmf_module.py:40
+#: bmf_module.py:42
 msgid "Open invoices"
 msgstr ""
 
-#: bmf_module.py:46
+#: bmf_module.py:48
 msgid "All invoices"
 msgstr ""
 
@@ -54,19 +54,19 @@ msgstr ""
 msgid "Term of payment"
 msgstr ""
 
-#: models.py:179 templates/djangobmf_invoice/invoice_bmfdetail.html:37
+#: models.py:189 templates/djangobmf_invoice/invoice_bmfdetail.html:37
 msgid "Name"
 msgstr ""
 
-#: models.py:184 templates/djangobmf_invoice/invoice_bmfdetail.html:38
+#: models.py:194 templates/djangobmf_invoice/invoice_bmfdetail.html:38
 msgid "Price"
 msgstr ""
 
-#: models.py:185 templates/djangobmf_invoice/invoice_bmfdetail.html:39
+#: models.py:195 templates/djangobmf_invoice/invoice_bmfdetail.html:39
 msgid "Amount"
 msgstr ""
 
-#: models.py:187
+#: models.py:197
 msgid "Description"
 msgstr ""
 
