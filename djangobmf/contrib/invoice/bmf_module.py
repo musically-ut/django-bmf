@@ -12,6 +12,7 @@ from djangobmf.sites import site
 
 from .models import Invoice
 from .models import InvoiceProduct
+from .serializers import InvoiceSerializer
 from .views import InvoiceCreateView
 from .views import InvoiceUpdateView
 
@@ -19,6 +20,7 @@ from .views import InvoiceUpdateView
 site.register_module(Invoice, **{
     'create': InvoiceCreateView,
     'update': InvoiceUpdateView,
+    'serializer': InvoiceSerializer,
     'report': True,
 })
 

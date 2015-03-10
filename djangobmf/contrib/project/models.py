@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -56,16 +55,6 @@ class BaseProject(BMFModel):
         return self
 
     # TODO add validations and make it impossible that you can create a project which is hidden to yourself
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
-            return qs
-        return qs.filter(
-            Q(employees=getattr(user, 'djangobmf_employee', -1))
-            |
-            Q(team__in=getattr(user, 'djangobmf_teams', []))
-        )
 
 
 class AbstractProject(BaseProject):

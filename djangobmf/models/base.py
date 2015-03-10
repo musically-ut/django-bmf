@@ -4,18 +4,18 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import AppRegistryNotReady
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.db.models import signals
 from django.db.models.base import ModelBase
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ImproperlyConfigured
-from django.contrib.contenttypes.fields import GenericRelation
 
+from djangobmf.conf import settings as bmfsettings
 from djangobmf.fields import WorkflowField
-from djangobmf.settings import APP_LABEL
 from djangobmf.workflow import Workflow
 
 import types
@@ -69,7 +69,11 @@ class BMFOptions(object):
         self.has_comments = False
         self.has_files = False
         self.can_clone = False
-        self.only_related = False
+
+        # mark this model as only related, which means that it
+        # won't get a detail view
+        self.only_related = getattr(options, 'only_related', False)
+
         self.clean = False
         self.observed_fields = []
         self.search_fields = []
@@ -110,16 +114,19 @@ class BMFOptions(object):
         self.changelog = {}
 
         # namespace detail
-        self.namespace_detail = '%s:detail_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_detail = '%s:detail_%s_%s' % (bmfsettings.APP_LABEL, meta.app_label, meta.model_name)
 
         # namespace api
-        self.namespace_api = '%s:moduleapi_%s_%s' % (APP_LABEL, meta.app_label, meta.model_name)
+        self.namespace_api = '%s:moduleapi_%s_%s' % (bmfsettings.APP_LABEL, meta.app_label, meta.model_name)
 
         # is set to true if a report-view is defined for this model (see sites.py)
         self.has_report = False
 
-        # is filles with keys if multiple create views are definied for this model (see sites.py)
+        # is filled with create views (see core/module.py)
         self.create_views = []
+
+        # is filled with report views (see core/module.py)
+        self.report_views = []
 
         if options:
             options = inspect.getmembers(cls.BMFMeta)
@@ -133,7 +140,6 @@ class BMFOptions(object):
                 'has_logging',
                 'has_comments',
                 'has_files',
-                'only_related',
                 'search_fields',
                 'number_cycle',
                 'clean',
@@ -293,18 +299,6 @@ class BMFModelBase(ModelBase):
             )
             field.contribute_to_class(cls, 'djangobmf_notification')
 
-        # classmethod: has_permissions
-        def has_permissions(cls, qs, user):
-            """
-            Overwrite this function to enable object bases permissions. It must return
-            a queryset.
-
-            Default: queryset
-            """
-            return qs
-
-        setattr(cls, 'has_permissions', classmethod(has_permissions))
-
         # instancemethod: bmfget_project
         def bmfget_project(self):
             """
@@ -343,6 +337,14 @@ class BMFModelBase(ModelBase):
             return self.bmfmodule_detail()
 
         setattr(cls, 'get_absolute_url', get_absolute_url)
+
+        # classmethod: bmfmodule_list
+        def bmfmodule_list(cls, manager="all"):
+            """
+            """
+            return ('%s:get' % cls._bmfmeta.namespace_api, (), {"manager": manager})
+
+        setattr(cls, 'bmfmodule_list', classmethod(models.permalink(bmfmodule_list)))
 
         if cls._bmfmeta.clean:
             if not hasattr(cls, 'bmf_clean') and not cls._meta.abstract:

@@ -1,14 +1,19 @@
-{% extends "djangobmf/module_base.html" %}
+{% extends "djangobmf/module_modal_base.html" %}
 
-{% load djangobmf_core %}
 {% load i18n %}
 
+{% block title %}{% trans "State could not be changed" %}{% endblock %}
+
 {% block base_content %}
-<h1>{% trans "State could not be changed" %}</h1>
 <p>{% trans "This object is not valid. You need to edit it in order to change it's state."%}</p>
-<p>{{ error }}</p>
-<p>
-    <a href="{% get_bmf_url object "detail" %}" class="btn btn-default">{% trans "Back" %}</a>
-    <a href="{% get_bmf_url object "update" %}" class="btn btn-primary">{% trans "Edit" %}</a>
-</p>
+
+<ul>
+    {% for e in error %}
+    <li><p>{{ e }}</p></li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block base_buttons %}
+<button type="button" class="btn bmfedit-cancel btn-primary">{% trans "Close" %}</button>
 {% endblock %}

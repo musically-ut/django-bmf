@@ -5,25 +5,22 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.categories import BaseCategory
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import ProjectManagement
 from djangobmf.sites import site
 
+from .categories import ProjectCategory
 from .models import Project
-from .views import ProjectGetView
+from .permissions import ProjectPermission
+from .serializers import ProjectSerializer
 from .views import ProjectUpdateView
 
 
 site.register_module(Project, **{
-    'get': ProjectGetView,
     'update': ProjectUpdateView,
+    'permissions': ProjectPermission,
+    'serializer': ProjectSerializer,
 })
-
-
-class ProjectCategory(BaseCategory):
-    name = _('Projects')
-    slug = "projects"
 
 
 site.register_dashboards(

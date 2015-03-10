@@ -3,24 +3,26 @@
 
 from __future__ import unicode_literals
 
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.forms.widgets import TextInput
 from django.utils.translation import ugettext_lazy as _
 from django.utils.six import with_metaclass
 
+from djangobmf.conf import settings
 from djangobmf.currency import BaseCurrency
-from djangobmf.workflow import WorkflowContainer
+
+from .workflow import WorkflowField
+
+import logging
+logger = logging.getLogger(__name__)
 
 
-class OptionalForeignKey(models.ForeignKey):
-    pass
-#   def __new__(cls, foreignname, *args, **kwargs):
-#       print(cls)
-#       print(foreignname)
-#       print(args)
-#       print(kwargs)
-#       return = super(OptionalForeignKey, cls).__new__(foreignname, *args, **kwargs)
+__all__ = [
+    'OLDWorkflowField',
+    'WorkflowField',
+    'CurrencyField',
+    'MoneyField',
+]
 
 
 class OLDWorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
@@ -44,64 +46,13 @@ class OLDWorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
         super(OLDWorkflowField, self).__init__(**defaults)
 
 
-class WorkflowField(with_metaclass(models.SubfieldBase, models.CharField)):
-    """
-    Holds the current state of an Workflow object
-    can not be edited
-    """
-    description = _("Workflow Field")
-
-    def __init__(self, workflow, *args, **kwargs):
-        self.workflow = workflow
-        defaults = {
-            'db_index': True,
-            'max_length': 32,
-        }
-        defaults.update(kwargs)
-        defaults.update({
-            'blank': True,
-            'default': None,
-            'editable': False,
-            'null': True,
-        })
-        super(WorkflowField, self).__init__(**defaults)
-
-    def deconstruct(self):
-        name, path, args, kwargs = super(WorkflowField, self).deconstruct()
-        del kwargs["blank"]
-        del kwargs["default"]
-        del kwargs["editable"]
-        del kwargs["null"]
-        kwargs["workflow"] = self.workflow
-        return name, path, args, kwargs
-
-    def to_python(self, value):
-        if isinstance(value, WorkflowContainer):
-            return value
-        return WorkflowContainer(self.workflow, value)
-
-    def get_prep_value(self, value):
-        if isinstance(value, WorkflowContainer):
-            return value.key
-        return value
-
-    def clean(self, value, *args, **kwargs):
-        if (isinstance(value, WorkflowContainer) and isinstance(value.obj, self.workflow)) \
-                or value in self.workflow._states:
-            return value
-        raise ValidationError(_('The workflow state "%s" is no valid') % value)
-
-
 # Currency and Money
 # -----------------------------------------------------------------------------
 # see: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
 
 
 def get_default_currency():
-    # FIXME when settings are properly cached
-    return 'EUR'
-    from .sites import site
-    return site.get_lazy_setting('djangobmf', 'currency')
+    return settings.DEFAULT_CURRENCY
 
 
 class MoneyProxy(object):
@@ -123,7 +74,7 @@ class MoneyProxy(object):
         else:
             precision = 0
 
-        if not isinstance(value, BaseCurrency):
+        if currency is not None and not isinstance(value, BaseCurrency):
             value = currency.__class__(value, precision=precision)
 
         obj.__dict__[self.field.name] = value
@@ -148,9 +99,13 @@ class CurrencyField(with_metaclass(models.SubfieldBase, models.CharField)):
     def to_python(self, value):
         if isinstance(value, BaseCurrency):
             return value
+
         # The string case.
-        from .sites import site
-        return site.currencies['%s' % value]()
+        from djangobmf.sites import site
+        return site.currencies['%s' % (value or settings.DEFAULT_CURRENCY)]()
+        # except ImportError:
+        #    logger.debug('Sites not available, returning no currency class')
+        #    return None
 
     def get_prep_value(self, obj):
         if hasattr(obj, 'iso'):
@@ -228,3 +183,68 @@ class MoneyField(models.DecimalField):
         if isinstance(value, BaseCurrency):
             value = value.value
         return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
+
+
+'''
+#-*- coding: utf-8 -*-
+import inspect
+from django import forms
+from django.conf import settings as globalsettings
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.contrib.admin.sites import site
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
+from filer.utils.compatibility import truncate_words
+from filer.models import File
+from filer import settings as filer_settings
+
+class AdminFileFormField(forms.ModelChoiceField):
+    widget = AdminFileWidget
+
+    def __init__(self, rel, queryset, to_field_name, *args, **kwargs):
+        self.rel = rel
+        self.queryset = queryset
+        self.to_field_name = to_field_name
+        self.max_value = None
+        self.min_value = None
+        other_widget = kwargs.pop('widget', None)
+        if 'admin_site' in inspect.getargspec(self.widget.__init__)[0]: # Django 1.4
+            widget_instance = self.widget(rel, site)
+        else: # Django <= 1.3
+            widget_instance = self.widget(rel)
+        forms.Field.__init__(self, widget=widget_instance, *args, **kwargs)
+
+    def widget_attrs(self, widget):
+        widget.required = self.required
+        return {}
+
+
+class FilerFileField(models.ForeignKey):
+    default_form_class = AdminFileFormField
+    default_model_class = File
+
+    def __init__(self, **kwargs):
+        # we call ForeignKey.__init__ with the Image model as parameter...
+        # a FilerImageFiled can only be a ForeignKey to a Image
+        return super(FilerFileField, self).__init__(
+            self.default_model_class, **kwargs)
+
+    def formfield(self, **kwargs):
+        # This is a fairly standard way to set up some defaults
+        # while letting the caller override them.
+        defaults = {
+            'form_class': self.default_form_class,
+            'rel': self.rel,
+        }
+        defaults.update(kwargs)
+        return super(FilerFileField, self).formfield(**defaults)
+
+from datetime import date
+from django.forms import widgets
+
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+
+'''

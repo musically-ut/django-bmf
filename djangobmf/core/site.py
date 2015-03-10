@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 from django import forms
-from django.apps import apps
 from django.conf.urls import include
 from django.conf.urls import patterns
 from django.conf.urls import url
@@ -14,14 +13,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 
 from djangobmf.core.module import Module
-from djangobmf.core.setting import Setting
+from djangobmf.models import Configuration
 from djangobmf.models import NumberCycle
-from djangobmf.settings import APP_LABEL
+
+from rest_framework import routers
 
 import logging
 logger = logging.getLogger(__name__)
-
-SETTING_KEY = "%s.%s"
 
 
 class Site(object):
@@ -32,15 +30,14 @@ class Site(object):
     def __init__(self, namespace=None, app_name=None):
         self.namespace = namespace or "djangobmf"
         self.app_name = app_name or "djangobmf"
+        self.router = routers.DefaultRouter()
         self.clear()
-
-    # TODO add some generic register function, which functions as a decorator and can be used on different objects
-    def register(self, *args, **kwargs):  # pragma: no cover
-        pass
 
     def clear(self):
         # true if the site is active, ie loaded
         self.is_active = False
+
+        self.is_migrated = False
 
         # combine all registered modules here
         self.modules = {}
@@ -59,17 +56,24 @@ class Site(object):
 
         # if a module requires a custom setting, it can be stored here
         self.settings = {}
-        self.settings_valid = False
-        self.register_settings(APP_LABEL, {
-            'company_name': forms.CharField(max_length=100, required=True,),
-            'company_email': forms.EmailField(required=True,),
-            'currency': forms.CharField(max_length=10, required=True,),  # TODO add validation / use dropdown
+        self.register_settings(self.app_name, {
+            'company_name': forms.CharField(
+                max_length=100,
+                required=True,
+            ),
+            'company_email': forms.EmailField(
+                required=True,
+            ),
         })
 
     def activate(self, test=False):
+        # at this point the apps are NOT ready,
+        # but we can make database connections
 
-        if self.is_active or not test:  # pragma: no cover
+        if self.is_active and not test:  # pragma: no cover
             return True
+
+        logger.debug('Site activation started')
 
         # ~~~~ numbercycles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -81,27 +85,54 @@ class Site(object):
                 obj.save()
                 logger.debug('Numbercycle for model %s created' % model.__class__.__name__)
 
+        # ~~~~ settings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        register_settings = list(self.settings.keys())
+        for setting in Configuration.objects.all():
+            key = '.'.join((setting.app_label, setting.field_name))
+
+            if key in self.settings:
+                if not setting.active:
+                    setting.active = True
+                    setting.save()
+                register_settings.remove(key)
+
+            elif setting.active:
+                setting.active = False
+                setting.save()
+
+        if register_settings:
+            logger.debug('Need to register new settings')
+            for setting in register_settings:
+                app, name = setting.split('.', 1)
+                Configuration.objects.create(app_label=app, field_name=name)
+                logger.debug('Registered setting %s' % setting)
+
         # ~~~~ END ~ activate ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.is_active = True
+        logger.debug('Site is now active')
         return True
 
     # --- modules -------------------------------------------------------------
 
-    def register_module(self, module, **options):
-        if not hasattr(module, '_bmfmeta'):
+    def register_module(self, model, **options):
+        if not hasattr(model, '_bmfmeta'):
             raise ImproperlyConfigured(
                 'The module %s needs to be an BMF-Model in order to be'
-                'registered with django BMF.' % module.__name__
+                'registered with django BMF.' % model.__name__
             )
-        if module in self.modules:
-            raise AlreadyRegistered('The module %s is already registered' % module.__name__)
-        self.modules[module] = Module(module, **options)
+        if model in self.modules:
+            raise AlreadyRegistered('The module %s is already registered' % model.__name__)
+        self.modules[model] = Module(model, **options)
 
     def unregister_module(self, module):
         if module not in self.modules:
             raise NotRegistered('The model %s is not registered' % module.__name__)
         del self.modules[module]
+
+    def get_module(self, model):
+        return self.modules[model]
 
     # --- currencies ----------------------------------------------------------
 
@@ -129,51 +160,25 @@ class Site(object):
 
     # --- settings ------------------------------------------------------------
 
-    # TODO move settings to cache backend!
     def register_settings(self, app_label, settings_dict):
-        pass
-        for setting_name, options in settings_dict.items():
-            self.register_setting(app_label, setting_name, options)
+        for setting_name, field in settings_dict.items():
+            self.register_setting(app_label, setting_name, field)
 
-    # TODO move settings to cache backend!
-    def register_setting(self, app_label, setting_name, options):
-        name = SETTING_KEY % (app_label, setting_name)
+    def register_setting(self, app_label, setting_name, field):
+        name = '.'.join([app_label, setting_name])
         if name in self.settings:
             raise AlreadyRegistered('The setting %s is already registered' % name)
-        self.settings[name] = Setting(app_label, setting_name, options)
+        self.settings[name] = field
 
-    # TODO move settings to cache backend!
     def unregister_setting(self, app_label, setting_name):
-        name = SETTING_KEY % (app_label, setting_name)
+        name = '.'.join([app_label, setting_name])
         if name not in self.settings:
             raise NotRegistered('The setting %s is not registered' % name)
         del self.settings[name]
 
-    # TODO move settings to cache backend!
-    def check_settings(self):
-        self.settings_valid = False
-        for key, setting in self.settings:
-            if not setting.value and setting.field.required:
-                self.settings_valid = False
-                return False
-        return True
-
-    # TODO move settings to cache backend!
-    def get_lazy_setting(self, app_label, setting_name):
-        """
-        will allways return None, if the django apps are not ready
-        """
-        if apps.ready:
-            return self.get_setting(app_label, setting_name)
-        return None
-
-    # TODO move settings to cache backend!
-    def get_setting(self, app_label, setting_name):
-        name = SETTING_KEY % (app_label, setting_name)
-        try:
-            return self.settings[name].value
-        except KeyError:
-            raise NotRegistered('The setting %s is not registered' % name)
+    def get_setting_field(self, app_label, setting_name):
+        name = '.'.join([app_label, setting_name])
+        return self.settings[name]
 
     # --- number cycle --------------------------------------------------------
 
@@ -218,18 +223,18 @@ class Site(object):
 
         from djangobmf.urls import urlpatterns
 
-        self.activate()
+        try:
+            ct = ContentType.objects.get_for_model(Configuration)
+            self.activate()
+        except RuntimeError:
+            # During the migrate command, contenttypes are not ready
+            # and raise a Runtime error. We ignore that error and return an empty
+            # pattern - the urls are not needed during migrations.
+            return patterns('')
 
         for module, data in self.modules.items():
             info = (module._meta.app_label, module._meta.model_name)
-
-            try:
-                ct = ContentType.objects.get_for_model(module)
-            except RuntimeError:
-                # During the first migrate command, contenttypes are not ready
-                # and raise a Runtime error. We ignore that error and return
-                # an empty pattern - the urls are not needed during migrations.
-                return patterns('')
+            ct = ContentType.objects.get_for_model(module)
 
             # set the apis
             urlpatterns += patterns(
@@ -249,5 +254,4 @@ class Site(object):
                         include((data.get_detail_urls(), self.app_name, "detail_%s_%s" % info))
                     ),
                 )
-
         return urlpatterns

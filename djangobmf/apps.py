@@ -12,7 +12,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import module_has_submodule
 from django.utils.module_loading import import_module
 
-from djangobmf.settings import APP_LABEL
+from djangobmf.conf import settings as bmfsettings
 from djangobmf.core.site import Site
 
 import logging
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class BMFConfig(AppConfig):
     name = 'djangobmf'
-    label = APP_LABEL
+    label = bmfsettings.APP_LABEL
     verbose_name = "Django BMF"
 
     def ready(self):
@@ -30,7 +30,7 @@ class BMFConfig(AppConfig):
 
 
 class ModuleTemplate(AppConfig):
-    bmf_label = APP_LABEL
+    bmf_label = bmfsettings.APP_LABEL
 
     def ready(self):
         # if ready was already called
@@ -87,6 +87,10 @@ class ContribTemplate(ModuleTemplate):
 
 class CurrencyTemplate(ModuleTemplate):
     verbose_name = "Django BMF Currency"
+
+
+class ReportTemplate(ModuleTemplate):
+    verbose_name = "Django BMF Report"
 
 
 # Checks

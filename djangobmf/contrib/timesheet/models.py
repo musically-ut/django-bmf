@@ -8,10 +8,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.settings import CONTRIB_PROJECT
-from djangobmf.settings import CONTRIB_TASK
 
 from .workflows import TimesheetWorkflow
 
@@ -27,7 +25,7 @@ class TimesheetManager(models.Manager):
 
     def mytimesheets(self, request):
         return self.get_queryset().filter(
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee or -1,
         )
 
 
@@ -39,20 +37,21 @@ class AbstractTimesheet(BMFModel):
     description = models.TextField(_("Description"), null=True, blank=True, )
     start = models.DateTimeField(null=True, blank=False, default=now)
     end = models.DateTimeField(null=True, blank=True)
+    billable = models.BooleanField(default=True)
     auto = models.BooleanField(default=False, editable=False)
     valid = models.BooleanField(default=False, editable=False)
 
     employee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+"
     )
 
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_PROJECT, null=True, blank=True, on_delete=models.SET_NULL,
     )
 
     task = models.ForeignKey(  # TODO: make optional
-        CONTRIB_TASK, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_TASK, null=True, blank=True, on_delete=models.SET_NULL,
     )
 
     objects = TimesheetManager()
@@ -94,12 +93,6 @@ class AbstractTimesheet(BMFModel):
 
     def __str__(self):
         return '%s' % (self.start)
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
-            return qs
-        return qs.filter(employee=getattr(user, 'djangobmf_employee', -1))
 
     class BMFMeta:
         has_logging = True

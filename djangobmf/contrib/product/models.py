@@ -94,6 +94,7 @@ class AbstractProduct(BMFModel):
         related_name="product_taxes",
         limit_choices_to={'is_active': True},
         through='ProductTax',
+        editable=False,
     )
     # discount = models.FloatField(_('Max. discount'), default=0.0)
     # Accounting
@@ -183,7 +184,7 @@ class AbstractProduct(BMFModel):
     # def calc_default_price(self, project, amount, price):
     #   return self.get_price(1.0, self.price)
 
-    def calc_tax(self, amount, price):
+    def calc_tax(self, amount, price, related=False):
         # TODO add currency for calculation of taxes
         if not isinstance(amount, Decimal):
             amount = Decimal(str(amount))
@@ -212,7 +213,10 @@ class AbstractProduct(BMFModel):
         for tax in taxes:
             tax_value = (net * tax.tax.get_rate()).quantize(Decimal('0.01'))
             gross += tax_value
-            used_taxes.append((tax.tax, tax_value))
+            if related:
+                used_taxes.append((tax.tax, tax_value, tax))
+            else:
+                used_taxes.append((tax.tax, tax_value))
         return unit_exact, net, gross, used_taxes
 
 
@@ -220,7 +224,7 @@ class Product(AbstractProduct):
     pass
 
 
-class ProductTax(models.Model):
+class ProductTax(BMFModel):
     product = models.ForeignKey(
         CONTRIB_PRODUCT,
         null=True,
@@ -239,3 +243,6 @@ class ProductTax(models.Model):
 
     class Meta:
         unique_together = ("product", "tax")
+
+    class BMFMeta:
+        only_related = True

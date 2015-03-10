@@ -17,57 +17,90 @@ from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
+from djangobmf.utils.testcases import WorkflowTestFactory
 
 
 class TaskFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = TaskConfig
 
-    def test_goal_workflow(self):
-        transitions, objects = self.prepare_workflow_test(GoalWorkflow)
-        objects['open'] = Goal(summary="Test")
-        self.auto_workflow_test(transitions, objects)
 
-    def test_task_workflow(self):
-        transitions, objects = self.prepare_workflow_test(TaskWorkflow)
-        objects['new'] = Task(summary="Test")
-        self.auto_workflow_test(transitions, objects)
+class GoalWorkflowFactory(WorkflowTestFactory, DemoDataMixin, TestCase):
+    workflow = GoalWorkflow
+
+    def test_goal_workflow_superuser(self):
+        self.objects['open'] = Goal(summary="Test")
+        self.auto_workflow_test()
 
 
-class TaskModuleTests(ModuleMixin, TestCase):
+class TaskWorkflowFactory(WorkflowTestFactory, DemoDataMixin, TestCase):
+    workflow = TaskWorkflow
+
+    def test_task_workflow_superuser(self):
+        self.objects['new'] = Task(summary="Test")
+        self.auto_workflow_test()
+
+
+class TaskModuleTests(ModuleMixin, DemoDataMixin, TestCase):
 
     def test_goal_views(self):
         self.model = Goal
-#       data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
-#       data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
-#       # self.autotest_get('index', 200)
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
 
-#       obj = self.get_latest_object()
-#       a = '%s'%obj # check if object name has any errors
+        obj = self.get_latest_object()
+        a = '%s'%obj # check if object name has any errors
 
-#       self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
-#       data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
-#      #self.autotest_get('delete', status_code=403, kwargs={'pk': obj.pk})
-#      #self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'complete'})
-#      #self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'reopen'})
-#       self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'complete'})
-#       self.autotest_get('delete', kwargs={'pk': obj.pk})
-#       self.autotest_post('delete', status_code=302, kwargs={'pk': obj.pk})
+#       self.autotest_ajax_post('delete', kwargs={'pk': obj.pk}, data=None)
 
     def test_task_views(self):
         self.model = Task
-#       # self.autotest_get('index')
-#       data = self.autotest_ajax_get('create', kwargs={'key': 'default'})
-#       data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
+        data = self.autotest_ajax_post('create', kwargs={'key': 'default'}, data={'summary':'test'})
 
-#       obj = self.get_latest_object()
-#       a = '%s'%obj # check if object name has any errors
+        obj = self.get_latest_object()
+        a = '%s'%obj # check if object name has any errors
 
-#       self.autotest_get('detail', kwargs={'pk': obj.pk}, api=False)
-#       data = self.autotest_ajax_get('update', kwargs={'pk': obj.pk})
-#       self.autotest_get('delete', status_code=403, kwargs={'pk': obj.pk})
-#       self.autotest_get('workflow', status_code=302, kwargs={'pk': obj.pk, 'transition': 'finish'})
-#       self.autotest_get('delete', kwargs={'pk': obj.pk})
-#       self.autotest_post('delete', status_code=302, kwargs={'pk': obj.pk})
+#       self.autotest_ajax_post('delete', kwargs={'pk': obj.pk}, data=None)
+
+    def test_goal_clone1(self):
+        self.model = Goal
+
+        obj = Goal(summary="test")
+        obj.save()
+        obj.task_set.create(summary="test1")
+        obj.task_set.create(summary="test2")
+        obj.task_set.create(summary="test3")
+        data = self.autotest_ajax_post(
+            'clone',
+            kwargs={'pk': obj.pk},
+            data={'summary':'test'},
+        )
+
+    def test_goal_clone2(self):
+        self.model = Goal
+
+        obj = Goal(summary="test")
+        obj.save()
+        obj.task_set.create(summary="test1")
+        obj.task_set.create(summary="test2")
+        obj.task_set.create(summary="test3")
+        data = self.autotest_ajax_post(
+            'clone',
+            kwargs={'pk': obj.pk},
+            data={'summary':'test', 'copy_tasks': True},
+        )
+
+    def test_goal_clone3(self):
+        self.model = Goal
+
+        obj = Goal(summary="test")
+        obj.save()
+        obj.task_set.create(summary="test1")
+        obj.task_set.create(summary="test2")
+        obj.task_set.create(summary="test3")
+        data = self.autotest_ajax_post(
+            'clone',
+            kwargs={'pk': obj.pk},
+            data={'summary':'test', 'copy_tasks': True, 'clear_employee': True},
+        )
 
     def test_task_workflows(self):
         """
@@ -192,16 +225,3 @@ class TaskModuleTests(ModuleMixin, TestCase):
 
 #       r = self.client.get(reverse(namespace+':workflow', None, None, {'pk': goal1.pk, 'transition': 'complete'}))
 #       self.assertEqual(r.status_code, 200)
-
-
-# class TaskWorkflowTests(WorkflowTestCase):
-
-#     def test_goal_workflow(self):
-#         self.object = GoalFactory()
-#         workflow = self.workflow_build()
-#         workflow = self.workflow_autotest()
-#  
-#     def test_task_workflow(self):
-#         self.object = TaskFactory()
-#         workflow = self.workflow_build()
-#         workflow = self.workflow_autotest()

@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django.db.models.query import QuerySet
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -18,15 +19,15 @@ from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 
 from djangobmf import get_version
+from djangobmf.conf import settings as bmfsettings
+from djangobmf.core.employee import Employee
 from djangobmf.decorators import login_required
 from djangobmf.document.forms import UploadDocument
 from djangobmf.notification.forms import HistoryCommentForm
 from djangobmf.models import Activity
 from djangobmf.models import Document
 from djangobmf.models import Notification
-from djangobmf.settings import APP_LABEL
 from djangobmf.utils.serializers import DjangoBMFEncoder
-from djangobmf.utils.user import user_add_bmf
 from djangobmf.views.defaults import bad_request
 from djangobmf.views.defaults import permission_denied
 from djangobmf.views.defaults import page_not_found
@@ -99,28 +100,23 @@ class BaseMixin(object):
         and add the functionality to this function.
         """
 
+        # add the site object to every request
+        setattr(self.request, 'djangobmf_site', apps.get_app_config(bmfsettings.APP_LABEL).site)
+
         if not self.check_permissions() or not self.request.user.has_perms(self.get_permissions([])):
             return permission_denied(self.request)
 
-        # === DJANGO BMF SITE OBJECT ======================================
-
-        self.request.djangobmf_site = apps.get_app_config(APP_LABEL).site
-
-        # === EMPLOYEE AND TEAMS ==========================================
-
         # automagicaly add the authenticated user and employee to the request (as a lazy queryset)
-        user_add_bmf(self.request.user)
+        self.request.user.djangobmf = Employee(self.request.user)
 
         # check if bmf has a employee model and if so do a validation of the
         # employee instance (users, who are not employees are not allowed to access)
-        if self.request.user.djangobmf_has_employee and not self.request.user.djangobmf_employee:
+        if self.request.user.djangobmf.has_employee and not self.request.user.djangobmf.employee:
             logger.debug("User %s does not have permission to access djangobmf" % self.request.user)
             if self.request.user.is_superuser:
                 return redirect('djangobmf:wizard', permanent=False)
             else:
                 return permission_denied(self.request)
-
-        # =================================================================
 
         response = super(BaseMixin, self).dispatch(*args, **kwargs)
 
@@ -278,11 +274,6 @@ class ViewMixin(BaseMixin):
             'navigation_dashboard': navigation_dashboard,
             'active_dashboard': current_dashboard,
             'active_dashboard_view': current_view,
-            #   'bmfworkspace': {
-            #       'dashboards': dashboards,
-            #       'workspace': workspace,
-            #       'workspace_active': session_data.get('dashboard', None),
-            #   },
         })
 
         # always read current version, if in development mode
@@ -347,6 +338,38 @@ class NextMixin(object):
             return reverse_lazy(reverse, args=args, kwargs=kwargs)
 
         return self.request.path_info
+
+
+class ReadOnlyMixin(object):
+
+    def get_initial(self):
+        initial = super(ReadOnlyMixin, self).get_initial()
+        self.readonly_fields = []
+
+        for key in self.request.GET.keys():
+            match = re.match(r'^set-(\w+)$|^data\[(\w+)\]$', key)
+            if match:
+                field = match.group(1) or match.group(2)
+                initial.update({field: self.request.GET.get(key)})
+                self.readonly_fields.append(field)
+
+        return initial
+
+    def get_form(self, *args, **kwargs):
+        form = super(ReadOnlyMixin, self).get_form(*args, **kwargs)
+
+        for field in self.readonly_fields:
+            if field in form.fields:
+                form.fields[field].widget.attrs['readonly'] = True
+            else:
+                raise ImproperlyConfigured(
+                    "Form %s in view %s has no field named %s" % (
+                        self.form.__class__.__name__,
+                        self.__class__.__name__,
+                        field
+                    )
+                )
+        return form
 
 
 # PERMISSIONS
@@ -426,14 +449,30 @@ class ModuleDeletePermissionMixin(object):
 
 class ModuleBaseMixin(object):
     model = None
+    module = None
 
     def get_queryset(self, manager=None):
         """
         Return the list of items for this view.
         `QuerySet` in which case `QuerySet` specific behavior will be enabled.
         """
-        if self.model and manager and hasattr(self.model._default_manager, manager):
-            qs = getattr(self.model._default_manager, manager)(self.request)
+        module = self.request.djangobmf_site.get_module(self.model)
+
+        if self.model and manager:
+            if module.manager.get(manager, None):
+                qs = module.manager[manager]
+                if isinstance(qs, QuerySet):
+                    qs = qs.all()
+            elif hasattr(self.model._default_manager, manager):
+                qs = getattr(self.model._default_manager, manager)(self.request)
+            else:
+                raise ImproperlyConfigured(
+                    "%(manager)s is not defined in %(cls)s.model" % {
+                        'manager': manager,
+                        'cls': self.__class__.__name__
+                    }
+                )
+
         elif self.model is not None:
             qs = self.model._default_manager.all()
         else:
@@ -444,28 +483,10 @@ class ModuleBaseMixin(object):
                 }
             )
 
-#       return qs
-
-#   def get_queryset(self):
-#       if self.queryset is not None:
-#           queryset = self.queryset
-#           if isinstance(queryset, QuerySet):
-#               queryset = queryset.all()
-#       elif self.model is not None:
-#           queryset = self.model._default_manager.all()
-#       else:
-#           raise ImproperlyConfigured(
-#               "%(cls)s is missing a QuerySet. Define "
-#               "%(cls)s.model, %(cls)s.queryset, or override "
-#               "%(cls)s.get_queryset()." % {
-#                   'cls': self.__class__.__name__
-#               }
-#           )
-
         # load employee and team data into user
-        user_add_bmf(self.request.user)
+        self.request.user.djangobmf = Employee(self.request.user)
 
-        return self.model.has_permissions(qs, self.request.user)
+        return self.module.permissions().filter_queryset(qs, self.request.user)
 
     def get_object(self):
         if hasattr(self, 'object'):
@@ -478,6 +499,7 @@ class ModuleBaseMixin(object):
             'bmfmodule': {
                 'verbose_name_plural': self.model._meta.verbose_name_plural,
                 'create_views': self.model._bmfmeta.create_views,
+                'report_views': self.model._bmfmeta.report_views,
                 'model': self.model,
                 # 'contenttype': ContentType.objects.get_for_model(self.model).pk,
                 'has_report': self.model._bmfmeta.has_report,
@@ -528,7 +550,7 @@ class ModuleAjaxMixin(ModuleBaseMixin, AjaxMixin):
         return ctx
 
     def render_valid_form(self, context):
-        if 'redirect' not in context:
+        if 'redirect' not in context and not self.model._bmfmeta.only_related:
             context.update({
                 'redirect': self.get_success_url(),
             })

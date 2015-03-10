@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.workflow import Workflow, State, Transition
 
-from .tasks import bmfcontrib_accounting_calc_balance
+from .tasks import calc_account_balance
 
 
 class TransactionWorkflow(Workflow):
@@ -28,7 +28,7 @@ class TransactionWorkflow(Workflow):
         self.instance.items.update(draft=False)
 
         for item in self.instance.items.all():
-            bmfcontrib_accounting_calc_balance(item.account_id)
+            calc_account_balance(item.account_id)
 
         # Update accounts
         self.instance.draft = False

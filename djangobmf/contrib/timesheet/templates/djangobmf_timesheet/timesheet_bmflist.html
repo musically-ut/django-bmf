@@ -12,46 +12,24 @@
     {% verbatim %}
     <tbody>
         <tr ng-repeat="obj in data.items">
-            <td>DATE</td>
+            <td>{{ obj.date }}</td>
             <td>
+                <span ng-if="obj.end == null" class="label label-warning">{% endverbatim %}{% trans "Active" %}{% verbatim %}</span>
                 {{ obj.summary }}
+                <div ng-if="obj.project || obj.task" class="text-muted small">
+                    <strong ng-if="obj.project">{{ obj.project_name }}</strong>
+                    {{ obj.task_name }}
+                </div>
             </td>
-            <td>{{ obj.employee }}</td>
-            <td>
+            <td>{{ obj.employee_name }}</td>
+            <td>{{ obj.timesince }}
             </td>
             <td class="text-right">
-              <a class="btn btn-xs btn-primary" href="{{ url }}">
+              <a class="btn btn-xs btn-primary" href="{{ obj.bmfdetail }}">
                 <span class="glyphicon glyphicon-list"></span>
               </a>
             </td>
         </tr>
     </tbody>
     {% endverbatim %}
-    {% comment %}
-    <tbody>
-        <tr ng-repeat="obj in data.items">
-            <td>{{ obj.start|date:"SHORT_DATE_FORMAT" }}</td>
-            <td>{% if not obj.end %}<span class="label label-warning">{% trans "Active" %}</span>{% endif %}
-                {{ obj.summary }}
-                {% if obj.project or obj.task %}<br /><small class="text-muted">
-                    {% if obj.project %}<strong>{{ obj.project }}</strong>{% endif %} {% if obj.task %}{{ obj.task }}{% endif %}
-                </small>
-                {% endif %}
-            </td>
-            <td>{{ obj.employee }}</td>
-            <td>
-                {% if obj.end %}
-                {{ obj.start|timesince:obj.end }}
-                {% else %}
-                {{ obj.start|timesince }}
-                {% endif %}
-            </td>
-            <td class="text-right">
-              <a class="btn btn-xs btn-primary" href="{{ obj.bmfmodule_detail }}">
-                <span class="glyphicon glyphicon-list"></span>
-              </a>
-            </td>
-        </tr>
-    </tbody>
-    {% endcomment %}
 </table>

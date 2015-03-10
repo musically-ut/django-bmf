@@ -8,8 +8,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_TEAM
-from djangobmf.settings import CONTRIB_EMPLOYEE
+from djangobmf.conf import settings
 
 
 @python_2_unicode_compatible
@@ -20,7 +19,7 @@ class AbstractTeam(BMFModel):
         max_length=255, null=False, blank=False, editable=True,
     )
     members = models.ManyToManyField(
-        CONTRIB_EMPLOYEE, blank=True, related_name="teams",
+        settings.CONTRIB_EMPLOYEE, blank=True, related_name="teams",
         limit_choices_to={'user__isnull': False}, through='TeamMember',
     )
 
@@ -41,10 +40,10 @@ class AbstractTeam(BMFModel):
 
 class TeamMember(BMFModel):
     team = models.ForeignKey(
-        CONTRIB_TEAM, null=True, blank=True, related_name="+", on_delete=models.CASCADE,
+        settings.CONTRIB_TEAM, null=True, blank=True, related_name="+", on_delete=models.CASCADE,
     )
     employee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, related_name="+", on_delete=models.CASCADE,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, related_name="+", on_delete=models.CASCADE,
     )
     is_manager = models.BooleanField(_("Is manager"), default=False)
 
@@ -52,8 +51,7 @@ class TeamMember(BMFModel):
         unique_together = ("team", "employee")
 
     class BMFMeta:
-        search_fields = ['name']
-        has_logging = False
+        only_related = True
 
 
 class Team(AbstractTeam):

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-# from django import forms
+from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.sites import site
@@ -11,25 +11,30 @@ from djangobmf.categories import BaseCategory
 from djangobmf.categories import ViewFactory
 from djangobmf.categories import Sales
 
-# from .apps import ProductConfig
-
 from .models import Product
-# from .models import PRODUCT_SERVICE
-
+from .models import ProductTax
+from .models import PRODUCT_SERVICE
+from .serializers import ProductSerializer
 from .views import ProductCreateView
+from .views import ProductDetailView
 from .views import ProductUpdateView
 
 
 site.register_module(Product, **{
     'create': ProductCreateView,
+    'detail': ProductDetailView,
     'update': ProductUpdateView,
+    'serializer': ProductSerializer,
 })
 
 
-# SETTINGS = {
-#     'default': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
-# }
-# site.register_settings(ProductConfig.label, SETTINGS)
+site.register_module(ProductTax, **{
+})
+
+
+site.register_settings('bmfcontrib_product', {
+    'default': forms.ModelChoiceField(queryset=Product.objects.filter(type=PRODUCT_SERVICE)),
+})
 
 
 class ProductCategory(BaseCategory):

@@ -57,12 +57,13 @@ Credits
 
 * `django`_
 * `django-mptt`_
+* `django-rest-framework`_
 
 .. _Github: https://github.com/django-bmf/django-bmf
 .. _Issue Tracker: https://github.com/django-bmf/django-bmf/issues
 .. _django: http://www.djangoproject.com
 .. _django-mptt: https://github.com/django-mptt/django-mptt
-
+.. _django-rest-framework: http://www.django-rest-framework.org
 
 .. |Build status| image:: https://api.travis-ci.org/django-bmf/django-bmf.svg?branch=develop
    :target: http://travis-ci.org/django-bmf/django-bmf

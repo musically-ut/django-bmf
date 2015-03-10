@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-08 04:15+0100\n"
+"POT-Creation-Date: 2015-03-10 09:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bmf_module.py:32 models.py:97
+#: bmf_module.py:33 models.py:97
 msgid "Positions"
 msgstr ""
 
-#: bmf_module.py:41
+#: bmf_module.py:42
 msgid "Open Positions"
 msgstr ""
 
-#: bmf_module.py:47
+#: bmf_module.py:48
 msgid "All positions"
 msgstr ""
 
-#: models.py:50 templates/djangobmf_position/position_bmflist.html:8
+#: models.py:50 templates/djangobmf_position/position_bmflist_old.html:8
 msgid "Date"
 msgstr ""
 
-#: models.py:51 templates/djangobmf_position/position_bmflist.html:9
+#: models.py:51 templates/djangobmf_position/position_bmflist_old.html:9
 msgid "Name"
 msgstr ""
 
@@ -57,14 +57,14 @@ msgstr ""
 msgid "Position"
 msgstr ""
 
-#: templates/djangobmf_position/position_bmflist.html:10
+#: templates/djangobmf_position/position_bmflist_old.html:10
 msgid "Product"
 msgstr ""
 
-#: templates/djangobmf_position/position_bmflist.html:11
+#: templates/djangobmf_position/position_bmflist_old.html:11
 msgid "Project"
 msgstr ""
 
-#: templates/djangobmf_position/position_bmflist.html:12
+#: templates/djangobmf_position/position_bmflist_old.html:12
 msgid "Employee"
 msgstr ""

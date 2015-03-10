@@ -6,7 +6,7 @@
 
 {% block title %}{{ view_name }}{% endblock %}
 
-{% block content_container %} ng-app="bmfApp" ng-controller="bmfListCtrl"{% endblock %}
+{% block content_container %} ng-app="bmfApp" ng-controller="bmfListCtrl" ng-init="apicall='{{ get_data_url }}'"{% endblock %}
 
 {% block full_content %}
 
@@ -15,18 +15,22 @@
     bmfApp.config(['$httpProvider', function($httpProvider) {
         $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     }]);
-    bmfApp.controller('bmfListCtrl', function($scope, $http) {
-            $http.get('{{ get_data_url }}').then(function(artResponse){
+    bmfApp.controller('bmfListCtrl', function($scope, $window, $http) {
+            $http.get('{{ get_data_url }}').then(function(artResponse) {
                 $scope.data = artResponse.data;
+                $scope.django = $window.django;
             });
     });
 --></script>{% endaddtoblock %}{% endblock %}
 
 {% block infobar %}
+{% if debug %}
+<p>API: <a href="{{ get_data_url }}">{{ get_data_url }}</a></p>
+{% endif %}
 <div class="input-group">
     <div class="input-group-btn">
         <button class="btn btn-default disabled" type="button">
-            <span class="glyphicon glyphicon-filter"></span>
+            <span class="glyphicon glyphicon-search"></span>
         </button>
     </div>
     <input type="text" class="form-control">

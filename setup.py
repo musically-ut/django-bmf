@@ -44,8 +44,10 @@ setup(
     install_requires=[
         'django',
         'pytz',
+        'requests',
         'django-sekizai',
         'django-mptt',
+        'djangorestframework',
         # 'django-haystack',
         'markdown',
     ],

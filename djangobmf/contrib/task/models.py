@@ -4,16 +4,12 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_PROJECT
-from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.settings import CONTRIB_TEAM
-from djangobmf.settings import CONTRIB_GOAL
 
 from .workflows import GoalWorkflow
 from .workflows import TaskWorkflow
@@ -36,7 +32,7 @@ class GoalManager(models.Manager):
     def mygoals(self, request):
         return self.get_queryset().filter(
             completed=False,
-            referee=getattr(request.user, 'djangobmf_employee', -1),
+            referee=request.user.djangobmf.employee,
         )
 
 
@@ -48,18 +44,18 @@ class AbstractGoal(BMFModel):
     description = models.TextField(_("Description"), null=True, blank=True, )
 
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
+        settings.CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
     )
 
     referee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+"
     )
     team = models.ForeignKey(
-        CONTRIB_TEAM, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_TEAM, null=True, blank=True, on_delete=models.SET_NULL,
     )
     employees = models.ManyToManyField(
-        CONTRIB_EMPLOYEE, blank=True,
+        settings.CONTRIB_EMPLOYEE, blank=True,
         related_name="employees"
     )
 
@@ -91,24 +87,6 @@ class AbstractGoal(BMFModel):
 
     def __str__(self):
         return '%s' % (self.summary)
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        if user.has_perm('%s.can_manage' % cls._meta.app_label, cls):
-            return qs
-
-        qs_filter = Q(referee=getattr(user, 'djangobmf_employee', -1))
-        qs_filter |= Q(employees=getattr(user, 'djangobmf_employee', -1))
-        qs_filter |= Q(team__in=getattr(user, 'djangobmf_teams', []))
-
-        if hasattr(cls, "project"):
-            project = cls._meta.get_field_by_name("project")[0].model
-            if user.has_perm('%s.can_manage' % project._meta.app_label, project):
-                qs_filter |= Q(project__isnull=False)
-            else:
-                qs_filter |= Q(project__isnull=False, project__employees=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(project__isnull=False, project__team__in=getattr(user, 'djangobmf_teams', []))
-        return qs.filter(qs_filter)
 
     def get_states(self):
         active_states = 0
@@ -184,14 +162,14 @@ class TaskManager(models.Manager):
     def mytasks(self, request):
         return self.get_queryset().filter(
             completed=False,
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee,
         )
 
     def todo(self, request):
         return self.get_queryset().filter(
             completed=False,
             state__in=["todo", "started", "review"],
-            employee=getattr(request.user, 'djangobmf_employee', -1),
+            employee=request.user.djangobmf.employee,
         )
 
 
@@ -205,17 +183,17 @@ class AbstractTask(BMFModel):
     due_date = models.DateField(_('Due date'), null=True, blank=True)
 
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
+        settings.CONTRIB_PROJECT, null=True, blank=True, on_delete=models.CASCADE,
     )
     employee = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
     )
     in_charge = models.ForeignKey(
-        CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.CONTRIB_EMPLOYEE, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+", editable=False,
     )
 
-    goal = models.ForeignKey(CONTRIB_GOAL, null=True, blank=True, on_delete=models.CASCADE)
+    goal = models.ForeignKey(settings.CONTRIB_GOAL, null=True, blank=True, on_delete=models.CASCADE)
 
     completed = models.BooleanField(_("Completed"), default=False, editable=False)
 
@@ -230,31 +208,6 @@ class AbstractTask(BMFModel):
 
     def __str__(self):
         return '#%s: %s' % (self.pk, self.summary)
-
-    @classmethod
-    def has_permissions(cls, qs, user):
-        qs_filter = Q(project__isnull=True, goal__isnull=True)
-        qs_filter |= Q(employee=getattr(user, 'djangobmf_employee', -1))
-        qs_filter |= Q(in_charge=getattr(user, 'djangobmf_employee', -1))
-
-        if hasattr(cls, "goal"):
-            goal = cls._meta.get_field_by_name("goal")[0].model
-            if user.has_perm('%s.can_manage' % goal._meta.app_label, goal):
-                qs_filter |= Q(goal__isnull=False)
-            else:
-                qs_filter |= Q(goal__isnull=False, goal__referee=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(goal__isnull=False, goal__employees=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(goal__isnull=False, goal__team__in=getattr(user, 'djangobmf_teams', []))
-
-        if hasattr(cls, "project"):
-            project = cls._meta.get_field_by_name("project")[0].model
-            if user.has_perm('%s.can_manage' % project._meta.app_label, project):
-                qs_filter |= Q(project__isnull=False)
-            else:
-                qs_filter |= Q(project__isnull=False, project__employees=getattr(user, 'djangobmf_employee', -1))
-                qs_filter |= Q(project__isnull=False, project__team__in=getattr(user, 'djangobmf_teams', []))
-
-        return qs.filter(qs_filter)
 
     def clean(self):
         # overwrite the project with the goals project

@@ -8,26 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 
-
-MIME_TYPES = {
-    'pdf': 'application/pdf',
-    'html': 'text/html',
-}
-
-
-class BaseReport(object):
-
-    def __init__(self, options):
-        self.options = options
-
-    def get_default_options(self):
-        raise NotImplementedError('You need to implement a get_default_options function')
-
-    def get_output_formats(self):
-        raise NotImplementedError('You need to implement a get_output_formats function')
-
-    def render(self, request, context):
-        raise NotImplementedError('You need to implement a render function')
+from djangobmf.core.report import Report as BaseReport
 
 
 class Report(models.Model):
@@ -70,21 +51,25 @@ class Report(models.Model):
 
     def get_generator(self):
         from djangobmf.sites import site
-        return site.reports[self.reporttype](self.options)
+        try:
+            return site.reports[self.reporttype](self.options)
+        except KeyError:
+            return BaseReport()
 
     # response with generated file
-    def render(self, request, context):
+    def render(self, filename, request, context):
         generator = self.get_generator()
 
-        # TODO depends on the instance of this model
-        mimetype = "application/pdf"
-        # FIXME: make filename from context, if context contains a object ... otherwise use report.{ext}
-        filename = "report.pdf"
+        extension, mimetype, data, attachment = generator.render(request, context)
 
-        file = generator.render(request, context)
+        response = HttpResponse(content_type=mimetype)
 
-        response = HttpResponse(content_type=mimetype)  # TODO depends on multiple options
-        if filename:
-            response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-        response.write(file)
+        if attachment:
+            response['Content-Disposition'] = 'attachment; filename="%s.%s"' % (
+                filename,
+                extension
+            )
+
+        response.write(data)
+
         return response

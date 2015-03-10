@@ -6,15 +6,25 @@ from __future__ import unicode_literals
 
 from .apps import TimesheetConfig
 from .models import Timesheet
+from .workflows import TimesheetWorkflow
 
 from djangobmf.utils.testcases import DemoDataMixin
 from djangobmf.utils.testcases import TestCase
 from djangobmf.utils.testcases import ModuleMixin
 from djangobmf.utils.testcases import ModuleTestFactory
+from djangobmf.utils.testcases import WorkflowTestFactory
 
 
 class TimesheetFactory(ModuleTestFactory, DemoDataMixin, TestCase):
     app = TimesheetConfig
+
+
+class TimesheetWorkflowFactory(WorkflowTestFactory, DemoDataMixin, TestCase):
+    workflow = TimesheetWorkflow
+
+    def test_timesheet_workflow_superuser(self):
+        self.objects['active'] = Timesheet(summary="Test")
+        self.auto_workflow_test()
 
 
 class TimesheetModuleTests(ModuleMixin, TestCase):

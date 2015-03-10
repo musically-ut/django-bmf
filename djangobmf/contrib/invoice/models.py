@@ -114,6 +114,16 @@ class AbstractInvoice(BaseInvoice):
             return self.project
         return None
 
+    def get_project_queryset(self, qs):
+        if self.customer:
+            return qs.filter(customer=self.customer)
+        return qs
+
+    def get_customer_queryset(self, qs):
+        if self.project:
+            return qs.filter(pk=self.project.customer_id)
+        return qs
+
     @staticmethod
     def post_delete(sender, instance, *args, **kwargs):
         numbercycle_delete_object(instance)
@@ -185,6 +195,9 @@ class InvoiceProduct(BMFModel):
     amount = models.FloatField(_("Amount"), null=True, blank=False, default=1.0)
     # unit = models.CharField() # TODO add units
     description = models.TextField(_("Description"), null=True, blank=True)
+
+    class BMFMeta:
+        only_related = True
 
     def calc_all(self):
         if hasattr(self, '_calcs'):

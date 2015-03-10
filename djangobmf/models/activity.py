@@ -10,12 +10,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from djangobmf.settings import ACTIVITY_WORKFLOW
-from djangobmf.settings import ACTIVITY_COMMENT
-from djangobmf.settings import ACTIVITY_UPDATED
-from djangobmf.settings import ACTIVITY_FILE
-from djangobmf.settings import ACTIVITY_CREATED
-from djangobmf.settings import ACTIVITY_UNKNOWN
+from djangobmf.conf import settings as bmfsettings
 
 import json
 
@@ -98,16 +93,16 @@ class Activity(models.Model):
 
     def get_symbol(self):
         if self.action == ACTION_WORKFLOW:
-            return ACTIVITY_WORKFLOW
+            return bmfsettings.ACTIVITY_WORKFLOW
         elif self.action == ACTION_COMMENT:
-            return ACTIVITY_COMMENT
+            return bmfsettings.ACTIVITY_COMMENT
         elif self.action == ACTION_UPDATED:
-            return ACTIVITY_UPDATED
+            return bmfsettings.ACTIVITY_UPDATED
         elif self.action == ACTION_FILE:
-            return ACTIVITY_FILE
+            return bmfsettings.ACTIVITY_FILE
         elif self.action == ACTION_CREATED:
-            return ACTIVITY_CREATED
-        return ACTIVITY_UNKNOWN
+            return bmfsettings.ACTIVITY_CREATED
+        return bmfsettings.ACTIVITY_UNKNOWN
 
     def get_template(self):
         if self.template:

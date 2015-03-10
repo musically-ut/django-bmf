@@ -54,10 +54,8 @@ class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
         abstract = True
 
 # =============================================================================
-
 # TODO: Add Fiscal Year
 # TODO: Add Period
-
 # =============================================================================
 
 
@@ -264,9 +262,6 @@ class BaseTransactionItem(BMFModel):
     class Meta:
         abstract = True
         swappable = "BMF_CONTRIB_TRANSACTIONITEM"
-
-    class BMFMeta:
-        has_logging = False
 
 # def set_debit(self, amount):
 #   if self.get_type in [ACCOUNTING_ASSET, ACCOUNTING_EXPENSE]:

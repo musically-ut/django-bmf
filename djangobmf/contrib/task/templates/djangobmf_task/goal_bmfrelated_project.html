@@ -15,7 +15,7 @@
         $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     }]);
     bmfApp.controller('bmfListCtrl', function($scope, $http) {
-            $http.get('/api/module/27/get/?relpk={{ object.pk }}&rel=project').then(function(artResponse){
+            $http.get('/api/module/27/get/?relpk={{ object.pk }}&rel=project&manager=active').then(function(artResponse){
                 $scope.data = artResponse.data;
             });
     });

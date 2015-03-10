@@ -3,46 +3,77 @@
 
 from __future__ import unicode_literals
 
-# from django.conf.urls import include
+from django.core.exceptions import ImproperlyConfigured
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.utils import six
 from django.utils.text import slugify
 
-from djangobmf.core.serializer import Serializer
+from djangobmf.permissions import ModulePermission
+from djangobmf.serializers import ModuleSerializer
 from djangobmf.views import ModuleCloneView
 from djangobmf.views import ModuleCreateView
 from djangobmf.views import ModuleDeleteView
 from djangobmf.views import ModuleDetailView
 from djangobmf.views import ModuleFormAPI
-from djangobmf.views import ModuleGetView
 from djangobmf.views import ModuleListView
 from djangobmf.views import ModuleReportView
 from djangobmf.views import ModuleUpdateView
 from djangobmf.views import ModuleWorkflowView
+from djangobmf.views.api import ModuleListAPIView
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class Module(object):
+class ModuleMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        super_new = super(ModuleMetaclass, cls).__new__
+        parents = [
+            b for b in bases if isinstance(b, ModuleMetaclass) and
+            not (b.__name__ == 'NewBase' and b.__mro__ == (b, object))
+        ]
+        if not parents:
+            return super_new(cls, name, bases, attrs)
+
+        # Create the class.
+        new_cls = super_new(cls, name, bases, attrs)
+
+        # validation
+        if not getattr(new_cls, 'model', None):
+            raise ImproperlyConfigured('No model defined in %s.' % new_cls)
+
+        return new_cls
+
+
+class Module(six.with_metaclass(ModuleMetaclass, object)):
     """
     Object internally used to register modules
     """
 
     def __init__(self, model, **options):
         self.model = model
-
+        self.dashboards = []
         self.create = options.get('create', ModuleCreateView)
         self.detail = options.get('detail', ModuleDetailView)
         self.update = options.get('update', ModuleUpdateView)
         self.delete = options.get('delete', ModuleDeleteView)
         self.clone = options.get('clone', ModuleCloneView)
-        self.get = options.get('get', ModuleGetView)
-        self.serializer = options.get('serializer', Serializer)
+        self.permissions = options.get('permissions', ModulePermission)
+        self.serializer = options.get('serializer', None)
         self.report = options.get('report', None)
         self.detail_urlpatterns = options.get('detail_urlpatterns', None)
         self.api_urlpatterns = options.get('api_urlpatterns', None)
+        self.manager = {}
+
+        # create a default serializer
+        if not self.serializer and not model._bmfmeta.only_related:
+            class AutoSerializer(ModuleSerializer):
+                class Meta:
+                    pass
+            AutoSerializer.Meta.model = model
+            logger.info('Creating a serializer for module %s' % model.__name__)
+            self.serializer = AutoSerializer
 
     def list_reports(self):
         if hasattr(self, 'listed_reports'):
@@ -56,12 +87,18 @@ class Module(object):
                     # overwrite the label, and correct the view
                     label = slugify(view[0])
                     view = view[1]
-            self.listed_reports.append((key, label, view))
+
+                if issubclass(view, ModuleReportView):
+                    self.listed_reports.append((key, label, view))
 
         elif isinstance(self.report, bool):
             self.listed_reports.append(('default', 'default', ModuleReportView))
+
         elif self.report and issubclass(self.report, ModuleReportView):
             self.listed_reports.append(('default', 'default', self.report))
+
+        # update model with all report views
+        self.model._bmfmeta.report_views = self.listed_reports
 
         return self.listed_reports
 
@@ -91,11 +128,18 @@ class Module(object):
     def get_detail_urls(self):
         reports = self.list_reports()
 
+        if self.model._bmfmeta.only_related:
+            return patterns('')
+
         urlpatterns = patterns(
             '',
             url(
                 r'^$',
-                self.detail.as_view(model=self.model, reports=reports),
+                self.detail.as_view(
+                    module=self,
+                    model=self.model,
+                    reports=reports
+                ),
                 name='detail',
             ),
         )
@@ -114,22 +158,34 @@ class Module(object):
             '',
             url(
                 r'^$',
-                ModuleListView.as_view(model=self.model),
+                ModuleListView.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='list',
             ),
             url(
-                r'^get/$',
-                self.get.as_view(model=self.model, serializer=self.serializer),
+                r'^get/(?P<manager>\w+)/$',
+                ModuleListAPIView.as_view(
+                    module=self,
+                    model=self.model,
+                    permissions=self.permissions,
+                    serializer_class=self.serializer,
+                ),
                 name='get',
             ),
             url(
                 r'^update/(?P<pk>[0-9]+)/$',
-                self.update.as_view(model=self.model),
+                self.update.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='update',
             ),
             url(
                 r'^update/(?P<pk>[0-9]+)/form/$',
                 ModuleFormAPI.as_view(
+                    module=self,
                     model=self.model,
                     form_view=self.update,
                 ),
@@ -137,21 +193,29 @@ class Module(object):
             ),
             url(
                 r'^delete/(?P<pk>[0-9]+)/$',
-                self.delete.as_view(model=self.model),
+                self.delete.as_view(
+                    module=self,
+                    model=self.model
+                ),
                 name='delete',
             ),
         )
+
         if self.model._bmfmeta.can_clone:
             urlpatterns += patterns(
                 '',
                 url(
                     r'^clone/(?P<pk>[0-9]+)/$',
-                    self.clone.as_view(model=self.model),
+                    self.clone.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='clone',
                 ),
                 url(
                     r'^clone/(?P<pk>[0-9]+)/form/$',
                     ModuleFormAPI.as_view(
+                        module=self,
                         model=self.model,
                         form_view=self.clone,
                     ),
@@ -164,12 +228,16 @@ class Module(object):
                 '',
                 url(
                     r'^create/(?P<key>%s)/$' % key,
-                    view.as_view(model=self.model),
+                    view.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='create',
                 ),
                 url(
                     r'^create/(?P<key>%s)/form/$' % key,
                     ModuleFormAPI.as_view(
+                        module=self,
                         model=self.model,
                         form_view=view,
                     ),
@@ -181,8 +249,11 @@ class Module(object):
             urlpatterns += patterns(
                 '',
                 url(
-                    r'^report/(?P<key>%s)/$' % key,
-                    view.as_view(model=self.model),
+                    r'^report/(?P<pk>[0-9]+)/(?P<key>%s)/$' % key,
+                    view.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='report',
                 ),
             )
@@ -193,7 +264,10 @@ class Module(object):
                 '',
                 url(
                     r'^workflow/(?P<pk>[0-9]+)/(?P<transition>\w+)/$',
-                    ModuleWorkflowView.as_view(model=self.model),
+                    ModuleWorkflowView.as_view(
+                        module=self,
+                        model=self.model
+                    ),
                     name='workflow',
                 ),
             )

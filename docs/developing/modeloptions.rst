@@ -9,6 +9,16 @@ BMFMeta-options that you can give your model in its internal
 Available ``BMFMeta`` options
 =============================
 
+``only_related``
+---------------
+
+Default: ``False``
+
+.. attribute:: Options.only_related
+
+    If ``only_realted = True``, this model won't generate a detail view
+    page.
+
 ``has_logging``
 ---------------
 

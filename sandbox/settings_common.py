@@ -126,6 +126,8 @@ TEST_PROJECT_APPS = (
     'djangobmf.contrib.timesheet',
     'djangobmf.currency.EUR',
     'djangobmf.currency.USD',
+    'djangobmf.report.xhtml2pdf',
+    'tests.appapis',
 )
 
 INSTALLED_APPS = (
@@ -140,10 +142,20 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'mptt',
     'sekizai',
+    'rest_framework',
     # 'haystack',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# CACHE ===========================================================================
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake-439478'
+    }
+}
 
 # LOGGING =========================================================================
 

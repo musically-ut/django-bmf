@@ -8,9 +8,9 @@ from django.contrib.auth import get_permission_codename
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
-from django.core.paginator import EmptyPage
-from django.core.paginator import PageNotAnInteger
-from django.core.paginator import Paginator
+# from django.core.paginator import EmptyPage
+# from django.core.paginator import PageNotAnInteger
+# from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db import router
 from django.db.models import Q
@@ -24,17 +24,17 @@ from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
-from django.views.generic import View
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import BaseFormView
 from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.list import MultipleObjectMixin
-from django.views.generic.list import MultipleObjectTemplateResponseMixin
 from django.template.loader import get_template
 from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.html import format_html
+# from django.utils.timezone import make_aware
+# from django.utils.timezone import get_current_timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -50,17 +50,16 @@ from .mixins import ModuleUpdatePermissionMixin
 from .mixins import ModuleSearchMixin
 from .mixins import ModuleViewPermissionMixin
 from .mixins import ModuleAjaxMixin
-from .mixins import ModuleBaseMixin
 from .mixins import ModuleViewMixin
 from .mixins import ModuleActivityMixin
 from .mixins import ModuleFilesMixin
 from .mixins import ModuleFormMixin
+from .mixins import ReadOnlyMixin
 
 import copy
 # import datetime
 import logging
 import operator
-import re
 import types
 import urllib
 # import warnings
@@ -75,8 +74,7 @@ logger = logging.getLogger(__name__)
 
 
 class ModuleListView(
-        ModuleViewPermissionMixin, ModuleViewMixin,
-        MultipleObjectTemplateResponseMixin, MultipleObjectMixin, View):
+        ModuleViewPermissionMixin, ModuleViewMixin, TemplateView):
     """
     """
     # set by views.dashboard
@@ -134,7 +132,19 @@ class ModuleListView(
             return self.model._meta.verbose_name_plural
 
     def get_data_url(self):
-        url = reverse('%s:get' % self.model._bmfmeta.namespace_api)
+        kwargs = {}
+
+        if self.manager:
+            kwargs.update({
+                'manager': self.manager
+            })
+        else:
+            kwargs.update({
+                'manager': 'all'
+            })
+
+        url = reverse('%s:get' % self.model._bmfmeta.namespace_api, kwargs=kwargs)
+
         args = {}
 
         page = self.request.GET.get('page')
@@ -144,9 +154,6 @@ class ModuleListView(
                 args['page'] = int(page)
             except ValueError:
                 pass
-
-        if self.manager:
-            args['manager'] = self.manager
 
         if not self.paginate:
             args['paginate'] = 'no'
@@ -176,10 +183,6 @@ class ModuleListView(
         })
         return super(ModuleListView, self).get_context_data(**kwargs)
 
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data(object_list=self.object_list)
-        return self.render_to_response(context)
 
 '''
 class ModuleArchiveView(ModuleGenericBaseView, YearMixin, MonthMixin, WeekMixin, DayMixin,
@@ -347,7 +350,7 @@ class ModuleDetailView(
             + ["djangobmf/module_detail_default.html"]
 
 
-class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
+class ModuleReportView(ModuleViewPermissionMixin, ModuleViewMixin, DetailView):
     """
     render a report
     """
@@ -362,109 +365,139 @@ class ModuleReportView(ModuleViewPermissionMixin, ModuleBaseMixin, DetailView):
         ct = ContentType.objects.get_for_model(self.get_object())
         try:
             report = Report.objects.get(contenttype=ct)
-            return report.render(self.request, self.get_context_data())
+            return report.render(self.get_filename(), self.request, self.get_context_data())
         except Report.DoesNotExist:
             # return "no view configured" page
             return response
 
-    def get_context_data(self, **kwargs):
-        context = super(ModuleReportView, self).get_context_data(**kwargs)
-        context['request'] = self.request
-        return context
+    def get_filename(self):
+        return "report"
 
 
-class ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
-    """
-    Provides an API to get object data
-    """
-    model = None  # set by views
-    serializer = None  # set by views
+# ass ModuleGetView(ModuleViewPermissionMixin, ModuleAjaxMixin, ModuleSearchMixin, MultipleObjectMixin, View):
+#   """
+#   Provides an API to get object data
+#   """
 
-    # Limit Queryset length and activate pagination
-    limit = 100
+#   # Limit Queryset length and activate pagination
+#   limit = 100
+#   date_field = None
 
-    def get_item_data(self, data):
-        """
-        this method calls the serializer, you can overwrite if, if you like
-        but it's recommended to create a serializer for your object
+#   def get_date_field(self):
+#       """
+#       Get the name of the date field to be used to filter by.
+#       """
+#       return self.date_field or 'modified'
 
-        it returns a (serialized) list with all objects in the queryset
-        """
-        return self.serializer(self.model, data).serialize()
+#   def get_item_data(self, data):
+#       """
+#       this method calls the serializer, you can overwrite if, if you like
+#       but it's recommended to create a serializer for your object
 
-    def get(self, request):
-        pk = int(self.request.GET.get('pk', 0))
+#       it returns a (serialized) list with all objects in the queryset
+#       """
+#       return self.serializer(self.model, data).serialize()
 
-        # activate pagination
-        pagination = not bool(self.request.GET.get('pagination', False))
+#   def get(self, request, manager=None):
+#       pk = int(self.request.GET.get('pk', 0))
 
-        search = self.request.GET.get('search', None)
-        page = self.request.GET.get('page', 1)
+#       # activate pagination
+#       pagination = not bool(self.request.GET.get('pagination', False))
 
-        queryset = self.get_queryset(self.request.GET.get('manager', None))
+#       period = self.request.GET.get('period', None)
+#       since = self.request.GET.get('since', None)
+#       until = self.request.GET.get('until', None)
+#       if since and until:
+#           since = make_aware(datetime.datetime(*map(int, since.split('-', 3)[:3])), get_current_timezone())
+#           until = make_aware(datetime.datetime(*map(int, until.split('-', 3)[:3])), get_current_timezone())
+#       else:
+#           until = None
+#           since = None
 
-        # select only models connected to a related model
-        # defined by the models contenttype and pk
-        # the contentype pk and the objects id
-        # and the related fields name
-        related_field = self.request.GET.get('rel', None)
-        # related_ct = self.request.GET.get('relct', 0)
-        related_pk = self.request.GET.get('relpk', 0)
-        # related_model = None
+#       search = self.request.GET.get('search', None)
+#       page = self.request.GET.get('page', 1)
 
-        if related_field and related_pk:
-            if hasattr(self.model, related_field):
-                queryset = queryset.filter(**{related_field: related_pk})
+#       queryset = self.get_queryset(manager)
 
-        # search
-        if search:
-            if self.model._bmfmeta.search_fields:
-                for bit in self.normalize_query(search):
-                    lookups = [self.construct_search(str(f)) for f in self.model._bmfmeta.search_fields]
-                    queries = [Q(**{l: bit}) for l in lookups]
-                    queryset = queryset.filter(reduce(operator.or_, queries))
-            else:
-                queryset = []
+#       if period in ["year", "month", "week", "day"] and not (since and until):
+#           pass
+#       else:
+#           period = None
 
-        if pagination and self.limit:
-            # pagination
-            paginator = Paginator(queryset, self.limit)
-            count = paginator.count
-            num_pages = paginator.num_pages
-            pages = paginator.page_range  # TODO move me to angular
+#       if since and until:
+#           date_field = self.get_date_field()
+#           queryset = queryset.filter(**{
+#               '%s__gte' % date_field: since,
+#               '%s__lt' % date_field: until,
+#           })
 
-            try:
-                qs_data = paginator.page(self.request.GET.get('page', 1))
-            except PageNotAnInteger:
-                qs_data = paginator.page(1)
-            except EmptyPage:
-                qs_data = paginator.page(num_pages)
+#       # select only models connected to a related model
+#       # defined by the models contenttype and pk
+#       # the contentype pk and the objects id
+#       # and the related fields name
+#       related_field = self.request.GET.get('rel', None)
+#       # related_ct = self.request.GET.get('relct', 0)
+#       related_pk = self.request.GET.get('relpk', 0)
+#       # related_model = None
 
-            page = qs_data.number
+#       if related_field and related_pk:
+#           if hasattr(self.model, related_field):
+#               queryset = queryset.filter(**{related_field: related_pk})
 
-        else:
-            # no pagination
-            count = queryset.count()
-            num_pages = 1
-            qs_data = queryset
-            page = 1
-            pages = [1]  # TODO: move me to angular
+#       # search
+#       if search:
+#           if self.model._bmfmeta.search_fields:
+#               for bit in self.normalize_query(search):
+#                   lookups = [self.construct_search(str(f)) for f in self.model._bmfmeta.search_fields]
+#                   queries = [Q(**{l: bit}) for l in lookups]
+#                   queryset = queryset.filter(reduce(operator.or_, queries))
+#           else:
+#               queryset = []
 
-        return self.render_to_json_response({
-            'model': str(self.model),
-            'count': count,
-            'pk': pk,
-            'pagination': {
-                'enabled': pagination,
-                'page': page,
-                'pages': pages,  # TODO: move me to angular
-                'num_pages': num_pages,
-                'next': None,  # TODO: unused
-                'previous': None,  # TODO: unused
-            },
-            'search': search,
-            'items': self.get_item_data(qs_data),
-        })
+#       if pagination and self.limit:
+#           # pagination
+#           paginator = Paginator(queryset, self.limit)
+#           count = paginator.count
+#           num_pages = paginator.num_pages
+#           pages = paginator.page_range  # TODO move me to angular
+
+#           try:
+#               qs_data = paginator.page(self.request.GET.get('page', 1))
+#           except PageNotAnInteger:
+#               qs_data = paginator.page(1)
+#           except EmptyPage:
+#               qs_data = paginator.page(num_pages)
+
+#           page = qs_data.number
+
+#       else:
+#           # no pagination
+#           count = queryset.count()
+#           num_pages = 1
+#           qs_data = queryset
+#           page = 1
+#           pages = [1]  # TODO: move me to angular
+
+#       return self.render_to_json_response({
+#           'model': str(self.model),
+#           'count': count,
+#           'pk': pk,
+#           'time': {
+#               'period': period,
+#               'since': since.strftime('%Y-%m-%d'),
+#               'until': until.strftime('%Y-%m-%d'),
+#           } if period or since and until else None,
+#           'pagination': {
+#               'enabled': pagination,
+#               'page': page,
+#               'pages': pages,  # TODO: move me to angular
+#               'num_pages': num_pages,
+#               'next': None,  # TODO: unused
+#               'previous': None,  # TODO: unused
+#           },
+#           'search': search,
+#           'items': self.get_item_data(qs_data),
+#       })
 
 
 class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMixin, UpdateView):
@@ -511,7 +544,7 @@ class ModuleCloneView(ModuleFormMixin, ModuleClonePermissionMixin, ModuleAjaxMix
         })
 
 
-class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxMixin, UpdateView):
+class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxMixin, ReadOnlyMixin, UpdateView):
     """
     """
     context_object_name = 'object'
@@ -531,27 +564,26 @@ class ModuleUpdateView(ModuleFormMixin, ModuleUpdatePermissionMixin, ModuleAjaxM
         # TODO: generate change signal
         # return dict([(field, getattr(self, field)) for field in self._bmfmeta.observed_fields])
         activity_update.send(sender=self.object.__class__, instance=self.object)
-        return self.render_valid_form({
-            'object_pk': self.object.pk,
-            'redirect': self.object.bmfmodule_detail(),
-            'message': True,
-        })
+        if self.model._bmfmeta.only_related:
+            return self.render_valid_form({
+                'object_pk': self.object.pk,
+                'message': True,
+                'reload': True,
+            })
+        else:
+            return self.render_valid_form({
+                'object_pk': self.object.pk,
+                'redirect': self.object.bmfmodule_detail(),
+                'message': True,
+            })
 
 
-class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxMixin, CreateView):
+class ModuleCreateView(ModuleFormMixin, ModuleCreatePermissionMixin, ModuleAjaxMixin, ReadOnlyMixin, CreateView):
     """
     create a new instance
     """
     context_object_name = 'object'
     template_name_suffix = '_bmfcreate'
-
-    def get_initial(self):
-        for key in self.request.GET.keys():
-            match = 'data\[(\w+)\]'
-            if re.match(match, key):
-                field = re.match(match, key).groups()[0]
-                self.initial.update({field: self.request.GET.get(key)})
-        return super(ModuleCreateView, self).get_initial()
 
     def get_template_names(self):
         return super(ModuleCreateView, self).get_template_names() \
@@ -605,16 +637,23 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
             if not registered:
                 return None
 
-            return format_html(
-                '{0}: <a href="{1}">{2}</a>',
-                obj._meta.verbose_name,
-                obj.bmfmodule_detail(),
-                obj
-            )
+            if hasattr(obj, '_bmfmeta') and obj._bmfmeta.only_related:
+                return format_html(
+                    '{0}: {1}',
+                    obj._meta.verbose_name,
+                    obj
+                )
+            else:
+                return format_html(
+                    '{0}: <a href="{1}">{2}</a>',
+                    obj._meta.verbose_name,
+                    obj.bmfmodule_detail(),
+                    obj
+                )
 
         def format_protected_callback(obj):
 
-            if obj.__class__ in self.request.djangobmf_site.modules:
+            if obj.__class__ in self.request.djangobmf_site.modules and not obj._bmfmeta.only_related:
                 return format_html(
                     '{0}: <a href="{1}">{2}</a>',
                     obj._meta.verbose_name,
@@ -646,10 +685,16 @@ class ModuleDeleteView(ModuleDeletePermissionMixin, ModuleAjaxMixin, DeleteView)
         self.object = self.get_object()
         success_url = self.get_success_url()
         self.object.delete()
-        return self.render_valid_form({
-            'message': ugettext('Object deleted'),
-            'redirect': self.request.GET.get('redirect', success_url),
-        })
+        if self.model._bmfmeta.only_related:
+            return self.render_valid_form({
+                'message': ugettext('Object deleted'),
+                'reload': True,
+            })
+        else:
+            return self.render_valid_form({
+                'redirect': self.request.GET.get('redirect', success_url),
+                'message': ugettext('Object deleted'),
+            })
 
     def clean_list(self, lst):
         if not isinstance(lst, (list, tuple)):
@@ -683,6 +728,11 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
     update the state of a workflow
     """
     context_object_name = 'object'
+    template_name_suffix = '_bmfworkflow'
+
+    def get_template_names(self):
+        return super(ModuleWorkflowView, self).get_template_names() \
+            + ["djangobmf/module_workflow.html"]
 
     def get_permissions(self, perms):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -692,19 +742,13 @@ class ModuleWorkflowView(ModuleAjaxMixin, DetailView):
 
     def get(self, request, transition, *args, **kwargs):
         self.object = self.get_object()
-        success_url = self.object._bmfmeta.workflow.transition(transition, self.request.user)
 
-#       try:
-#           # TODO also change modelbase.py, when updating to use ajax
-#           success_url = self.object.bmfmodule_transition(transition, self.request.user)
-#       except ValidationError as e:
-#           # the objects gets checks with full_clean
-#           # if a validation error is raised, show an error page and don't save the object
-#           raise e
-#           return self.render_to_json_response({
-#               'html': 'VALIDATION_ERROR',
-#           })
-#       print('GET', success_url)
+        try:
+            success_url = self.object._bmfmeta.workflow.transition(transition, self.request.user)
+        except ValidationError as e:
+            return self.render_to_response({
+                'error': e,
+            })
 
         return self.render_valid_form({
             'message': True,
@@ -819,8 +863,15 @@ class ModuleFormAPI(ModuleFormMixin, ModuleAjaxMixin, ModuleSearchMixin, SingleO
                 raise Http404
             qs = field.field.queryset
 
-            if hasattr(field.field.queryset.model, 'has_permissions'):
-                qs = field.field.queryset.model.has_permissions(qs, self.request.user)
+            # use permissions from module
+            try:
+                module = self.request.djangobmf_site.get_module(qs.model)
+                qs = module.permissions().filter_queryset(
+                    qs,
+                    self.request.user,
+                )
+            except KeyError:
+                pass
 
             func = getattr(form.instance, 'get_%s_queryset' % field.name, None)
             if func:

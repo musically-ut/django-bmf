@@ -11,9 +11,12 @@ from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Address
+from .serializers import AddressSerializer
 
 
-site.register_module(Address)
+site.register_module(Address, **{
+    'serializer': AddressSerializer,
+})
 
 
 class AddressCategory(BaseCategory):

@@ -4,45 +4,6 @@
 from __future__ import unicode_literals
 
 '''
-
-from django import forms
-from django.contrib.admin.widgets import ForeignKeyRawIdWidget
-from django.db import models
-
-from .models import Document
-
-class AdminFileWidget(ForeignKeyRawIdWidget):
-  choices = None
-  def __init__(self,*args,**kwargs):
-    print args
-    print kwargs
-    super(AdminFileWidget, self).__init__(*args, **kwargs)
-
-class AdminFileFormField(forms.ModelChoiceField):
-  pass
-# widget = AdminFileWidget
-
-  def __init__(self,*args,**kwargs):
-    print args
-    print kwargs
-    super(AdminFileFormField, self).__init__(*args, **kwargs)
-
-class FileField(models.ForeignKey):
-  default_form_class = AdminFileFormField
-
-  def __init__(self, *args, **kwargs):
-    super(FileField, self).__init__(Document, *args, **kwargs)
-
-  def formfield(self, **kwargs):
-    defaults = {
-      'form_class': self.default_form_class,
-#     'rel': self.rel,
-    }
-    defaults.update(kwargs)
-#   print dir(self)
-    return super(FileField, self).formfield(**defaults)
-'''
-'''
 #-*- coding: utf-8 -*-
 import inspect
 from django import forms
@@ -131,62 +92,6 @@ class AdminFileWidget(ForeignKeyRawIdWidget):
     class Media:
         js = (filer_settings.FILER_STATICMEDIA_PREFIX + 'js/popup_handling.js',)
 
-
-class AdminFileFormField(forms.ModelChoiceField):
-    widget = AdminFileWidget
-
-    def __init__(self, rel, queryset, to_field_name, *args, **kwargs):
-        self.rel = rel
-        self.queryset = queryset
-        self.to_field_name = to_field_name
-        self.max_value = None
-        self.min_value = None
-        other_widget = kwargs.pop('widget', None)
-        if 'admin_site' in inspect.getargspec(self.widget.__init__)[0]: # Django 1.4
-            widget_instance = self.widget(rel, site)
-        else: # Django <= 1.3
-            widget_instance = self.widget(rel)
-        forms.Field.__init__(self, widget=widget_instance, *args, **kwargs)
-
-    def widget_attrs(self, widget):
-        widget.required = self.required
-        return {}
-
-
-class FilerFileField(models.ForeignKey):
-    default_form_class = AdminFileFormField
-    default_model_class = File
-
-    def __init__(self, **kwargs):
-        # we call ForeignKey.__init__ with the Image model as parameter...
-        # a FilerImageFiled can only be a ForeignKey to a Image
-        return super(FilerFileField, self).__init__(
-            self.default_model_class, **kwargs)
-
-    def formfield(self, **kwargs):
-        # This is a fairly standard way to set up some defaults
-        # while letting the caller override them.
-        defaults = {
-            'form_class': self.default_form_class,
-            'rel': self.rel,
-        }
-        defaults.update(kwargs)
-        return super(FilerFileField, self).formfield(**defaults)
-
-    def south_field_triple(self):
-        "Returns a suitable description of this field for South."
-        # We'll just introspect ourselves, since we inherit.
-        from south.modelsinspector import introspector
-        field_class = "django.db.models.fields.related.ForeignKey"
-        args, kwargs = introspector(self)
-        # That's our definition!
-        return (field_class, args, kwargs)
-'''
-'''
-from datetime import date
-from django.forms import widgets
-
-from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 
 class FileWidget(widgets.MultiWidget):
   def __init__(self, attrs=None):

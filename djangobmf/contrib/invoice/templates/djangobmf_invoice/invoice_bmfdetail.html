@@ -51,7 +51,7 @@
       <td>{{ object.calc_gross }}</td>
       {% if not object.completed %}
       <td class="text-right">
-          <a class="btn btn-xs bmf-edit btn-success" href="{% url "djangobmf:moduleapi_djangobmf_invoice_invoiceproduct:create" "default" %}?related={{ object.pk }}&amp;data[quotation]={{ object.pk }}">
+          <a class="btn btn-xs bmf-edit btn-success" href="{% url "djangobmf:moduleapi_djangobmf_invoice_invoiceproduct:create" "default" %}?set-invoice={{ object.pk }}">
           <span class="glyphicon glyphicon-plus"></span>
         </a>
       </td>
@@ -80,7 +80,7 @@
           {{ obj.calc_gross }}
       </td>
       <td class="text-right">
-          <a class="btn btn-xs bmfedit btn-bmfupdate" href="{% get_bmf_url obj "update" %}">
+          <a class="btn btn-xs bmfedit btn-bmfupdate" href="{% get_bmf_url obj "update" %}?set-invoice={{ object.pk }}">
             <span class="glyphicon glyphicon-wrench"></span>
           </a>
           <a class="btn btn-xs bmfedit btn-bmfdelete" href="{% get_bmf_url obj "delete" %}">

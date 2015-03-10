@@ -3,12 +3,12 @@
 
 from __future__ import unicode_literals
 
+from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
+from djangobmf.conf import settings
 from djangobmf.workflow import Workflow, State, Transition
-from djangobmf.settings import CONTRIB_TIMESHEET
-from djangobmf.utils.model_from_name import model_from_name
 
 
 def cancel_condition(object, user):
@@ -120,8 +120,8 @@ class TaskWorkflow(Workflow):
         )
 
     def start(self):
-        self.instance.in_charge = self.user.djangobmf_employee
-        self.instance.employee = self.user.djangobmf_employee
+        self.instance.in_charge = self.user.djangobmf.employee
+        self.instance.employee = self.user.djangobmf.employee
 
         if self.instance.project:
             project = self.instance.project
@@ -130,11 +130,11 @@ class TaskWorkflow(Workflow):
         else:
             project = None
 
-        timesheet = model_from_name(CONTRIB_TIMESHEET)
+        timesheet = apps.get_model(settings.CONTRIB_TIMESHEET)
         if timesheet is not None:
             obj = timesheet(
                 task=self.instance,
-                employee=self.user.djangobmf_employee,
+                employee=self.user.djangobmf.employee,
                 auto=True,
                 project=project,
                 summary=self.instance.summary
@@ -142,19 +142,19 @@ class TaskWorkflow(Workflow):
             obj.save()
 
     def todo(self):
-        self.instance.in_charge = self.user.djangobmf_employee
-        self.instance.employee = self.user.djangobmf_employee
+        self.instance.in_charge = self.user.djangobmf.employee
+        self.instance.employee = self.user.djangobmf.employee
         self.stop()
 
     def stop(self):
         if not self.instance.in_charge and self.instance.employee:
             self.instance.in_charge = self.instance.employee
 
-        timesheet = model_from_name(CONTRIB_TIMESHEET)
+        timesheet = apps.get_model(settings.CONTRIB_TIMESHEET)
         if timesheet is not None:
             for obj in timesheet.objects.filter(
                 task=self.instance,
-                employee__in=[self.instance.in_charge, self.user.djangobmf_employee],
+                employee__in=[self.instance.in_charge, self.user.djangobmf.employee],
                 end=None,
                 auto=True,
             ):

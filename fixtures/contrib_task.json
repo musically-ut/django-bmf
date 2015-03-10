@@ -212,7 +212,7 @@
   "modified": "2014-07-19T15:34:35.756Z",
   "project": null,
   "completed": false,
-  "state": "new",
+  "state": "open",
   "created_by": [
    "admin"
   ],
@@ -233,8 +233,8 @@
   "employee": null,
   "modified": "2014-07-19T15:34:53.908Z",
   "project": 1,
-  "completed": false,
-  "state": "new",
+  "completed": true,
+  "state": "finished",
   "created_by": [
    "admin"
   ],
@@ -256,7 +256,7 @@
   "modified": "2014-08-29T14:30:05.174Z",
   "project": null,
   "completed": false,
-  "state": "new",
+  "state": "hold",
   "created_by": [
    "admin"
   ],
@@ -278,7 +278,7 @@
   "modified": "2014-08-29T14:30:20.259Z",
   "project": null,
   "completed": false,
-  "state": "new",
+  "state": "review",
   "created_by": [
    "admin"
   ],
@@ -300,7 +300,7 @@
   "modified": "2014-08-29T14:30:33.650Z",
   "project": null,
   "completed": false,
-  "state": "new",
+  "state": "todo",
   "created_by": [
    "admin"
   ],
@@ -366,7 +366,7 @@
   "modified": "2014-08-29T14:31:18.160Z",
   "project": 2,
   "completed": false,
-  "state": "new",
+  "state": "started",
   "created_by": [
    "admin"
   ],

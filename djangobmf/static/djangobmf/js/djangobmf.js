@@ -156,7 +156,7 @@ $.extend($.fn.treegrid.defaults, {
       //console.log(data.form);
 
       $.ajax({
-        url: base.form.attr('action')+"form/?changed",
+        url: base.form.attr('action').split('?')[0]+"form/?changed",
         dataType: 'json',
         type: 'post',
         data: data,
@@ -193,7 +193,7 @@ $.extend($.fn.treegrid.defaults, {
       };
 
       $.ajax({
-        url: base.form.attr('action')+"form/?search",
+        url: base.form.attr('action').split('?')[0]+"form/?search",
         dataType: 'json',
         type: 'post',
         data: data,

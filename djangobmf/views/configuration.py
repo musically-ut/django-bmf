@@ -6,37 +6,27 @@ from __future__ import unicode_literals
 from django import forms
 from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
-# from django.core import serializers
 from django.db import models
-from django.views.generic import TemplateView
+from django.views.generic import ListView
 from django.views.generic import FormView
 
 from djangobmf.views.mixins import ViewMixin
 from djangobmf.models import Configuration
+from djangobmf.sites import site
 
 import json
 
-SETTING_KEY = "%s.%s"
 
-
-class ConfigurationView(ViewMixin, TemplateView):
+class ConfigurationView(ViewMixin, ListView):
+    model = Configuration
     template_name = "djangobmf/configuration/index.html"
-
-    def get_context_data(self, **kwargs):
-        from djangobmf.sites import site
-        kwargs.update({
-            'settings': site.settings,
-        })
-        return super(ConfigurationView, self).get_context_data(**kwargs)
 
 
 class ConfigurationEdit(ViewMixin, FormView):
     template_name = "djangobmf/configuration/edit.html"
 
     def get_form_class(self):
-        from djangobmf.sites import site
-
-        key = SETTING_KEY % (self.kwargs['app_label'], self.kwargs['name'])
+        app_label = self.kwargs['app_label']
         name = self.kwargs['name']
 
         class ConfigForm(forms.Form):
@@ -45,8 +35,17 @@ class ConfigurationEdit(ViewMixin, FormView):
             """
             def __init__(self, *args, **kwargs):
                 super(ConfigForm, self).__init__(*args, **kwargs)
-                self.fields[name] = site.settings[key].field
+                self.fields[name] = site.get_setting_field(app_label, name)
         return ConfigForm
+
+    def get_form(self, *args, **kwargs):
+        form = super(ConfigurationEdit, self).get_form(*args, **kwargs)
+        # update initial data
+        form.fields[self.kwargs['name']].initial = Configuration.get_setting(
+            self.kwargs['app_label'],
+            self.kwargs['name'],
+        )
+        return form
 
     def form_valid(self, form, *args, **kwargs):
         obj, created = Configuration.objects.get_or_create(

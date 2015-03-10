@@ -16,7 +16,7 @@ from django.utils import six
 
 from djangobmf import contrib as bmfcontrib
 from djangobmf import currency as bmfcurrencies
-from djangobmf import reports as bmfreports
+from djangobmf import report as bmfreports
 
 from argparse import ArgumentParser
 from importlib import import_module
@@ -106,13 +106,12 @@ def main(modules, verbosity=2, failfast=False, contrib=None, nocontrib=False):
                 settings.INSTALLED_APPS += ('djangobmf.currency.%s' % module, )
 
         # add reports to INSTALLED_APPS
-        if six.PY2:
-            path = bmfreports.__path__[0]
-            for module in os.listdir(path):
-                if os.path.isdir(os.path.join(path, module)):
-                    if module[0] == '_':
-                        continue
-                    settings.INSTALLED_APPS += ('djangobmf.reports.%s' % module, )
+        path = bmfreports.__path__[0]
+        for module in os.listdir(path):
+            if os.path.isdir(os.path.join(path, module)):
+                if module[0] == '_':
+                    continue
+                settings.INSTALLED_APPS += ('djangobmf.report.%s' % module, )
 
     # update installed apps
     installed_app_names = set(get_installed())

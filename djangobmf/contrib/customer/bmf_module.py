@@ -11,7 +11,7 @@ from djangobmf.categories import Sales
 from djangobmf.sites import site
 
 from .models import Customer
-
+from .serializers import CustomerSerializer
 from .views import CustomerCreateView
 from .views import CompanyCreateView
 from .views import UpdateView
@@ -22,6 +22,7 @@ site.register_module(Customer, **{
         u'customer': (_('Customer'), CustomerCreateView),
     },
     'update': UpdateView,
+    'serializer': CustomerSerializer,
 })
 
 

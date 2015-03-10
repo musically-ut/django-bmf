@@ -3,15 +3,16 @@
 
 from __future__ import unicode_literals
 
-# from django.conf import settings
 from django.utils.timezone import now
 
-from djangobmf.utils.user import user_add_bmf
+from djangobmf.core.employee import Employee
+from djangobmf.decorators import optional_celery
 
 import logging
 logger = logging.getLogger(__name__)
 
 
+@optional_celery
 def djangobmf_user_watch(pk):
     from djangobmf.models import Activity
     from djangobmf.models import Notification
@@ -32,12 +33,10 @@ def djangobmf_user_watch(pk):
         for notification in Notification.objects \
                 .filter(watch_ct=object.parent_ct, watch_id__isnull=True) \
                 .select_related('user'):
-            # ACL / Permissions lookups
-            base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
-            user_add_bmf(notification.user)
-            validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
 
-            if validated:
+            # ACL / Permissions lookups
+            employee = Employee(notification.user)
+            if employee.has_object_perms(object.parent_object):
                 notification.pk = None
                 if notification.user == object.user:
                     notification.unread = False
@@ -72,11 +71,9 @@ def djangobmf_user_watch(pk):
 
         # ACL
         for notification in qs.select_related('user'):
-            base_qs = object.parent_ct.model_class().objects.filter(pk=object.parent_id)
-            user_add_bmf(notification.user)
-            validated = bool(object.parent_object.has_permissions(base_qs, notification.user))
 
-            if validated:
+            employee = Employee(notification.user)
+            if employee.has_object_perms(object.parent_object):
                 if notification.user != object.user:
                     notification.triggered = True
                     notification.unread = True

@@ -7,14 +7,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
+from djangobmf.conf import settings
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_CUSTOMER
-from djangobmf.settings import CONTRIB_QUOTATION
-from djangobmf.settings import CONTRIB_PROJECT
-from djangobmf.settings import CONTRIB_INVOICE
-from djangobmf.settings import CONTRIB_PRODUCT
-from djangobmf.settings import CONTRIB_EMPLOYEE
-from djangobmf.settings import CONTRIB_ADDRESS
 from djangobmf.numbering.utils import numbercycle_get_name, numbercycle_delete_object
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
@@ -39,7 +33,7 @@ class AbstractQuotation(BMFModel):
     """
     """
     invoice = models.OneToOneField(
-        CONTRIB_INVOICE,
+        settings.CONTRIB_INVOICE,
         null=True,
         blank=True,
         editable=False,
@@ -47,32 +41,32 @@ class AbstractQuotation(BMFModel):
         on_delete=models.PROTECT
     )
     customer = models.ForeignKey(  # TODO: make me optional
-        CONTRIB_CUSTOMER,
+        settings.CONTRIB_CUSTOMER,
         null=True,
         blank=False,
         on_delete=models.SET_NULL,
     )
     project = models.ForeignKey(  # TODO: make me optional
-        CONTRIB_PROJECT,
+        settings.CONTRIB_PROJECT,
         null=True,
         blank=False,
         on_delete=models.SET_NULL,
     )
     employee = models.ForeignKey(  # TODO: make me optional
-        CONTRIB_EMPLOYEE,
+        settings.CONTRIB_EMPLOYEE,
         null=True,
         blank=False,
         on_delete=models.SET_NULL,
     )
     shipping_address = models.ForeignKey(
-        CONTRIB_ADDRESS,
+        settings.CONTRIB_ADDRESS,
         null=True,
         blank=True,
         related_name="shipping_quotation",
         on_delete=models.PROTECT,
     )
     invoice_address = models.ForeignKey(
-        CONTRIB_ADDRESS,
+        settings.CONTRIB_ADDRESS,
         null=True,
         blank=True,
         related_name="invoice_quotation",
@@ -80,7 +74,7 @@ class AbstractQuotation(BMFModel):
     )
     quotation_number = models.CharField(_('Quotation number'), max_length=255, null=True, blank=False)
     products = models.ManyToManyField(
-        CONTRIB_PRODUCT,
+        settings.CONTRIB_PRODUCT,
         through='QuotationProduct',
         editable=False,
     )
@@ -110,6 +104,16 @@ class AbstractQuotation(BMFModel):
         if hasattr(self, 'project'):
             return self.project
         return None
+
+    def get_project_queryset(self, qs):
+        if self.customer:
+            return qs.filter(customer=self.customer)
+        return qs
+
+    def get_customer_queryset(self, qs):
+        if self.project:
+            return qs.filter(pk=self.project.customer_id)
+        return qs
 
     def clean(self):
         if self.project and not self.customer_id:
@@ -187,11 +191,11 @@ class Quotation(AbstractQuotation):
 
 class QuotationProduct(BMFModel):
     quotation = models.ForeignKey(
-        CONTRIB_QUOTATION, null=True, blank=True,
+        settings.CONTRIB_QUOTATION, null=True, blank=True,
         related_name="quotation_products", on_delete=models.CASCADE,
     )
     product = models.ForeignKey(
-        CONTRIB_PRODUCT, null=True, blank=True,
+        settings.CONTRIB_PRODUCT, null=True, blank=True,
         related_name="quotation_products", on_delete=models.PROTECT,
     )
     name = models.CharField(_("Name"), max_length=255, null=True, blank=False)
@@ -203,6 +207,9 @@ class QuotationProduct(BMFModel):
     amount = models.FloatField(_("Amount"), null=True, blank=False, default=1.0)
     # unit = models.CharField() # TODO add units
     description = models.TextField(_("Description"), null=True, blank=True)
+
+    class BMFMeta:
+        only_related = True
 
     def calc_all(self):
         if hasattr(self, '_calcs'):

@@ -8,9 +8,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
+from djangobmf.conf import settings as bmfsettings
 from djangobmf.models import BMFModel
-from djangobmf.settings import CONTRIB_PROJECT
-from djangobmf.settings import CONTRIB_ACCOUNT
 
 from djangobmf.contrib.accounting.models import ACCOUNTING_ASSET, ACCOUNTING_LIABILITY
 
@@ -43,7 +42,7 @@ class BaseCustomer(BMFModel):
     )
     # TODO edit queryset for projects (show only company projects and own ones)
     project = models.ForeignKey(  # TODO: make optional
-        CONTRIB_PROJECT,
+        bmfsettings.CONTRIB_PROJECT,
         null=True,
         blank=True,
         related_name="+",
@@ -67,7 +66,7 @@ class BaseCustomer(BMFModel):
     # TODO add timezone
 
     asset_account = models.ForeignKey(  # TODO: make optional
-        CONTRIB_ACCOUNT,
+        bmfsettings.CONTRIB_ACCOUNT,
         null=True,
         blank=False,
         related_name="customer_asset",
@@ -75,7 +74,7 @@ class BaseCustomer(BMFModel):
         on_delete=models.PROTECT,
     )
     liability_account = models.ForeignKey(  # TODO: make optional
-        CONTRIB_ACCOUNT,
+        bmfsettings.CONTRIB_ACCOUNT,
         null=True,
         blank=False,
         related_name="customer_liability",
@@ -111,7 +110,7 @@ class BaseCustomer(BMFModel):
 
 #   @staticmethod
 #   def post_save(sender, instance, created, raw, *args, **kwargs):
-#       project = get_model_from_name(BASE_MODULE['PROJECT'])
+#       project = apps.get_model(BASE_MODULE['PROJECT'])
 #       if created:
 #           # create project
 #           p = project(name=instance.name, customer=instance, is_bound=True)

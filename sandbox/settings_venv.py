@@ -1,5 +1,6 @@
 from sandbox.settings_common import *
 
+import sys
 import tempfile
 
 BMF_DOCUMENT_ROOT = tempfile.mkdtemp(prefix='djangobmf_')
@@ -22,17 +23,19 @@ HAYSTACK_CONNECTIONS = {
      },
 }
 
-INSTALLED_APPS += (
-    'debug_toolbar',
-)
+if 'runserver' in sys.argv:
 
-MIDDLEWARE_CLASSES += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
-
-DEBUG_TOOLBAR_CONFIG = {
-    'JQUERY_URL': None,
-}
+    INSTALLED_APPS += (
+        'debug_toolbar',
+    )
+    
+    MIDDLEWARE_CLASSES += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+    
+    DEBUG_TOOLBAR_CONFIG = {
+        'JQUERY_URL': None,
+    }
 
 try:
     from settings_local import *
