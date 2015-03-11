@@ -13,7 +13,6 @@ from django.utils.module_loading import module_has_submodule
 from django.utils.module_loading import import_module
 
 from djangobmf.conf import settings as bmfsettings
-from djangobmf.core.site import Site
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,6 +25,8 @@ class BMFConfig(AppConfig):
 
     def ready(self):
         self.bmf_modules = []
+
+        from djangobmf.core.site import Site
         self.site = Site(namespace=self.label, app_name=self.label)
 
 
