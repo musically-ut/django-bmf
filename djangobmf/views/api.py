@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from djangobmf.core.employee import Employee
 
 from rest_framework import pagination
-from rest_framework import serializers
+from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
 from rest_framework.mixins import CreateModelMixin
@@ -15,16 +15,17 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.mixins import DestroyModelMixin
 
 
-class PaginationSerializer(serializers.Serializer):
-    next = pagination.NextPageField(source='*')
-    prev = pagination.PreviousPageField(source='*')
-    total_results = serializers.ReadOnlyField(source='paginator.count')
+class ModulePaginationSerializer(pagination.PageNumberPagination):
 
-
-class ModulePaginationSerializer(pagination.BasePaginationSerializer):
-    # Takes the page object as the source
-    pagination = PaginationSerializer(source='*')
-    results_field = 'items'
+    def get_paginated_response(self, data):
+        return Response({
+            'pagination': {
+                'next': self.get_next_link(),
+                'prev': self.get_previous_link(),
+                'count': self.page.paginator.count,
+            },
+            'items': data,
+        })
 
 
 class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
@@ -33,7 +34,7 @@ class ModuleListAPIView(ListModelMixin, CreateModelMixin, GenericAPIView):
     model = None
     module = None
     permissions = None
-    pagination_serializer_class = ModulePaginationSerializer
+    pagination_class = ModulePaginationSerializer
     paginate_by = 100
 
     def get(self, request, *args, **kwargs):

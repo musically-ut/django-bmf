@@ -5,6 +5,7 @@
 - push translations
 - pull translations
 - compile translations
+- run tests and recreate test env
 
 - pypi:
   python setup.py register

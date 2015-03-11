@@ -16,13 +16,13 @@ class ModuleSerializer(serializers.ModelSerializer):
 class MoneyField(DecimalField):
     def to_representation(self, value):
         return value.value
-ModuleSerializer._field_mapping[fields.MoneyField] = MoneyField
+ModuleSerializer.serializer_field_mapping[fields.MoneyField] = MoneyField
 
 
 class WorkflowField(CharField):
     def to_representation(self, value):
         return value.key
-ModuleSerializer._field_mapping[fields.WorkflowField] = WorkflowField
+ModuleSerializer.serializer_field_mapping[fields.WorkflowField] = WorkflowField
 
 
 class DocumentSerializer(serializers.HyperlinkedModelSerializer):
