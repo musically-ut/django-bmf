@@ -46,7 +46,7 @@ setup(
         'pytz',
         'requests',
         'django-sekizai',
-        'django-mptt',
+        # 'django-mptt',
         'djangorestframework>=3.1',
         # 'django-haystack',
         'markdown',

@@ -77,7 +77,7 @@ class BaseAccount(BMFModel):
         on_delete=models.CASCADE,
     )
     parents = models.ManyToManyField(
-        'self', related_name='children',
+        'self', related_name='children', editable=False,
     )
 
     balance_currency = CurrencyField(editable=False)
@@ -105,21 +105,17 @@ class BaseAccount(BMFModel):
     class BMFMeta:
         observed_fields = ['name', ]
 
-    class MPTTMeta:
-        order_insertion_by = ['number', 'name', 'type']
-
     def __init__(self, *args, **kwargs):
         super(BaseAccount, self).__init__(*args, **kwargs)
-        self.initial_number = self.number
+        self.initial_parent = self.parent_id
 
     @staticmethod
     def post_save(sender, instance, created, *args, **kwargs):
-        if not created and instance.initial_number != instance.number:
-            # TODO this get's the job done, but there might be a more efficient way to do this
+        if instance.initial_parent != instance.parent_id:
             if instance.parent:
-                instance._meta.model.objects.partial_rebuild(instance.tree_id)
+                instance.parents = list(instance.parent.parents.values_list('pk', flat=True)) + [instance.parent_id]
             else:
-                instance._meta.model.objects.rebuild()
+                instance.parents = []
 
     def clean(self):
         if self.parent:
