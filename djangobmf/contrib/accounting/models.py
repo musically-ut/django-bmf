@@ -9,7 +9,6 @@ models doctype
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -17,16 +16,11 @@ from djangobmf.currency import Wallet
 from djangobmf.fields import CurrencyField
 from djangobmf.fields import MoneyField
 from djangobmf.models import BMFModel
-from djangobmf.models import BMFModelBase
 from djangobmf.settings import CONTRIB_ACCOUNT
 from djangobmf.settings import CONTRIB_PROJECT
 from djangobmf.settings import CONTRIB_TRANSACTION
 
 from .workflows import TransactionWorkflow
-
-from mptt.managers import TreeManager
-from mptt.models import TreeForeignKey
-from mptt.models import MPTTModelBase, MPTTModel
 
 ACCOUNTING_INCOME = 10
 ACCOUNTING_EXPENSE = 20
@@ -43,15 +37,19 @@ ACCOUNTING_TYPES = (
 )
 
 
-class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
-    pass
-
-
-class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
-    objects = TreeManager()
-
-    class Meta:
-        abstract = True
+# from django.utils import six
+# from djangobmf.models import BMFModelBase
+# from mptt.managers import TreeManager
+# from mptt.models import TreeForeignKey
+# from mptt.models import MPTTModelBase, MPTTModel
+#
+# class BMFModelMPTTBase(MPTTModelBase, BMFModelBase):
+#     pass
+#
+# class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
+#     objects = TreeManager()
+#     class Meta:
+#         abstract = True
 
 # =============================================================================
 # TODO: Add Fiscal Year
@@ -60,7 +58,7 @@ class BMFModelMPTT(six.with_metaclass(BMFModelMPTTBase, BMFModel, MPTTModel)):
 
 
 @python_2_unicode_compatible
-class BaseAccount(BMFModelMPTT):
+class BaseAccount(BMFModel):
     """
     Accounts
 
@@ -74,10 +72,14 @@ class BaseAccount(BMFModelMPTT):
     Equity/Capital  Increase  Decrease
     ==============  ========  ========
     """
-    parent = TreeForeignKey(
-        'self', null=True, blank=True, related_name='children',
+    parent = models.ForeignKey(
+        'self', null=True, blank=True, related_name='child',
         on_delete=models.CASCADE,
     )
+    parents = models.ManyToManyField(
+        'self', related_name='children',
+    )
+
     balance_currency = CurrencyField(editable=False)
     balance = MoneyField(editable=False)
     number = models.CharField(_('Number'), max_length=30, null=True, blank=True, unique=True, db_index=True)
