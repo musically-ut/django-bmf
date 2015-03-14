@@ -19,7 +19,8 @@ def _calc_account_balance(pk):
     account_cls = apps.get_model(settings.CONTRIB_ACCOUNT)
     transaction_cls = apps.get_model(settings.CONTRIB_TRANSACTIONITEM)
     account = account_cls.objects.get(pk=pk)
-    pks = list(account.get_descendants(include_self=True).values_list('pk', flat=True))
+    pks = list(account_cls.objects.filter(parents=pk).values_list('pk', flat=True))
+    pks += [pk]
 
     credit = transaction_cls.objects.filter(
         account_id__in=pks,
@@ -43,8 +44,8 @@ def _calc_account_balance(pk):
 
     account.save()
 
-    for model in account.get_ancestors():
-        _calc_account_balance(model.pk)
+    for obj in account.parents.all():
+        _calc_account_balance(obj.pk)
 
 
 @optional_celery
