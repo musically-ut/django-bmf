@@ -42,7 +42,7 @@ def _calc_account_balance(pk):
     else:
         account.balance = value_credit - value_debit
 
-    account.save()
+    account.save(update_parents=False)
 
     for obj in account.parents.all():
         _calc_account_balance(obj.pk)

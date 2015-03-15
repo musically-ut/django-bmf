@@ -105,17 +105,12 @@ class BaseAccount(BMFModel):
     class BMFMeta:
         observed_fields = ['name', ]
 
-    def __init__(self, *args, **kwargs):
-        super(BaseAccount, self).__init__(*args, **kwargs)
-        self.initial_parent = self.parent_id
-
-    @staticmethod
-    def post_save(sender, instance, created, *args, **kwargs):
-        if instance.initial_parent != instance.parent_id:
-            if instance.parent:
-                instance.parents = list(instance.parent.parents.values_list('pk', flat=True)) + [instance.parent_id]
+    def save(self, update_parents=True, *args, **kwargs):
+        if update_parents:
+            if self.parent:
+                self.parents = list(self.parent.parents.values_list('pk', flat=True)) + [self.parent_id]
             else:
-                instance.parents = []
+                self.parents = []
 
     def clean(self):
         if self.parent:
