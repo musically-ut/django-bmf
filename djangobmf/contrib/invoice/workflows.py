@@ -55,14 +55,14 @@ class InvoiceWorkflow(Workflow):
                 # calculate taxes for the products
                 taxes = item.product.calc_tax(item.amount, item.price)
                 # add total net to income account (product)
-                accounts.append((item.product.income_account_id, taxes[1], True, True))
+                accounts.append((item.product.income_account_id, taxes[1], False, True))
                 for tax, value in taxes[3]:
                     # add taxes
-                    accounts.append((tax.account_id, value, True, True))
+                    accounts.append((tax.account_id, value, False, True))
                 # add the gross value to the credit and debit site of the customers liability account
                 # and only mark the debit site as executed
-                accounts.append((self.instance.project.customer.asset_account_id, taxes[2], False, True))
-                accounts.append((self.instance.project.customer.asset_account_id, taxes[2], True, False))
+                accounts.append((self.instance.project.customer.asset_account_id, taxes[2], False, False))
+                accounts.append((self.instance.project.customer.asset_account_id, taxes[2], True, True))
 
             # sort and summerize the accounts
             credit_execute = {}
