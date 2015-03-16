@@ -77,7 +77,7 @@ class BaseAccount(BMFModel):
         on_delete=models.CASCADE,
     )
     parents = models.ManyToManyField(
-        'self', related_name='children', editable=False,
+        'self', related_name='children', editable=False, symmetrical=False,
     )
 
     balance_currency = CurrencyField(editable=False)
@@ -105,12 +105,23 @@ class BaseAccount(BMFModel):
     class BMFMeta:
         observed_fields = ['name', ]
 
+    def __init__(self, *args, **kwargs):
+        super(BaseAccount, self).__init__(*args, **kwargs)
+        self.initial_parent = self.parent_id
+
     def save(self, update_parents=True, *args, **kwargs):
+        super(BaseAccount, self).save(*args, **kwargs)
+
         if update_parents:
             if self.parent:
                 self.parents = list(self.parent.parents.values_list('pk', flat=True)) + [self.parent_id]
             else:
                 self.parents = []
+
+        if self.initial_parent != self.parent_id:
+            # Update children ...
+            for account in Account.objects.filter(parents=self):
+                account.save()
 
     def clean(self):
         if self.parent:
