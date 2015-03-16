@@ -140,7 +140,6 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'mptt',
     'sekizai',
     'rest_framework',
     # 'haystack',

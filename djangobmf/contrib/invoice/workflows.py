@@ -34,7 +34,7 @@ class InvoiceWorkflow(Workflow):
         """
         if not self.instance.transaction:
             transaction_mdl = self.instance._meta.model.transaction.field.related_field.model
-            account_mdl = transaction_mdl.accounts.through
+            item_cls = transaction_mdl.items.related.model
             items = self.instance.invoice_products.select_related('product').all()
             transaction = transaction_mdl(
                 project=self.instance.project,
@@ -88,41 +88,44 @@ class InvoiceWorkflow(Workflow):
                     arr[data[0]] = data[1]
 
             for account, value in credit_execute.items():
-                account = account_mdl(
+                item = item_cls(
                     account_id=account,
                     transaction=transaction,
                     amount=value,
                     credit=True,
-                    balanced=True,
+                    draft=False,
                 )
-                account.save()
+                item.save()
+
             for account, value in debit_execute.items():
-                account = account_mdl(
+                item = item_cls(
                     account_id=account,
                     transaction=transaction,
                     amount=value,
                     credit=False,
-                    balanced=True,
+                    draft=False,
                 )
-                account.save()
+                item.save()
+
             for account, value in credit_virtual.items():
-                account = account_mdl(
+                item = item_cls(
                     account_id=account,
                     transaction=transaction,
                     amount=value,
                     credit=True,
-                    balanced=False,
+                    draft=True,
                 )
-                account.save()
+                item.save()
+
             for account, value in debit_virtual.items():  # pragma: no cover / see above
-                account = account_mdl(
+                item = item_cls(
                     account_id=account,
                     transaction=transaction,
                     amount=value,
                     credit=False,
-                    balanced=False,
+                    draft=True,
                 )
-                account.save()
+                item.save()
 
             self.instance.transaction = transaction
 
