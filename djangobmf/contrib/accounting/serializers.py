@@ -14,9 +14,13 @@ from .models import TransactionItem
 
 class AccountSerializer(ModuleSerializer):
     balance_formatted = serializers.SerializerMethodField()
+    type_name = serializers.SerializerMethodField()
 
     def get_balance_formatted(self, obj):
         return '%s' % obj.balance
+
+    def get_type_name(self, obj):
+        return '%s' % obj.get_type_display()
 
     class Meta:
         model = Account
