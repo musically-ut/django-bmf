@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.workflow import Workflow, State, Transition
+from djangobmf.contrib.accounting.tasks import calc_account_balance
 
 
 class InvoiceWorkflow(Workflow):
@@ -96,6 +97,7 @@ class InvoiceWorkflow(Workflow):
                     draft=False,
                 )
                 item.save()
+                calc_account_balance(account)
 
             for account, value in debit_execute.items():
                 item = item_cls(
@@ -106,6 +108,7 @@ class InvoiceWorkflow(Workflow):
                     draft=False,
                 )
                 item.save()
+                calc_account_balance(account)
 
             for account, value in credit_virtual.items():
                 item = item_cls(
