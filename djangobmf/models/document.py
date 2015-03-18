@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangobmf.conf import settings as bmfsettings
 from djangobmf.document.storage import BMFStorage
-
+from djangobmf.tasks import generate_sha1
 from djangobmf.utils.generate_filename import generate_filename
 
 
@@ -22,7 +22,7 @@ class Document(models.Model):
     file = models.FileField(_('File'), upload_to=generate_filename, storage=BMFStorage())
     size = models.PositiveIntegerField(null=True, blank=True, editable=False)
     mimetype = models.CharField(_('Mimetype'), max_length=50, editable=False, null=True)
-    # sha1 = models.CharField(_('Mimetype'), max_length=40, editable=False, null=True)
+    sha1 = models.CharField(_('SHA1'), max_length=40, editable=False, null=True)
 
     is_static = models.BooleanField(default=False)
 
@@ -73,21 +73,14 @@ class Document(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        super(Document, self).save(*args, **kwargs)
+        generate_sha1(self.pk)
+
     def clean(self):
         if self.file:
             self.size = self.file.size
             self.mimetype = self.file.content_type
-
-        # import hashlib
-        # f = self.image_file.open('rb')
-        # hash = hashlib.sha1()
-        # if f.multiple_chunks():
-        # for chunk in f.chunks():
-        #     hash.update(chunk)
-        # else:    
-        #     hash.update(f.read())
-        # f.close()
-        # self.sha1 =  hash.hexdigest()
 
         if not self.name:
             self.name = self.file.name.split(r'/')[-1]

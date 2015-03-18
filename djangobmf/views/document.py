@@ -19,6 +19,7 @@ from djangobmf.models import Document
 
 from djangobmf.document.forms import UploadDocument
 
+
 '''
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden, Http404
@@ -50,6 +51,7 @@ def sendfile(request, fileobject, allowed=True):
   # serve with django
   return serve(request,fileobject.url[len(settings.BMF_DOCUMENTS_URL):],document_root=settings.BMF_DOCUMENTS_ROOT)
 '''
+
 
 class DocumentListView(BaseMixin, ListView):
     model = Document
