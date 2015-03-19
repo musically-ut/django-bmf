@@ -23,12 +23,15 @@ def generate_sha1(pk):
 
     hash = hashlib.sha1()
 
-    f = obj.file.open('rb')
-    if f.multiple_chunks():
-        for chunk in f.chunks():
-            hash.update(chunk)
-    else:
-        hash.update(f.read())
-    f.close()
+    try:
+        obj.file.open('rb')
+        if obj.file.multiple_chunks():
+            for chunk in obj.file.chunks():
+                hash.update(chunk)
+        else:
+            hash.update(obj.file.read())
+        obj.file.close()
+        Document.objects.filter(pk=pk).update(sha1=hash.hexdigest())
 
-    Document.objects.filter(pk=pk).update(sha1=hash.hexdigest())
+    except FileNotFoundError:
+        pass

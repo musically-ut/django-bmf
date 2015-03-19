@@ -15,13 +15,16 @@ from djangobmf.document.storage import BMFStorage
 from djangobmf.tasks import generate_sha1
 from djangobmf.utils.generate_filename import generate_filename
 
+import mimetypes
+
 
 @python_2_unicode_compatible
 class Document(models.Model):
     name = models.CharField(_('Name'), max_length=120, null=True, blank=True, editable=False)
+    mimetype = models.CharField(_('Mimetype'), max_length=50, editable=False, null=True)
+    description = models.TextField(_('Description'), blank=True, null=True)
     file = models.FileField(_('File'), upload_to=generate_filename, storage=BMFStorage())
     size = models.PositiveIntegerField(null=True, blank=True, editable=False)
-    mimetype = models.CharField(_('Mimetype'), max_length=50, editable=False, null=True)
     sha1 = models.CharField(_('SHA1'), max_length=40, editable=False, null=True)
 
     is_static = models.BooleanField(default=False)
@@ -80,7 +83,7 @@ class Document(models.Model):
     def clean(self):
         if self.file:
             self.size = self.file.size
-            self.mimetype = self.file.content_type
+            self.mimetype = mimetypes.guess_type(self.file.name)[0]
 
         if not self.name:
             self.name = self.file.name.split(r'/')[-1]
