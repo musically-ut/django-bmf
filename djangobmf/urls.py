@@ -105,6 +105,11 @@ urlpatterns = patterns(
         kwargs={'project': True},
     ),
     url(
+        r'^documents/add/$',
+        DocumentCreateView.as_view(),
+        name="documents-add",
+    ),
+    url(
         r'^documents/add/(?P<ct>[0-9]+)/(?P<pk>[0-9]+)/$',
         DocumentCreateView.as_view(),
         name="document-add",

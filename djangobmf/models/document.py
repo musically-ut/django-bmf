@@ -88,11 +88,11 @@ class Document(models.Model):
         if not self.name:
             self.name = self.file.name.split(r'/')[-1]
 
-        if hasattr(self, 'project') and hasattr(self.content_object, 'bmfget_project'):
-            self.project_pk = getattr(self.content_object.bmfget_project(), 'pk', None)
+        if hasattr(self.content_object, 'bmfget_project'):
+            self.project = self.content_object.bmfget_project()
 
-        if hasattr(self, 'customer') and hasattr(self.content_object, 'bmfget_customer'):
-            self.customer_pk = getattr(self.content_object.bmfget_customer(), 'pk', None)
+        if hasattr(self.content_object, 'bmfget_customer'):
+            self.customer = self.content_object.bmfget_customer()
 
     @models.permalink
     def bmffile_download(self):
