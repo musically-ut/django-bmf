@@ -21,12 +21,12 @@
         <tr>
             <td>{{ obj.mimetype }}</td>
             <td>
-                <a href="#">{{ obj.name }}</a><br>
+                <a href="{{ obj.get_download_url }}">{{ obj.name }}</a><br>
                 <span class="small text-muted">{{ obj.size|filesizeformat }}</small>
             </td>
             <td class="text-right">
                 {{ obj.modified|date:"SHORT_DATE_FORMAT" }}
-                <a class="btn btn-primary" href="#">Edit</a>
+                <a class="btn btn-primary" href="{{ obj.get_update_url }}">Edit</a>
             </td>
         </tr>
     {% endfor %}

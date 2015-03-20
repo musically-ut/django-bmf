@@ -95,6 +95,20 @@ class Document(models.Model):
             self.customer = self.content_object.bmfget_customer()
 
     @models.permalink
+    def get_update_url(self):
+        """
+        A permalink to the default view of this model in the BMF-System
+        """
+        return ('djangobmf:documents-update', (), {"pk": self.pk})
+
+    @models.permalink
+    def get_download_url(self):
+        """
+        A permalink to the default view of this model in the BMF-System
+        """
+        return ('djangobmf:document-get', (), {"pk": self.pk})
+
+    @models.permalink
     def bmffile_download(self):
         """
         A permalink to the default view of this model in the BMF-System

@@ -21,6 +21,8 @@ from djangobmf.views.configuration import ConfigurationEdit
 from djangobmf.views.dashboard import DashboardView
 from djangobmf.views.dashboard import dashboard_view_factory
 from djangobmf.views.document import DocumentCreateView
+from djangobmf.views.document import DocumentCreateStatic
+from djangobmf.views.document import DocumentUpdate
 from djangobmf.views.document import DocumentListView
 from djangobmf.views.document import DocumentDownloadView
 
@@ -106,8 +108,13 @@ urlpatterns = patterns(
     ),
     url(
         r'^documents/add/$',
-        DocumentCreateView.as_view(),
+        DocumentCreateStatic.as_view(),
         name="documents-add",
+    ),
+    url(
+        r'^documents/update/(?P<pk>[0-9]+)/$',
+        DocumentUpdate.as_view(),
+        name="documents-update",
     ),
     url(
         r'^documents/add/(?P<ct>[0-9]+)/(?P<pk>[0-9]+)/$',

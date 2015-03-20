@@ -4,9 +4,6 @@ db:
 redis:
     image: redis
 
-elasticsearch:
-    image: dockerfile/elasticsearch
-
 web:
     build: .
     environment:
@@ -18,8 +15,8 @@ web:
         - "8000:8000"
     links:
         - db
-        - elasticsearch
         - redis
+
 worker:
     build: .
     command: celery -A sandbox worker -l info -c 1 --autoreload
@@ -30,7 +27,6 @@ worker:
         - .:/code
     links:
         - db
-        - elasticsearch
         - redis
 
 flower:

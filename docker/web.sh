@@ -14,6 +14,6 @@ python develop.py loaddata \
     fixtures/contrib_team.json \
     fixtures/admin_dashboard.json 
 
-python develop.py runserver rebuild_index --noinput
+# python develop.py runserver rebuild_index --noinput
 
 python develop.py runserver 0.0.0.0:8000

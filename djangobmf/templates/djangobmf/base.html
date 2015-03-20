@@ -92,16 +92,16 @@
                                     </a>
                                 </li>
                                 {% endcomment %}
-                                <li>
-                                    <a href="{% url 'djangobmf:documents' %}">
-                                        <span class="glyphicon glyphicon-folder-open"></span>
-                                        <span class="nav-text">{% trans "Documents" %}</span>
-                                    </a>
-                                </li>
                                 <li class="disabled" id="bmf_timesheet">
                                     <a href="#">
                                         <span class="glyphicon glyphicon-time"></span>
                                         <span class="nav-text">{% trans "Timesheet" %}</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'djangobmf:documents' %}">
+                                        <span class="glyphicon glyphicon-folder-open"></span>
+                                        <span class="nav-text">{% trans "Documents" %}</span>
                                     </a>
                                 </li>
                                 {% endblock %}

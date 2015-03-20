@@ -4,11 +4,13 @@
 from __future__ import unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 # from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect
 from django.http import Http404
 from django.utils.timezone import now
 from django.views.generic import CreateView
+from django.views.generic import UpdateView
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.static import serve
@@ -114,15 +116,56 @@ class DocumentCreateView(BaseMixin, CreateView):
             return self.related_object
 
         try:
-            ct = ContentType.objects.get_for_id(self.kwargs['ct'])
+            ct = ContentType.objects.get_for_id(self.kwargs.get('ct', None))
+        except ContentType.DoesNotExist:
+            return None
+
+        if ct:
             model = ct.model_class()
+            try:
+                self.related_object = model.objects.get(pk=self.kwargs['pk'])
+            except model.DoesNotExist:
+                raise Http404
 
-            self.related_object = model.objects.get(pk=self.kwargs['pk'])
-
-        except model.DoesNotExist:
-            raise Http404
-
-        return self.related_object
+            return self.related_object
 
     def get_success_url(self):
         return self.get_rel_object().bmfmodule_detail()
+
+
+class DocumentCreateStatic(BaseMixin, CreateView):
+    model = Document
+    form_class = UploadDocument
+
+    def get_success_url(self):
+        return reverse(
+            'djangobmf:documents',
+            kwargs={
+                'static': True,
+            },
+        )
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        form.instance.modified_by = self.request.user
+        form.instance.is_static = True
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class DocumentUpdate(BaseMixin, UpdateView):
+    model = Document
+    form_class = UploadDocument
+
+    def get_success_url(self):
+        return reverse(
+            'djangobmf:documents',
+            kwargs={
+                'static': True,
+            },
+        )
+
+    def form_valid(self, form):
+        form.instance.modified_by = self.request.user
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
