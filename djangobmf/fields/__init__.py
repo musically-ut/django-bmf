@@ -11,6 +11,7 @@ from django.utils.six import with_metaclass
 from djangobmf.conf import settings
 from djangobmf.currency import BaseCurrency
 
+from .configobj import ConfigField
 from .workflow import WorkflowField
 
 import logging
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     'OLDWorkflowField',
+    'ConfigField',
     'WorkflowField',
     'CurrencyField',
     'MoneyField',
