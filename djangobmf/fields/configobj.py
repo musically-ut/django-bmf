@@ -16,7 +16,10 @@ class ConfigField(with_metaclass(models.SubfieldBase, models.TextField)):
     description = _("Config Field")
 
     def __init__(self, config, *args, **kwargs):
-        self.config = config
+        self.def_config = config
+        if callable(config):
+            self.generate_config = config
+
         defaults = {
             'editable': True,
             'blank': True,
@@ -33,6 +36,9 @@ class ConfigField(with_metaclass(models.SubfieldBase, models.TextField)):
         del kwargs["db_index"]
         kwargs["config"] = self.config
         return name, path, args, kwargs
+
+    def generate_config(self, instance):
+        return self.def_config
 
 #   def to_python(self, value):
 #       if isinstance(value, WorkflowContainer):
