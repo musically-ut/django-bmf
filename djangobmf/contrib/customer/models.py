@@ -32,11 +32,10 @@ class BaseCustomerManager(models.Manager):
 class BaseCustomer(BMFModel):
     name = models.CharField(_("Name"), max_length=255, null=True, blank=False, )
     number = models.CharField(_("Number"), max_length=255, null=True, blank=True, )
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
         blank=True,
         null=True,
-        unique=True,
         related_name="bmf_customer",
         on_delete=models.SET_NULL,
     )
